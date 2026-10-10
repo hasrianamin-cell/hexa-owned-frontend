@@ -1,0 +1,77 @@
+name: Cutover read-only inventory
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cutover-inventory.yml'
+      - '.github/cutover-inventory.once'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture current DNS
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p inventory
+          {
+            echo "[NS]"
+            dig +short NS hexahessman-th.com || true
+            echo "[A]"
+            dig +short A hexahessman-th.com || true
+            echo "[AAAA]"
+            dig +short AAAA hexahessman-th.com || true
+            echo "[CAA]"
+            dig +short CAA hexahessman-th.com || true
+            echo "[WWW_CNAME]"
+            dig +short CNAME www.hexahessman-th.com || true
+            echo "[WWW_A]"
+            dig +short A www.hexahessman-th.com || true
+          } | tee inventory/dns-current.txt
+
+      - name: Capture current production HTTP state
+        shell: bash
+        run: |
+          set -euo pipefail
+          prod='https://hexahessman-th.com'
+          root_state="$(curl -L -sS -o inventory/prod-root.html -D inventory/prod-root-headers.txt -w '%{http_code} %{url_effective}' --connect-timeout 15 --max-time 60 "$prod/" || true)"
+          dmu_noslash_state="$(curl -L -sS -o inventory/prod-dmu-noslash.html -D inventory/prod-dmu-noslash-headers.txt -w '%{http_code} %{url_effective}' --connect-timeout 15 --max-time 60 "$prod/teams/dmu" || true)"
+          dmu_slash_state="$(curl -L -sS -o inventory/prod-dmu-slash.html -D inventory/prod-dmu-slash-headers.txt -w '%{http_code} %{url_effective}' --connect-timeout 15 --max-time 60 "$prod/teams/dmu/" || true)"
+          {
+            echo "root=$root_state"
+            echo "dmuNoSlash=$dmu_noslash_state"
+            echo "dmuSlash=$dmu_slash_state"
+          } | tee inventory/http-current.txt
+
+      - name: Summarize current production headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "HEXA_CUTOVER_READONLY_INVENTORY=COMPLETE"
+            cat inventory/http-current.txt
+            echo
+            echo "[PROD_ROOT_HEADERS]"
+            sed 's/$//' inventory/prod-root-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
+            echo
+            echo "[PROD_DMU_NOSLASH_HEADERS]"
+            sed 's/$//' inventory/prod-dmu-noslash-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
+            echo
+            echo "[DNS]"
+            cat inventory/dns-current.txt
+            echo "mutationPerformed=false"
+          } | tee inventory/cutover-inventory-summary.txt
+
+      - name: Upload inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-owned-frontend-cutover-inventory
+          path: inventory
+          retention-days: 30
