@@ -1,0 +1,128 @@
+name: Deploy governed frontend to GitHub Pages staging
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pages-staging.yml'
+      - '.github/pages-staging.once'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: hexa-owned-frontend-pages
+  cancel-in-progress: false
+
+env:
+  EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
+  EXPECTED_DMU_SHA256: 098176577dc665259a59fccd31357afff3e5bdb3c522b4b51c1d99cb0a562720
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Validate governed package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sha256sum script.js | awk '{print $1}')" = "$EXPECTED_WEBSITE_SCRIPT_SHA256"
+          test "$(sha256sum teams/dmu/index.html | awk '{print $1}')" = "$EXPECTED_DMU_SHA256"
+          grep -q 'phase6WebsitePublicIntake' script.js
+          grep -q 'crypto.randomUUID' script.js
+          ! grep -R -q '/api/website-enquiry' --include='*.html' --include='*.js' --include='*.css' .
+          ! grep -R -q '/cdn-cgi/challenge-platform/' index.html
+
+          test "$(git hash-object assets/dfm-fleet-overview.png)" = "3ebffd9ba16a01d37851b85155152d868ec6fe47"
+          test "$(git hash-object assets/dfm-maintenance-dashboard.png)" = "10cb9d6df8d17d45f2ccb8fe093c48adb096d1c9"
+          test "$(git hash-object assets/dtc-gps-location.png)" = "d203d7b2f44017bd3670f4367584b062c8530a78"
+          test "$(git hash-object assets/forklift-dynamic.png)" = "266fb69c6881eb99bfdfdf6b5f8fb9cbc0dae227"
+          test "$(git hash-object assets/forklift-future-white.png)" = "d8913c2204221c25326c415a2c48b1c623d4f7df"
+          test "$(git hash-object assets/hexa-logo.png)" = "a8a967b74732e099f0a6868758fc3d668020b205"
+          test "$(git hash-object assets/noblelift-standard-range.png)" = "b52f6401914c7ae5aa8d4a46f9dd88ffae481aa6"
+          test "$(git hash-object assets/zowell-special-range.png)" = "ae9ad7e22cd97842b101ec958c770026d020b180"
+
+      - name: Build Pages artifact directory
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/teams/dmu _site/assets
+          cp .nojekyll _site/.nojekyll
+          cp index.html script.js styles.css gate.css brands.css _site/
+          cp teams/dmu/index.html _site/teams/dmu/index.html
+          cp assets/* _site/assets/
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify staging bytes
+        shell: bash
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          mkdir -p verify
+          base="$PAGE_URL"
+          case "$base" in */) ;; *) base="$base/" ;; esac
+
+          for attempt in 1 2 3 4 5 6; do
+            root_http="$(curl -L -sS -o verify/index.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "$base" || true)"
+            script_http="$(curl -L -sS -o verify/script.js -w '%{http_code}' --connect-timeout 15 --max-time 60 "${base}script.js" || true)"
+            dmu_http="$(curl -L -sS -o verify/dmu.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "${base}teams/dmu/" || true)"
+            if [ "$root_http" = "200" ] && [ "$script_http" = "200" ] && [ "$dmu_http" = "200" ]; then break; fi
+            sleep 10
+          done
+
+          test "$root_http" = "200"
+          test "$script_http" = "200"
+          test "$dmu_http" = "200"
+          test "$(sha256sum verify/script.js | awk '{print $1}')" = "$EXPECTED_WEBSITE_SCRIPT_SHA256"
+          test "$(sha256sum verify/dmu.html | awk '{print $1}')" = "$EXPECTED_DMU_SHA256"
+          grep -q 'phase6WebsitePublicIntake' verify/script.js
+          ! grep -q '/api/website-enquiry' verify/script.js
+
+          {
+            echo "HEXA_OWNED_FRONTEND_PAGES_STAGING=PASS"
+            echo "pageUrl=$PAGE_URL"
+            echo "rootHttp=$root_http"
+            echo "scriptHttp=$script_http"
+            echo "dmuHttp=$dmu_http"
+            echo "websiteScriptSha256=$(sha256sum verify/script.js | awk '{print $1}')"
+            echo "dmuSha256=$(sha256sum verify/dmu.html | awk '{print $1}')"
+            echo "dnsMutationPerformed=false"
+            echo "customDomainAttached=false"
+            echo "backendMutationPerformed=false"
+            echo "guardMutationPerformed=false"
+          } | tee verify/pages-staging-summary.txt
+
+      - name: Upload staging verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-owned-frontend-pages-staging-evidence
+          path: verify
+          retention-days: 30
