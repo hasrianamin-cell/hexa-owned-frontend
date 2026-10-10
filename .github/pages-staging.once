@@ -1,0 +1,6 @@
+confirmation=HEXA-OWNED-FRONTEND-PAGES-STAGING-20261011
+source=main
+custom_domain=false
+dns_mutation=false
+backend_mutation=false
+guard_mutation=false
