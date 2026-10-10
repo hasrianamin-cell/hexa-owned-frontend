@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<!-- Phase 6AH candidate: governed DMU member binding + context stories + zero-manual default UX. Business facts are loaded from authenticated backend. -->
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HEXA Sales DMU App — Build 6B11 Archived Quotes</title>
+<style>
+:root{--navy:#0f2a4a;--navy2:#173a63;--orange:#f59e0b;--bg:#f5f7fb;--line:#dfe5ee;--txt:#1f2937;--muted:#6b7280;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
+header{background:var(--navy);color:#fff;border-bottom:5px solid var(--orange);padding:15px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:20px;margin:0}.sub{font-size:12px;opacity:.82}.wrap{max-width:1450px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(15,42,74,.05)}.full{grid-column:1/-1}
+.card h2{font-size:15px;color:var(--navy);margin:0 0 12px;border-left:4px solid var(--orange);padding-left:8px}.toolbar{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.field{min-width:150px;flex:1}.field label{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.field input,.field select,.field textarea{width:100%;padding:8px 9px;border:1px solid #cfd7e3;border-radius:7px;font:inherit;background:#fff}.field textarea{min-height:72px;resize:vertical}.deal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.span2{grid-column:span 2}.span4{grid-column:span 4}
+.btn{border:0;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}.primary{background:var(--navy);color:#fff}.secondary{background:#e5e7eb;color:#111}.accent{background:var(--orange);color:#111}.danger{background:#fee2e2;color:#991b1b}.btn:disabled{opacity:.5;cursor:not-allowed}
+.badge{display:inline-block;padding:5px 10px;border-radius:16px;font-size:12px;font-weight:700}.green{background:#dcfce7;color:#166534}.yellow{background:#fef3c7;color:#92400e}.red{background:#fee2e2;color:#991b1b}.blue{background:#dbeafe;color:#1e40af}.gray{background:#e5e7eb;color:#374151}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfcfe}.stat b{font-size:28px;color:var(--navy);display:block}.stat span{font-size:11px;color:var(--muted)}.execBrief{display:grid;grid-template-columns:1.1fr .7fr 1.6fr .8fr;gap:10px;margin-top:12px}.briefItem{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fbfcfe;min-width:0}.briefItem span{display:block;font-size:10px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.02em}.briefItem b{display:block;color:var(--navy);font-size:14px;line-height:1.35;margin-top:5px;white-space:normal;overflow-wrap:anywhere}.secondaryPanel{padding:0}.secondaryPanel summary{cursor:pointer;list-style:none;padding:16px;font-weight:800;color:var(--navy);border-left:4px solid var(--orange)}.secondaryPanel summary::-webkit-details-marker{display:none}.secondaryPanel[open] summary{border-bottom:1px solid var(--line)}.secondaryPanelBody{padding:14px 16px 16px}.compactCard{padding:11px 16px}.compactCard h2{margin-bottom:7px}
+table{width:100%;border-collapse:collapse;font-size:12px}th{background:var(--navy);color:#fff;padding:8px;text-align:left;position:sticky;top:0}td{border-bottom:1px solid #edf1f5;padding:6px;vertical-align:top}td input,td select{width:100%;font:inherit;padding:6px;border:1px solid #d6dde8;border-radius:6px}.tablewrap{max-height:430px;overflow:auto;border:1px solid #edf1f5;border-radius:8px}.small{font-size:11.5px;color:var(--muted)}
+.radarWrap{display:flex;justify-content:center;overflow:auto}.timeline{list-style:none;margin:0;padding:0}.timeline li{border-left:3px solid #dbe3ef;margin-left:8px;padding:0 0 12px 14px}.timeline b{color:var(--navy)}.actionrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.footer{font-size:11px;color:var(--muted);text-align:center;padding:16px}.conn{display:flex;gap:8px;align-items:center}.dot{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--yellow)}
+@media(max-width:980px){.grid{grid-template-columns:1fr}.deal{grid-template-columns:1fr 1fr}.span2,.span4{grid-column:span 2}.stats{grid-template-columns:1fr 1fr}.execBrief{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.deal{grid-template-columns:1fr}.span2,.span4{grid-column:span 1}.stats{grid-template-columns:1fr}.execBrief{grid-template-columns:1fr}}
+
+/* V4 Teams/Mobile */
+.mobileNav{display:none;position:sticky;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);box-shadow:0 -3px 12px rgba(15,42,74,.10);grid-template-columns:repeat(4,1fr)}
+.mobileNav button{border:0;background:#fff;padding:10px 4px;font-size:11px;color:var(--navy);font-weight:700}
+.mobileNav button.active{background:#fff7ed;color:#9a3412;border-top:3px solid var(--orange)}
+.quickbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.quickbar .btn{min-height:42px}
+.portfolioSummary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.portfolioMetric{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfcfe}.portfolioMetric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:700}.portfolioMetric b{display:block;margin-top:4px;font-size:20px;color:var(--navy)}.decisionGapBreakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.decisionGapChip{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;text-align:left;cursor:pointer;color:var(--navy)}.decisionGapChip:hover{border-color:var(--orange)}.decisionGapChip.active{border-color:var(--orange);background:#fff7ed}.decisionGapChip span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.decisionGapChip b{display:block;font-size:17px;margin-top:3px}.decisionActionQueue{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:10px}.decisionActionQueueHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.decisionActionQueueHead strong{color:var(--navy);font-size:12px}.decisionActionQueueList{display:grid;gap:7px;margin-top:8px}.decisionActionItem{display:grid;grid-template-columns:minmax(150px,1fr) auto minmax(220px,1.4fr) auto;gap:8px;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff}.decisionActionItem .customer{font-size:12px;font-weight:800;color:var(--navy)}.decisionActionItem .gap{font-size:11px;color:#991b1b}.decisionActionItem .action{font-size:11px;line-height:1.35;color:#334155}.dealCards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.dealFilters{display:grid;grid-template-columns:1.25fr .72fr .72fr auto auto auto;gap:8px;align-items:end;margin-top:10px}.dealFocusToggle{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #cfd7e3;border-radius:8px;background:#fff;font-size:11px;font-weight:700;color:var(--navy);min-height:35px}.dealFocusToggle input{margin:0}.dealFilters .field{min-width:0}.dealFilterCount{font-size:11px;color:var(--muted);white-space:nowrap;align-self:center;padding-bottom:8px}
+.dealCard{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer}
+.dealCard:hover{border-color:var(--orange);box-shadow:0 2px 8px rgba(15,42,74,.08)}
+.dealCard .name{font-weight:800;color:var(--navy);font-size:14px}
+.dealCard .meta{font-size:11px;color:var(--muted);margin-top:4px}.dealCardAction{margin-top:9px;padding-top:8px;border-top:1px solid #edf1f5;display:grid;gap:5px}.dealCardAction .next{font-size:11px;line-height:1.4;color:#334155}.dealCardAction .coverage{font-size:11px;color:var(--muted)}.storyAction{margin-top:9px}
+.missingPills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.missingPills span{font-size:11px;border-radius:14px;padding:5px 8px;background:#fee2e2;color:#991b1b;font-weight:700}.missingPills span.complete{background:#dcfce7;color:#166534}
+.viewSection{scroll-margin-top:10px}
+.goldenLock{border-color:#b48a00!important;background:#fffdf4!important}
+.aiRevision,.closePlan{margin-top:12px;padding:12px;border:1px solid #d8dee8;border-radius:10px;background:#f8fafc}
+.aiRevision h3,.closePlan h3{margin:0 0 8px;font-size:15px;color:var(--navy)}
+.aiRevision .revisionRow{margin-top:6px;font-size:14px;line-height:1.45}
+.closePlanGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.closeMilestone{padding:10px;border:1px solid #e2e7ef;border-radius:8px;background:#fff;min-width:0}
+.milestoneName{font-size:12px;font-weight:700;color:#536075}.milestoneDate{font-size:15px;font-weight:700;color:#17223b;margin-top:5px}.milestoneStatus{font-size:13px;color:#3f4c61;margin-top:2px}.requiredConfirmation{font-size:12px;color:#9a4b00;margin-top:6px;line-height:1.35}
+@media(max-width:900px){header{padding:11px 14px}.wrap{padding:10px}.card{padding:12px}.portfolioSummary,.decisionGapBreakdown{grid-template-columns:1fr 1fr}.decisionActionItem{grid-template-columns:1fr auto}.decisionActionItem .action{grid-column:1/-1}.dealCards{grid-template-columns:1fr 1fr}.dealFilters{grid-template-columns:1fr 1fr}.mobileNav{display:grid}.footer{padding-bottom:72px}}
+@media(max-width:620px){header h1{font-size:17px}.sub{font-size:10px}.portfolioSummary{grid-template-columns:1fr 1fr}.dealCards{grid-template-columns:1fr}.dealFilters{grid-template-columns:1fr}.dealFilterCount{padding-bottom:0}.toolbar .field{min-width:100%;max-width:none!important}.toolbar .btn{flex:1}.quickbar{display:grid;grid-template-columns:1fr 1fr}.quickbar .btn{width:100%}.tablewrap{max-height:none;overflow:visible;border:0}#dmuTable thead{display:none}#dmuTable,#dmuTable tbody,#dmuTable tr,#dmuTable td{display:block;width:100%}#dmuTable tr{border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:10px;background:#fff}#dmuTable td{border:0;padding:4px}#dmuTable td:first-child:before{content:"Role";display:block;font-size:10px;color:var(--muted)}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:22px}}
+@media(max-width:760px){.closePlanGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.closePlanGrid{grid-template-columns:1fr}}
+/* Phase 6AH governed production surfaces */
+.legacyManualControl{display:none!important}
+.aiDmuRow td{background:#f8fafc;border-color:#e2e8f0}
+.aiDmuBadge{display:inline-block;padding:2px 7px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:11px;font-weight:700}
+.aiStoryGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.priorityFilters{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.priorityFilter{border:1px solid #cfd7e3;background:#fff;color:var(--navy);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer}.priorityFilter.active{background:var(--navy);color:#fff;border-color:var(--navy)}.priorityActionsFooter{grid-column:1/-1;display:flex;justify-content:center;margin-top:4px}
+.aiStory{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.aiStory h3{font-size:14px;margin:0 0 5px}.aiStory .storyMeta{font-size:11px;color:var(--muted);margin-top:5px}
+.sourceFreshness{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sourceFreshness b{color:var(--navy)}
+body.phase6LiveReadOnly #viewDMU input,
+body.phase6LiveReadOnly #viewDMU textarea,
+body.phase6LiveReadOnly #viewDMU select:not(#oppSelect),
+body.phase6LiveReadOnly #viewControl textarea{background:#f8fafc;color:#334155}
+body.phase6LiveReadOnly .humanWriteControl input,
+body.phase6LiveReadOnly .humanWriteControl textarea,
+body.phase6LiveReadOnly .humanWriteControl select{background:#fff;color:var(--txt)}
+@media(max-width:760px){.aiStoryGrid{grid-template-columns:1fr}}
+ .influenceControl{display:flex;align-items:center;gap:6px;white-space:nowrap}.influenceControl output{min-width:1.4em;text-align:center;font-weight:700}
+.historicalTabs{display:flex;gap:8px;margin:12px 0}.historicalTabs .activeTab{background:var(--navy);color:#fff}.historicalPanel{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.historicalStats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.historicalStat{border:1px solid var(--line);border-radius:8px;padding:9px;background:#fbfcfe}.historicalStat span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.historicalStat b{display:block;margin-top:4px;color:var(--navy);font-size:18px}.historicalFilters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:8px;margin:12px 0}.historicalTableWrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:8px}.historicalTable{min-width:1020px}.historicalTable th{position:sticky;top:0}.historicalGroup td{background:#eef4fb;color:var(--navy);font-weight:800}.historicalDetails{min-width:160px}.historicalDetails dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:8px 0;font-size:11px}.historicalDetails dt{color:var(--muted);font-weight:700}.historicalDetails dd{margin:0;overflow-wrap:anywhere}.historicalReview{display:inline-block;padding:3px 7px;border-radius:99px;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800}.historicalLinked{display:inline-block;padding:3px 7px;border-radius:99px;background:#dcfce7;color:#166534;font-size:10px;font-weight:800}.historicalStandalone{display:inline-block;padding:3px 7px;border-radius:99px;background:#e5e7eb;color:#374151;font-size:10px;font-weight:800}
+@media(max-width:760px){.historicalStats{grid-template-columns:1fr 1fr}.historicalFilters{grid-template-columns:1fr 1fr}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+function legacyRenderDealCards(){
+ const box=document.getElementById('dealCards'); if(!box) return;
+ box.innerHTML=state.opportunities.map(o=>{
+   const rows=state.dmu.filter(x=>x.oppId===o.id);
+   const known=rows.filter(r=>r.person && !/Forklift Operator|Warehouse \/ Logistics Manager|Engineering \/ Maintenance|Safety Manager|Purchasing \/ Sourcing/.test(r.person)).length;
+   const critical=[];
+   const dm=rows.find(r=>r.role==='Decision Maker'); const eb=rows.find(r=>r.role==='Economic Buyer'); const ch=rows.find(r=>r.role==='Champion');
+   if(!dm||!dm.person) critical.push('Decision Maker');
+   if(!eb||!eb.person) critical.push('Economic Buyer');
+   if(!ch||!ch.person||/Potential/.test(ch.person)) critical.push('Champion');
+   const hasProb=Number.isFinite(Number(o.prob));const cls=hasProb&&Number(o.prob)>=70?'yellow':hasProb&&Number(o.prob)>=50?'blue':'gray';
+   return `<div class="dealCard" onclick="openDealCard('${esc(o.id)}')">
+     <div class="name">${esc(o.customer)}</div>
+     <div class="meta">${esc(o.offer||'Sales opportunity')}</div>
+     <div style="margin-top:7px"><span class="badge ${cls}">${esc(o.stage||'')} • ${hasProb?Number(o.prob)+'%':'—'}</span></div>
+     <div class="missingPills">${critical.length?critical.map(x=>`<span>Missing: ${esc(x)}</span>`).join(''):'<span class="complete">Decision Team Complete</span>'}</div>
+   </div>`;
+ }).join('');
+}
+function legacyOpenDealCard(id){
+ state.current=id; const sel=document.getElementById('oppSelect'); if(sel) sel.value=id;
+ loadSelectedOpportunity(); navTo('viewDMU'); renderDealCards();
+}
+function legacyScrollToId(id){const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'})}
+function legacyGoQuickActivity(){navTo('viewActivity'); setTimeout(()=>scrollToId('actNote'),250)}
+function legacyNavTo(id,btn){
+ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+ document.querySelectorAll('#mobileNav button').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active');
+}
+
+</script>
+<script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+<meta name="hexa-dmu-build" content="HEXA_DMU_BUILD_2026_10_03_6B11_ARCHIVED_QUOTES">
+</head>
+<body>
+<header>
+  <div><h1>HEXA Sales DMU App</h1><div class="sub">Customers → DMU → Activity → Control Tower</div></div>
+  <div class="conn"><span class="dot" id="connDot"></span><span id="connText">Connecting…</span><span class="badge blue" id="forecastBadge">Management Forecast</span></div>
+</header>
+<div class="wrap"><div id="sandboxNote" style="display:none;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;padding:9px 12px;border-radius:8px;margin-bottom:10px;font-size:12px">
+โหมดชั่วคราว: App ยังใช้งานได้ และข้อมูลที่ยืนยันจะบันทึกผ่านระบบส่วนกลางเมื่อเชื่อมต่อสำเร็จ
+</div><div class="grid">
+<section class="card full viewSection" id="managementAttention">
+<h2>Priority Actions</h2>
+<div class="small">AI สรุปเฉพาะเรื่องธุรกิจที่ต้องติดตามจากข้อมูลฝ่ายขายที่มีแหล่งอ้างอิง — ซ่อนข้อมูลเทคนิคที่ผู้ใช้ไม่จำเป็นต้องเห็น</div>
+<div class="priorityFilters" id="priorityFilters" aria-label="Priority action filters">
+  <button class="priorityFilter active" type="button" data-filter="all" onclick="setPriorityFilter('all')">All <span id="priorityCountAll">0</span></button>
+  <button class="priorityFilter" type="button" data-filter="closing" onclick="setPriorityFilter('closing')">Closing <span id="priorityCountClosing">0</span></button>
+  <button class="priorityFilter" type="button" data-filter="followup" onclick="setPriorityFilter('followup')">Follow-up <span id="priorityCountFollowup">0</span></button>
+  <button class="priorityFilter" type="button" data-filter="risk" onclick="setPriorityFilter('risk')">Risk <span id="priorityCountRisk">0</span></button>
+</div>
+<div id="managementAttentionList" class="aiStoryGrid" style="margin-top:10px"></div>
+</section>
+
+<section class="card full viewSection" id="viewDeals">
+<h2>Customers / Active Deals</h2>
+<div class="small">เลือกชื่อบริษัทเพื่อดู DMU, กิจกรรม และแผนการขายของลูกค้ารายนั้น</div><div class="historicalTabs" role="tablist" aria-label="Commercial records"><button class="btn primary activeTab" id="activeDealsTab" type="button" role="tab" aria-selected="true" onclick="setDealsView('active')">Active Deals</button><button class="btn secondary" id="archivedHistoricalTab" type="button" role="tab" aria-selected="false" onclick="setDealsView('historical')">Archived / Historical <span id="archivedQuotationCountTab">0</span></button></div><div id="activeDealsView">
+<div class="portfolioSummary" id="portfolioSummary">
+  <div class="portfolioMetric"><span>Active Deals</span><b id="portfolioTotalDeals">0</b></div>
+  <div class="portfolioMetric"><span>Visible</span><b id="portfolioVisibleDeals">0</b></div>
+  <div class="portfolioMetric"><span>Needs Decision Team</span><b id="portfolioDecisionGap">0</b></div>
+  <div class="portfolioMetric"><span>Decision Team Complete</span><b id="portfolioDecisionComplete">0</b></div>
+</div>
+<div class="decisionGapBreakdown" id="decisionGapBreakdown" aria-label="Decision team gap breakdown">
+  <button class="decisionGapChip" type="button" data-role="Procurement" onclick="setDecisionRoleFilter('Procurement')"><span>Missing Procurement</span><b id="gapCountProcurement">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="Decision Maker" onclick="setDecisionRoleFilter('Decision Maker')"><span>Missing Decision Maker</span><b id="gapCountDecisionMaker">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="Economic Buyer" onclick="setDecisionRoleFilter('Economic Buyer')"><span>Missing Economic Buyer</span><b id="gapCountEconomicBuyer">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="Champion" onclick="setDecisionRoleFilter('Champion')"><span>Missing Champion</span><b id="gapCountChampion">0</b></button>
+</div>
+<div class="decisionActionQueue" id="decisionActionQueue">
+  <div class="decisionActionQueueHead">
+    <strong>Decision Team Actions</strong>
+    <span class="small" id="decisionActionQueueCount">0 deals need decision-team action</span>
+  </div>
+  <div class="decisionActionQueueList" id="decisionActionQueueList"></div>
+</div>
+<div class="dealFilters" id="dealFilters">
+  <div class="field"><label>Search Customer</label><input id="customerSearch" type="search" placeholder="Search company..." oninput="setCustomerSearch(this.value)"></div>
+  <div class="field"><label>Sales Stage</label><select id="dealStageFilter" onchange="setDealStageFilter(this.value)"><option value="">All stages</option></select></div>
+  <div class="field" id="dealOwnerFilterWrap"><label>Sales Owner</label><select id="dealOwnerFilter" onchange="setDealOwnerFilter(this.value)"><option value="">All owners</option></select><div class="small" id="dealOwnerUnavailable" style="display:none;margin-top:4px">Sales Owner data not available in governed deal sources.</div></div>
+  <label class="dealFocusToggle"><input id="decisionGapFilter" type="checkbox" onchange="setDecisionGapFilter(this.checked)">Needs Decision Team</label>
+  <div class="field"><label>Sort</label><select id="dealSort" onchange="setDealSort(this.value)">
+    <option value="customer-asc">Customer A–Z</option>
+    <option value="stage-asc">Sales Stage A–Z</option>
+    <option value="coverage-asc">Decision Coverage Low → High</option>
+    <option value="coverage-desc">Decision Coverage High → Low</option>
+  </select></div>
+  <button class="btn secondary" type="button" onclick="clearDealFilters()">Clear</button>
+  <div class="dealFilterCount"><span id="dealVisibleCount">0 of 0 customers</span></div>
+</div>
+<div id="dealCards" class="dealCards" style="margin-top:10px"></div>
+</div><div id="archivedHistoricalView" hidden><div class="historicalPanel"><h3 style="margin:0;color:var(--navy)">Archived / Historical Quotations</h3><p class="small">Read-only Smart Sale quotation history. Quotation records are not Opportunities and do not change active deal counts, pipeline, forecast, or deal probability.</p><div class="quickbar"><button class="btn primary" id="loadArchivedQuotationsButton" type="button" onclick="loadArchivedQuotations()">Load / Refresh Historical Quotations</button><span class="small" id="archivedQuotationStatus" aria-live="polite">Not loaded</span></div><div class="historicalStats"><div class="historicalStat"><span>Historical Quotations</span><b id="historicalQuotationTotal">0</b></div><div class="historicalStat"><span>Review Required</span><b id="historicalQuotationReviewCount">0</b></div><div class="historicalStat"><span>Quoted Value (THB)</span><b id="historicalQuotationValue">—</b></div><div class="historicalStat"><span>Quotation Date Range</span><b id="historicalQuotationDates">—</b></div></div><div class="historicalFilters"><div class="field"><label>Customer</label><input id="historyCustomerSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search customer"></div><div class="field"><label>Quotation Number</label><input id="historyQuoteSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search quotation"></div><div class="field"><label>Sales / Owner</label><select id="historyOwnerFilter" onchange="renderArchivedQuotations()" disabled><option value="">Owner unavailable in source</option></select><div class="small" id="historicalOwnerUnavailable">Owner field is not present in this workbook.</div></div><div class="field"><label>Product / Specification</label><input id="historyProductSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search product or specification"></div><div class="field"><label>Product Category</label><select id="historyProductFilter" onchange="renderArchivedQuotations()"><option value="">All categories</option></select></div><div class="field"><label>Quotation Date From</label><input id="historyDateFrom" type="date" onchange="renderArchivedQuotations()"></div><div class="field"><label>Quotation Date To</label><input id="historyDateTo" type="date" onchange="renderArchivedQuotations()"></div><div class="field"><label>Status</label><select id="historyStatusFilter" onchange="renderArchivedQuotations()"><option value="">All statuses</option></select></div><div class="field"><label>Opportunity ID</label><input id="historyOpportunitySearch" type="search" oninput="renderArchivedQuotations()" placeholder="Governed exact link"></div><button class="btn secondary" type="button" onclick="clearHistoricalQuotationFilters()">Clear filters</button></div><div class="small" id="historicalQuotationResultCount" aria-live="polite">0 quotations</div><div class="historicalTableWrap" style="margin-top:8px"><table class="historicalTable"><thead><tr><th>Quotation</th><th>Customer</th><th>Date</th><th>Product / Specification</th><th>Status</th><th>Quoted Value (THB)</th><th>Opportunity</th><th>Details</th></tr></thead><tbody id="historicalQuotationRows"></tbody></table></div></div></div></section>
+
+<section class="card full viewSection" id="aiNewOpportunities">
+<h2>New Opportunities to Review</h2>
+<div class="small">รอตรวจสอบ — ทีมขายยืนยันก่อนเพิ่มเป็นลูกค้าหรืองานขายจริง</div>
+<div id="newOpportunityStories" class="aiStoryGrid" style="margin-top:10px"></div>
+</section>
+
+<details class="card full viewSection secondaryPanel" id="otherSalesTopics">
+<summary>Other Sales Topics</summary>
+<div class="secondaryPanelBody">
+<div class="small">ข้อมูลรองจากการประชุมที่ยังไม่ต้องใช้ตัดสินใจทันที</div>
+<div id="otherSalesTopicStories" class="aiStoryGrid" style="margin-top:10px"></div>
+</div>
+</details>
+
+<section class="card full compactCard" id="sourceFreshnessCard">
+<h2>Latest Data</h2>
+<div id="sourceFreshness" class="sourceFreshness small">Waiting for latest sales data…</div>
+</section>
+
+<section class="card full viewSection" id="viewDMU">
+<h2>Customer Workspace</h2>
+<div class="toolbar">
+  <div class="field" style="max-width:360px"><label>Customer</label><select id="oppSelect"></select></div>
+  <button class="btn secondary legacyManualControl" onclick="loadSelectedOpportunity()">Load</button>
+  <button class="btn primary legacyManualControl" onclick="saveAll()">Save</button>
+  <button class="btn secondary legacyManualControl" type="button" onclick="navTo('viewDeals');setDealsView('historical')">Archived / Historical</button>
+  
+</div>
+<div class="execBrief" id="executiveDealBrief" aria-live="polite">
+  <div class="briefItem"><span>Customer</span><b id="briefCustomer">—</b></div>
+  <div class="briefItem"><span>Sales Stage</span><b id="briefStage">—</b></div>
+  <div class="briefItem"><span>Recommended Next Action</span><b id="briefNextAction">—</b></div>
+  <div class="briefItem"><span>Decision Coverage</span><b id="briefDecisionCoverage">—</b></div>
+</div>
+<div class="quickbar humanWriteControl">
+  <button class="btn accent" onclick="goQuickActivity()">+ Activity</button>
+  <button class="btn secondary" onclick="addDMURow();scrollToId('dmuTable')">+ DMU Contact / Decision Maker</button>
+  <button class="btn primary" onclick="saveHumanUpdate()">Save Human Update</button>
+</div>
+<div class="small humanWriteControl" style="margin-top:6px">ข้อมูล DMU และกิจกรรมที่ทีมยืนยันเอง • ระบบจะไม่สร้างหรือแก้ข้อมูลลูกค้า/งานขายหลักอัตโนมัติ</div>
+<div class="deal" style="margin-top:12px">
+  <input id="oppId" type="hidden">
+  <input id="quoteNo" type="hidden">
+  <div id="quotationHistory" class="small span2" aria-live="polite" hidden></div>
+  <div class="field span2"><label>Customer</label><input id="customer"></div>
+  <div class="field"><label>Sales Owner</label><input id="salesOwner"></div>
+  <div class="field span2"><label>Product / Solution</label><input id="offer"></div>
+  <div class="field"><label>Sales Stage</label><select id="stage"><option>Lead</option><option>Qualified</option><option>Requirement</option><option>Site Survey</option><option>Solution / Pricing</option><option>Technical Validation</option><option>Pricing</option><option>Proposal</option><option>Quotation</option><option>Inspection / Visit</option><option>Demo / Testing</option><option>Decision</option><option>Negotiation</option><option>Verbal Commit</option><option>Won</option><option>Lost</option></select></div>
+  <div class="field"><label>Pipeline Probability</label><input id="pipelineProb" type="number" min="0" max="100"></div>
+  <div class="field span2"><label>Competitors</label><input id="competitors"></div>
+  <div class="field"><label>Key Contact</label><input id="keyContact"><div id="contactPhone" class="small" style="margin-top:4px"></div></div>
+  <div class="field"><label>Key Contact Role</label><input id="keyContactRole"></div>
+</div>
+</section>
+
+<section class="card full">
+<h2>Deal Health</h2>
+<div class="stats">
+ <div class="stat"><b id="coveragePct">0%</b><span>Decision Coverage</span></div>
+ <div class="stat"><b id="dmuConfidence">0%</b><span>Decision Confidence</span></div>
+ <div class="stat"><b id="pipelineDisplay">0%</b><span>Pipeline Probability</span></div>
+ <div class="stat"><b id="mgmtForecast">0%</b><span>DMU-adjusted Forecast</span></div>
+</div>
+<div class="small" style="margin-top:8px">Forecast = Pipeline Probability × Decision Confidence. ใช้เป็น management challenge ไม่ได้แทน sales stage probability โดยตรง</div>
+</section>
+
+<section class="card full">
+<h2>Decision Team (DMU)</h2>
+<div class="tablewrap"><table id="dmuTable"><thead><tr><th>DMU Role</th><th>Person / Function</th><th>Influence (0–5)</th><th>Support</th><th>Care About / Pain</th><th>Win Criteria</th><th>HEXA Strategy</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+<div class="actionrow humanWriteControl"><button class="btn accent" onclick="addDMURow()">+ Add DMU Member</button></div>
+</section>
+
+<section class="card">
+<h2>DMU Radar</h2>
+<div class="radarWrap"><svg id="radar" width="420" height="360" viewBox="0 0 420 360"></svg></div>
+<div class="small">Radar แสดง coverage/readiness ของ DMU แต่ละ role ไม่ใช่ buying power</div>
+</section>
+
+<section class="card viewSection" id="viewActivity">
+<h2>Quick Activity</h2>
+<ul class="timeline" id="activityList"></ul>
+<div class="deal humanWriteControl" style="grid-template-columns:1fr 1fr">
+ <div class="field"><label>Date</label><input id="actDate" type="date"></div>
+ <div class="field"><label>Type</label><select id="actType"><option>Call</option><option>Email</option><option>Meeting</option><option>Demo</option><option>Site Visit</option><option>Follow-up</option></select></div>
+ <div class="field span2"><label>Activity Note</label><textarea id="actNote"></textarea></div>
+</div>
+<div class="actionrow humanWriteControl"><button class="btn primary" onclick="addActivity()">+ Add Activity</button></div>
+</section>
+
+<section class="card full viewSection" id="viewControl">
+<h2>Next Action & Close Plan</h2>
+<div class="deal">
+ <div class="field span2"><label>Current Diagnosis</label><textarea id="diagnosis"></textarea></div>
+ <div class="field span2"><label>Recommended Next Action</label><textarea id="nextAction"></textarea><div id="salesActions" class="small" aria-live="polite"></div></div>
+ <div class="field"><label>Champion Test</label><textarea id="championTest"></textarea></div>
+ <div class="field"><label>Decision Process</label><textarea id="decisionProcess"></textarea></div>
+ <div class="field"><label>Win Theme</label><textarea id="winTheme"></textarea></div>
+ <div class="field"><label>Critical Missing Info</label><textarea id="missingInfo"></textarea></div>
+</div>
+<div id="latestAiPanel" class="aiRevision" style="display:none"></div>
+<div id="salesClosePlan" class="closePlan"></div>
+</section>
+</div></div>
+
+<nav class="mobileNav" id="mobileNav">
+ <button onclick="navTo('viewDeals',this)" class="active">Customers</button>
+ <button onclick="navTo('viewDMU',this)">Customer / DMU</button>
+ <button onclick="navTo('viewActivity',this)">+ Activity</button>
+ <button onclick="navTo('viewControl',this)">Next Action</button>
+</nav>
+<!-- HEXA_DMU_BUILD_2026_09_28_6B8 --><!-- HEXA_DMU_AUTH_RESUME_2026_09_27_3 --><div class="footer">HEXA Sales DMU App • Sales Intelligence</div>
+<script>
+const CONFIG={
+ siteUrl:'https://hexahessmanth.sharepoint.com/sites/Sales_23o7yb',
+ lists:{opportunities:'HEXA Sales Pipeline',dmu:'HEXA DMU Members',activities:'HEXA Sales Activities'},
+ localFallback:true,
+ legacyWorkbook:'/sites/Sales_23o7yb/Shared Documents/Sale/ข้อมูลลูกค้า/Smart Sale with Dashboard.xlsx'
+};
+const stageProb={'Lead':10,'Qualified':20,'Requirement':30,'Site Survey':30,'Solution / Pricing':40,'Technical Validation':40,'Pricing':40,'Proposal':50,'Quotation':50,'Inspection / Visit':50,'Demo / Testing':60,'Decision':70,'Negotiation':70,'Verbal Commit':90,'Won':100,'Lost':0};
+let state={opportunities:[],current:null,dmu:[],activities:[],legacy:{customers:[],quotations:[],customerUpdates:[],quotationUpdates:[],lastSync:null}};
+let phase6ReadModel=null,phase6ContextReview=null,showAllActivities=false,phase6LiveReadOnly=false;
+const CMI_OPPORTUNITY_ID='OPP-2608-019';
+const CMI_GOLDEN=null;
+const SMART_SALE_DRIVE_ID='b!B-is1z_1_UqfbZzVyRnbHy6aaOLL2t5PlafMGwaUNmSVSPOv7ZpkS51SsnFx5aur';
+const SMART_SALE_ITEM_ID='01PSDF6ZDOKRJMLZCXKNAZFZMK3OQFMV4B';
+let archivedQuotationRows=[];
+let archivedQuotationLoadPromise=null;
+const standardRoles=[
+ ['End User','Forklift Operator',1,0,'Usability, visibility, safety','','Demo / Trial','Unknown'],
+ ['User Manager','Warehouse / Logistics Manager',1,0,'Productivity, uptime','','Fleet Management + demo','Unknown'],
+ ['Operations Influencer','',2,0,'Operation, spec, TCO, service','','Develop as Champion','Unknown'],
+ ['Technical Influencer','Engineering / Maintenance',1,0,'Reliability, battery, PM, parts','','Technical + warranty','Unknown'],
+ ['Safety / EHS','Safety Manager',1,0,'Risk, collision, compliance','','Safety comparison','Unknown'],
+ ['Procurement','Purchasing / Sourcing',1,0,'Price, terms, SLA','','Commercial package','Unknown'],
+ ['Decision Maker','',0.5,0,'Business continuity, risk','','Executive business case','Critical Unknown'],
+ ['Economic Buyer','',0.5,0,'CAPEX, ROI, TCO','','TCO / cash impact','Critical Unknown'],
+ ['Champion','',2.5,2,'Internal credibility','','Internal selling kit','To Confirm']
+];
+const seedOpps=[];
+let storageAvailable=false;
+function detectStorage(){
+  try{
+    const k='__hexa_test__';
+    window.localStorage.setItem(k,'1');
+    window.localStorage.removeItem(k);
+    storageAvailable=true;
+  }catch(e){storageAvailable=false}
+}
+function updateStorageStatus(){
+  const t=document.getElementById('connText'), d=document.getElementById('connDot'), n=document.getElementById('sandboxNote');
+  if(storageAvailable){
+    if(t)t.textContent='Restoring HEXA session…';
+    if(d)d.style.background='var(--yellow)';
+    if(n)n.style.display='none';
+  }else{
+    if(t)t.textContent='Session mode';
+    if(d)d.style.background='var(--yellow)';
+    if(n)n.style.display='block';
+  }
+}
+function getLocal(){
+  if(!storageAvailable)return null;
+  try{return JSON.parse(window.localStorage.getItem('HEXA_DMU_APP_STATE')||'null')}catch(e){return null}
+}
+function setLocal(){
+  if(!storageAvailable)return false;
+  try{window.localStorage.setItem('HEXA_DMU_APP_STATE',JSON.stringify(state));return true}
+  catch(e){storageAvailable=false;updateStorageStatus();return false}
+}
+function init(){
+  detectStorage();updateStorageStatus();
+  const saved=getLocal()||{};
+  state={
+    opportunities:[],
+    current:String(saved.current||'').trim()||null,
+    dmu:rowsOf(saved.dmu).filter(x=>x&&x.humanConfirmed===true),
+    activities:rowsOf(saved.activities).filter(x=>x&&x.humanConfirmed===true),
+    pendingHumanDeletes:rowsOf(saved.pendingHumanDeletes).filter(x=>x&&x.opportunityId&&x.rowId),
+    legacy:{customers:[],quotations:[],customerUpdates:[],quotationUpdates:[],lastSync:null}
+  };
+  renderOppSelector();renderDealCards();
+  const dateInput=document.getElementById('actDate');if(dateInput)dateInput.value=new Date().toISOString().slice(0,10);
+  const freshness=document.getElementById('sourceFreshness');if(freshness)freshness.textContent='Sign in with HEXA to load latest sales data.';
+}
+function renderOppSelector(){const s=document.getElementById('oppSelect');if(!s)return;const counts=new Map();state.opportunities.forEach(o=>{const k=String(o.customer||'').trim().toLowerCase();counts.set(k,(counts.get(k)||0)+1)});s.innerHTML=state.opportunities.map(o=>{const customer=String(o.customer||'').trim()||'Unnamed customer';const duplicate=(counts.get(customer.toLowerCase())||0)>1;const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';const label=detail?customer+' · '+detail:customer;return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`}).join('');s.onchange=async()=>{loadSelectedOpportunity();if(hexaAccount&&state.current){await loadHumanOverlay(state.current);loadSelectedOpportunity()}}}
+
+function setPhase6LiveReadOnly(enabled){
+ phase6LiveReadOnly=!!enabled;
+ document.body.classList.toggle('phase6LiveReadOnly',phase6LiveReadOnly);
+ const selector=document.getElementById('oppSelect');
+ document.querySelectorAll('#viewDMU input,#viewDMU textarea,#viewDMU select,#viewActivity input,#viewActivity textarea,#viewActivity select,#viewControl textarea').forEach(el=>{
+   if(el===selector||el.closest('.humanWriteControl')){el.disabled=false;el.readOnly=false;return}
+   if(el.tagName==='SELECT')el.disabled=phase6LiveReadOnly;
+   else el.readOnly=phase6LiveReadOnly;
+ });
+}
+function normalizedPersonName(v){return String(v||'').toLowerCase().replace(/\s+/g,' ').trim()}
+function governedDmuMembers(d360){return rowsOf(d360?.DMUMembers)}
+function aiDmuRowHTML(member,index){
+ const name=String(valueOf(member.Name,member.ContactPerson)).trim();
+ const title=String(valueOf(member.JobTitle,member.ContactRole)).trim();
+ const role=String(valueOf(member.DMURole,'AI suggestion')).trim();
+ const person=[name,title].filter(Boolean).join(' — ');
+ const source=[member.SourceType,member.SourceTimestamp?formatSourceDate(member.SourceTimestamp):''].filter(Boolean).join(' • ');
+ const confidence=Number(member.Confidence||0);
+ const conf=Number.isFinite(confidence)&&confidence>0?Math.round(confidence*100)+'%':'—';
+ const status=member.FinalDecisionMaker===true?'Final Decision Maker':String(valueOf(member.Status,'AI suggestion'));
+ return '<tr class="aiDmuRow" data-ai="1" data-id="ai-dmu-'+index+'">'+
+   '<td>'+esc(role)+'</td>'+
+   '<td><strong>'+esc(person||'Observed contact')+'</strong></td>'+
+   '<td>— / Not Confirmed</td><td>'+esc(conf)+'</td>'+
+   '<td>Observed from sales activity</td>'+
+   '<td>—</td>'+
+   '<td>'+esc(source||'Sales source')+'</td>'+
+   '<td><span class="aiDmuBadge">'+esc(status)+'</span></td><td></td></tr>';
+}
+function canonicalRoleForAiMember(member){
+ const text=String(valueOf(member.DMURole,member.ContactRole,member.JobTitle,'')).toLowerCase();
+ if(member.FinalDecisionMaker===true||/final decision maker|decision maker/.test(text))return 'Decision Maker';
+ if(/economic buyer/.test(text))return 'Economic Buyer';
+ if(/champion/.test(text))return 'Champion';
+ if(/procurement|purchasing|sourcing|buyer/.test(text))return 'Procurement';
+ if(/safety|ehs/.test(text))return 'Safety / EHS';
+ if(/engineering|maintenance|technical/.test(text))return 'Technical Influencer';
+ if(/warehouse|logistics|operations manager|user manager/.test(text))return 'User Manager';
+ if(/operator|end user/.test(text))return 'End User';
+ return 'Operations Influencer';
+}
+function scoringRowsForOpportunity(opportunityId){
+ const human=state.dmu.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
+ const ai=governedDmuMembers(detailFor(opportunityId)).map((m,i)=>{
+   const finalDm=m.FinalDecisionMaker===true;
+   const role=canonicalRoleForAiMember(m);
+   return {
+     id:'AI-SCORE-'+opportunityId+'-'+i,
+     oppId:opportunityId,
+     role,
+     person:String(valueOf(m.Name,m.ContactPerson,'')).trim(),
+     power:null,
+     support:null,
+     status:'AI-observed',
+     aiObserved:true
+   };
+ }).filter(x=>x.person);
+ return [...human,...ai];
+}
+function roleReadiness(row){
+ if(!row||row.aiObserved)return 0;
+ const statusScore=row.status==='Confirmed'?5:row.status==='Known'?4:row.status==='To Confirm'?2.5:row.status==='Critical Unknown'?0.5:1;
+ return Math.max(0,Math.min(5,(Number(row.power||0)+statusScore+Number(row.support||0))/3));
+}
+function credibleNewOpportunityStory(story){
+ const customer=String(valueOf(story?.Customer,'')).trim();
+ if(!customer||customer.length<3)return false;
+ if(/^(?:อะ|เอ่อ|อ่า|เรา|เราอะ|เรานะ|อื่น|ทั้งนั้น|อย่างเดียว|อย่างเดียวใช่ไหม|อะไรนะ|เฉยๆ|credit term|he)$/i.test(customer))return false;
+ if(/^(?:เรา|อะ|เอ่อ|อ่า|อย่างเดียว|ไหนบ้าง|ของเจ้าใหม่|รถพวก|เปิดพี่|นะเดี๋ยว|ประมาณนี้|ก็ได้แล้ว|บริษัทเราควร|อะต้องช่วย)/i.test(customer))return false;
+ const highlights=rowsOf(story?.BusinessHighlights);
+ const categories=rowsOf(story?.Categories);
+ const strongName=/(?:บริษัท|จำกัด|มหาชน|กรุ๊ป|พาวเวอร์|อินดัสทรี|โซลูชั่น|โลจิสติก|ฟู้ด|เคมี)/i.test(customer)||/\b[A-Z][A-Z0-9&._-]{2,}\b/.test(customer);
+ return strongName&&(highlights.length>0||categories.includes('Requirement / Technical')||categories.includes('Quotation / Pricing'));
+}
+function storyPriority(story){
+ const categories=Array.isArray(story?.Categories)?story.Categories:[];
+ const highlights=rowsOf(story?.BusinessHighlights);
+ let score=Number(story?.ActionCount||0)+highlights.length*15;
+ if(categories.includes('Decision / Closing'))score+=35;
+ if(categories.includes('Risk / Blocker'))score+=25;
+ if(categories.includes('Follow-up'))score+=20;
+ if(categories.includes('Quotation / Pricing'))score+=15;
+ if(categories.includes('Requirement / Technical'))score+=10;
+ const freshness=Date.parse(valueOf(story?.LatestOccurredAt,story?.SourceOccurredAt,''));if(Number.isFinite(freshness))score+=Math.min(20,Math.max(0,Math.round((freshness-Date.parse('2026-08-01T00:00:00Z'))/86400000/3)));
+ return score;
+}
+function storyOpportunityId(story){return String(valueOf(story?.OpportunityID,story?.opportunityId,'')).trim()}
+function openCustomerFromStory(opportunityId){
+ const id=String(opportunityId||'').trim();
+ if(!id||!state.opportunities.some(o=>o.id===id))return;
+ state.current=id;
+ const sel=document.getElementById('oppSelect');if(sel)sel.value=id;
+ loadSelectedOpportunity();
+ navTo('viewDMU');
+}
+function decisionCoverageSummary(opportunityId){
+ return decisionCoverageCount(opportunityId)+'/4 confirmed';
+}
+function renderStoryCard(story){
+ const customer=String(valueOf(story.Customer,story.Topic,'Sales update'));
+ const changed=String(valueOf(story.WhatChanged,'AI found a sales update.'));
+ const next=String(valueOf(story.RecommendedNextAction,'Review and confirm next action.'));
+ const categories=Array.isArray(story.Categories)?story.Categories.join(' • '):String(story.Categories||'');
+ const review=story.ReviewRequired===true?'<span class="badge yellow">รอตรวจสอบ</span>':'<span class="badge green">ยืนยันแล้ว</span>';
+ const freshness=valueOf(story.LatestOccurredAt,story.SourceOccurredAt);
+ const freshnessText=freshness?' • '+esc(formatSourceDate(freshness)):'';
+ const highlights=rowsOf(story.BusinessHighlights);
+ const highlightsHtml=highlights.length?'<ul style="margin:7px 0 0 18px">'+highlights.slice(0,6).map(x=>'<li>'+esc(String(x))+'</li>').join('')+'</ul>':'';
+ const opportunityId=storyOpportunityId(story);
+ const linked=opportunityId&&state.opportunities.some(o=>o.id===opportunityId);
+ const action=linked?'<div class="storyAction"><button class="btn secondary" type="button" onclick="openCustomerFromStory(\''+esc(opportunityId)+'\')">Open Customer</button></div>':'';
+ return '<div class="aiStory"><h3>'+esc(customer)+'</h3><div>'+esc(changed)+'</div>'+highlightsHtml+
+   '<div style="margin-top:7px"><strong>Next:</strong> '+esc(next)+'</div>'+
+   '<div class="storyMeta">'+review+(categories?' • '+esc(categories):'')+freshnessText+'</div>'+action+'</div>';
+}
+function storyMoreButton(kind,total,shown){
+ if(total<=shown)return '';
+ const remaining=total-shown;
+ const fn=kind==='new'?'window.hexaShowAllNewStories=true;renderManagementStories()':'window.hexaShowAllOtherSalesTopics=true;renderManagementStories()';
+ return '<div style="grid-column:1/-1"><button class="btn secondary" type="button" onclick="'+fn+'">Show '+remaining+' more</button></div>';
+}
+function priorityStoryMatches(story,filter){
+ if(filter==='all')return true;
+ const categories=Array.isArray(story?.Categories)?story.Categories:[];
+ if(filter==='closing')return categories.includes('Decision / Closing');
+ if(filter==='followup')return categories.includes('Follow-up');
+ if(filter==='risk')return categories.includes('Risk / Blocker');
+ return true;
+}
+function setPriorityFilter(filter){
+ window.hexaPriorityFilter=['all','closing','followup','risk'].includes(filter)?filter:'all';
+ window.hexaShowAllPriorityStories=false;
+ document.querySelectorAll('#priorityFilters .priorityFilter').forEach(b=>b.classList.toggle('active',b.dataset.filter===window.hexaPriorityFilter));
+ renderManagementStories();
+}
+function setPriorityCounts(existing){
+ const count=f=>existing.filter(x=>priorityStoryMatches(x,f)).length;
+ setText('priorityCountAll',count('all'));
+ setText('priorityCountClosing',count('closing'));
+ setText('priorityCountFollowup',count('followup'));
+ setText('priorityCountRisk',count('risk'));
+}
+function priorityMoreButton(total,shown){
+ if(total<=4&&window.hexaShowAllPriorityStories!==true)return '';
+ if(window.hexaShowAllPriorityStories===true)return '<div class="priorityActionsFooter"><button class="btn secondary" type="button" onclick="window.hexaShowAllPriorityStories=false;renderManagementStories()">Show Less</button></div>';
+ const remaining=total-shown;
+ return remaining>0?'<div class="priorityActionsFooter"><button class="btn secondary" type="button" onclick="window.hexaShowAllPriorityStories=true;renderManagementStories()">Show '+remaining+' more</button></div>':'';
+}
+function renderManagementStories(){
+ const model=phase6ContextReview?.reviewModel||phase6ContextReview||{};
+ const stories=model.managementStories||{};
+
+ const existing=rowsOf(stories.existingOpportunities).slice().sort((a,b)=>storyPriority(b)-storyPriority(a));
+ setPriorityCounts(existing);
+ const priorityFilter=window.hexaPriorityFilter||'all';
+ document.querySelectorAll('#priorityFilters .priorityFilter').forEach(b=>b.classList.toggle('active',b.dataset.filter===priorityFilter));
+ const filteredAttention=existing.filter(x=>priorityStoryMatches(x,priorityFilter));
+ const attention=document.getElementById('managementAttentionList');
+ const attentionLimit=window.hexaShowAllPriorityStories===true?filteredAttention.length:Math.min(4,filteredAttention.length);
+ const attentionRows=filteredAttention.slice(0,attentionLimit);
+ if(attention)attention.innerHTML=attentionRows.map(renderStoryCard).join('')+
+   priorityMoreButton(filteredAttention.length,attentionLimit)||
+   '<div class="small">No priority action in this filter.</div>';
+
+ const newBox=document.getElementById('newOpportunityStories');
+ const newRows=rowsOf(stories.newOpportunities).filter(credibleNewOpportunityStory).slice().sort((a,b)=>String(valueOf(b.LatestOccurredAt,b.SourceOccurredAt,'')).localeCompare(String(valueOf(a.LatestOccurredAt,a.SourceOccurredAt,'')))||storyPriority(b)-storyPriority(a));
+ const newLimit=window.hexaShowAllNewStories?newRows.length:Math.min(12,newRows.length);
+ if(newBox)newBox.innerHTML=newRows.slice(0,newLimit).map(renderStoryCard).join('')+
+   storyMoreButton('new',newRows.length,newLimit)||
+   '<div class="small">No new sales opportunity found.</div>';
+
+ const otherBox=document.getElementById('otherSalesTopicStories');
+ const otherRows=rowsOf(stories.otherSalesTopics).slice().sort((a,b)=>String(valueOf(b.SourceOccurredAt,b.LatestOccurredAt,'')).localeCompare(String(valueOf(a.SourceOccurredAt,a.LatestOccurredAt,'')))||storyPriority(b)-storyPriority(a));
+ const otherLimit=window.hexaShowAllOtherSalesTopics?otherRows.length:Math.min(12,otherRows.length);
+ if(otherBox)otherBox.innerHTML=otherRows.slice(0,otherLimit).map(renderStoryCard).join('')+
+   storyMoreButton('other',otherRows.length,otherLimit)||
+   '<div class="small">No additional sales topic.</div>';
+}
+function renderSourceFreshness(d360){
+ const box=document.getElementById('sourceFreshness');if(!box)return;
+ const f=d360?.Freshness||{};
+ const contextFresh=valueOf(contextStoryFor(state.current)?.LatestOccurredAt);
+ const latest=valueOf(contextFresh,f.latestAnyAt,f.latestAiAt,phase6ReadModel?.lastAiSync,phase6ContextReview?.reviewModel?.generatedAt,phase6ContextReview?.generatedAt);
+ const ai=valueOf(f.latestAiAt);
+ const quote=valueOf(f.latestQuotationAt);
+ const email=valueOf(f.latestEmailAt);
+ const parts=[
+   latest?'<b>Latest sales data:</b> '+esc(formatSourceDate(latest)):'<b>Latest sales data:</b> TBC',
+   ai?'AI '+esc(formatSourceDate(ai)):'',
+   quote?'Quotation '+esc(formatSourceDate(quote)):'',
+   email?'Email '+esc(formatSourceDate(email)):''
+ ].filter(Boolean);
+ box.innerHTML=parts.join(' • ');
+}
+function refreshExecutiveDealBrief(){
+ const o=state.opportunities.find(x=>x.id===state.current)||{};
+ const customer=valueOf(document.getElementById('customer')?.value,o.customer,'—');
+ const stage=valueOf(document.getElementById('stage')?.value,o.stage,'—');
+ const next=valueOf(document.getElementById('nextAction')?.value,detailFor(state.current)?.ControlTower?.RecommendedNextAction,'—');
+ setText('briefCustomer',customer);
+ setText('briefStage',stage);
+ setText('briefNextAction',next);
+ setText('briefDecisionCoverage',decisionCoverageSummary(state.current));
+}
+function loadSelectedOpportunity(){
+ const selector=document.getElementById('oppSelect');
+ state.current=(selector&&selector.value)||state.current;
+ const selectedOpportunityId=state.current;
+ if(!selectedOpportunityId){renderDealCards();return;}
+ showAllActivities=false;
+ clearLiveDealBinding();
+ const o=state.opportunities.find(x=>x.id===selectedOpportunityId);if(!o)return;
+ const live=liveDeal(selectedOpportunityId),d360=detailFor(selectedOpportunityId);
+ const latestQuotation=d360?.LatestQuotation||null;
+ setVal('oppId',o.id);setVal('customer',valueOf(d360?.Customer,d360?.CustomerName,live?.Customer,live?.CustomerName,o.customer));setVal('salesOwner',valueOf(d360?.Owner,latestQuotation?.Owner,live?.Owner,live?.SalesOwner,o.sales));setVal('quoteNo',valueOf(d360?.LatestQuotationNo,live?.LatestQuotationNo,live?.LatestQuoteNo,o.quoteNo));setVal('offer',quotationOffer(d360)||valueOf(live?.OpportunityName,live?.SolutionSummary,o.offer));setVal('stage',valueOf(live?.StageCode,live?.Stage,o.stage,'Lead'));setVal('pipelineProb',(live?.Probability!==undefined&&live?.Probability!==null&&live?.Probability!=='')?live.Probability:(o.prob!==undefined&&o.prob!==null?o.prob:''));setVal('competitors',valueOf(live?.Competitors,o.competitors));setVal('keyContact',valueOf(d360?.ContactPerson,latestQuotation?.ContactPerson,live?.ContactPerson,live?.ContactName,o.keyContact));setVal('keyContactRole',valueOf(d360?.ContactRole,live?.ContactRole,o.keyContactRole));
+ renderQuotationHistory(d360);
+ const contactPhone=valueOf(d360?.ContactPhone,latestQuotation?.ContactPhone,live?.ContactPhone);document.getElementById('contactPhone').textContent=contactPhone?'Contact phone: '+contactPhone:'';
+ let d=state.dmu.filter(x=>x.oppId===o.id&&x.humanConfirmed===true);if(!phase6LiveReadOnly&&!d.length){d=seedForOpp(o.id);state.dmu.push(...d)}renderDMU(d,d360);renderActivities();
+ applyControlTower(o.id,d360);renderSourceFreshness(d360);refreshExecutiveDealBrief();setTimeout(()=>renderSalesClosePlan(d360),0);
+ if(d360&&!document.getElementById('competitors').value.trim())setVal('competitors',valueOf(d360.ControlTower?.CompetitorSignal));
+ calc();setLocal();renderDealCards()
+}
+function seedForOpp(oppId){return standardRoles.map((r,i)=>({id:`${oppId}-R${i+1}`,oppId,role:r[0],person:r[1],power:r[2],support:r[3],care:r[4],win:r[5],strategy:r[6],status:r[7]}))}
+function renderDMU(rows,d360=null){
+ const trusted=(Array.isArray(rows)?rows:[]).filter(r=>r.humanConfirmed===true);
+ const knownNames=new Set(trusted.map(r=>normalizedPersonName(r.person)).filter(Boolean));
+ const ai=governedDmuMembers(d360).filter(m=>{
+   const name=normalizedPersonName(valueOf(m.Name,m.ContactPerson));
+   return name&&!knownNames.has(name);
+ });
+ document.querySelector('#dmuTable tbody').innerHTML=trusted.map(r=>rowHTML(r)).join('')+ai.map(aiDmuRowHTML).join('');
+ setPhase6LiveReadOnly(phase6LiveReadOnly);
+}
+function rowHTML(r){const influence=Math.max(0,Math.min(5,Number(r.power)||0));return `<tr class="humanWriteControl humanDmuRow" data-id="${esc(r.id)}"><td><input data-k="role" value="${esc(r.role)}" oninput="syncDMU();calc()"></td><td><input data-k="person" value="${esc(r.person)}"></td><td><div class="influenceControl"><button class="btn secondary" type="button" onclick="changeInfluence('${esc(r.id)}',-1)" aria-label="Decrease influence">−</button><output aria-label="Influence">${influence}</output><input data-k="power" type="hidden" value="${influence}"><button class="btn secondary" type="button" onclick="changeInfluence('${esc(r.id)}',1)" aria-label="Increase influence">+</button></div></td><td><select data-k="support" onchange="syncDMU();calc()">${supportOptions(r.support)}</select></td><td><input data-k="care" value="${esc(r.care)}"></td><td><input data-k="win" value="${esc(r.win||'')}"></td><td><input data-k="strategy" value="${esc(r.strategy)}"></td><td><select data-k="status" onchange="syncDMU();calc()">${statusOptions(r.status)}</select></td><td><button class="btn danger humanWriteControl" type="button" onclick="removeDMU('${esc(r.id)}')" aria-label="Delete DMU member">Delete DMU</button></td></tr>`}
+function changeInfluence(id,delta){const tr=[...document.querySelectorAll('#dmuTable tbody tr.humanDmuRow')].find(x=>x.dataset.id===id);if(!tr)return;const input=tr.querySelector('[data-k="power"]');const next=Math.max(0,Math.min(5,(Number(input.value)||0)+delta));input.value=String(next);tr.querySelector('output').textContent=String(next);syncDMU();calc()}
+function supportOptions(v){return [[0,'?'],[1,'Against'],[2,'Neutral'],[3,'Support'],[4,'Strong'],[5,'Champion']].map(x=>`<option value="${x[0]}" ${+v===x[0]?'selected':''}>${x[1]}</option>`).join('')}
+function statusOptions(v){return ['Unknown','Known','To Confirm','Critical Unknown','Confirmed'].map(x=>`<option ${v===x?'selected':''}>${x}</option>`).join('')}
+function syncDMU(){const rows=[...document.querySelectorAll('#dmuTable tbody tr:not([data-ai="1"])')];const ids=new Set(rows.map(r=>r.dataset.id));state.dmu=state.dmu.filter(x=>x.oppId!==state.current||ids.has(x.id));rows.forEach(tr=>{let obj=state.dmu.find(x=>x.id===tr.dataset.id);if(!obj){obj={id:tr.dataset.id,oppId:state.current,humanConfirmed:true,persisted:false};state.dmu.push(obj)}tr.querySelectorAll('[data-k]').forEach(el=>obj[el.dataset.k]=el.type==='number'?parseFloat(el.value)||0:el.tagName==='SELECT'?el.value:el.value);obj.support=+obj.support;obj.humanConfirmed=true;obj.dirty=true});setLocal()}
+function humanOverlayOpportunityReady(opportunityId=state.current){const id=String(opportunityId||'').trim();return /^OPP-\d{4}-\d{3,}$/.test(id)&&state.opportunities.some(o=>o.id===id)}
+function addDMURow(){if(!humanOverlayOpportunityReady()){flashConn(false,'เลือกงานขายที่ยืนยันแล้วก่อนเพิ่ม DMU');return}syncDMU();const id=`${state.current}-H-${Date.now()}`;state.dmu.push({id,oppId:state.current,role:'New Role',person:'',power:1,support:0,care:'',win:'',strategy:'',status:'Unknown',humanConfirmed:true,persisted:false,dirty:true});renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards();setPhase6LiveReadOnly(phase6LiveReadOnly)}
+function removeDMU(id){const row=state.dmu.find(x=>x.id===id);if(!row||row.humanConfirmed!==true)return;if(row.persisted===true){state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes);if(!state.pendingHumanDeletes.some(x=>x.kind==='dmu'&&x.rowId===id))state.pendingHumanDeletes.push({kind:'dmu',rowId:id,opportunityId:row.oppId})}state.dmu=state.dmu.filter(x=>x.id!==id);renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards()}
+function seedStandardRoles(){if(phase6LiveReadOnly)return;state.dmu=state.dmu.filter(x=>x.oppId!==state.current);state.dmu.push(...seedForOpp(state.current));renderDMU(state.dmu.filter(x=>x.oppId===state.current),detailFor(state.current));calc();setLocal();renderDealCards()}
+function renderActivities(){
+ let rows=state.activities.filter(x=>x.oppId===state.current);const legacy=legacyActivitiesForCurrent();const ai=activityFor(state.current);const seen=new Set(rows.map(x=>x.id));
+ for(const a of [...legacy,...ai])if(!seen.has(a.id)){rows.push(a);seen.add(a.id)}
+ rows=rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const visible=showAllActivities?rows:rows.slice(0,10),more=rows.length>10&&!showAllActivities;
+ document.getElementById('activityList').innerHTML=visible.map(a=>`<li><b>${esc(a.date)} • ${esc(a.type)}${a.legacy?' • Legacy':''}</b><br>${esc(a.note)}</li>`).join('')+(more?'<li><button class="btn secondary" type="button" onclick="showMoreActivities()">Show More</button></li>':'')||'<li>No activities yet</li>'
+}
+function showMoreActivities(){showAllActivities=true;renderActivities()}
+function addActivity(){const note=document.getElementById('actNote').value.trim();if(!note||!state.current)return;state.activities.push({id:`${state.current}-A-${Date.now()}`,oppId:state.current,date:document.getElementById('actDate').value||new Date().toISOString().slice(0,10),type:document.getElementById('actType').value,note,humanConfirmed:true,persisted:false,dirty:true});document.getElementById('actNote').value='';renderActivities();setLocal()}
+function loadStrategy(oppId){const key='strategy_'+oppId,s=state[key]||{};['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(k=>setVal(k,s[k]||''))}
+function saveStrategy(){if(phase6LiveReadOnly)return;state['strategy_'+state.current]={};['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(k=>state['strategy_'+state.current][k]=document.getElementById(k).value)}
+function calc(){
+ syncDMU();
+ const rows=scoringRowsForOpportunity(state.current);
+ const canonical=['End User','User Manager','Operations Influencer','Technical Influencer','Safety / EHS','Procurement','Decision Maker','Economic Buyer','Champion'];
+ const roleScores=canonical.map(role=>{
+   const matches=rows.filter(x=>x.role===role&&!x.aiObserved);
+   return matches.length?Math.max(...matches.map(roleReadiness)):0;
+ });
+ const coverage=Math.round((roleScores.reduce((a,b)=>a+b,0)/(canonical.length*5))*100);
+ const criticalRoles=['Procurement','Decision Maker','Economic Buyer','Champion'];
+ const criticalScore=criticalRoles.map(role=>{
+   const matches=rows.filter(x=>x.role===role&&!x.aiObserved);
+   if(!matches.length)return 0;
+   const best=matches.sort((a,b)=>roleReadiness(b)-roleReadiness(a))[0];
+   return best.status==='Confirmed'?1:best.status==='Known'?0.8:best.status==='To Confirm'?0.5:best.status==='Critical Unknown'?0.1:0.2;
+ }).reduce((a,b)=>a+b,0)/criticalRoles.length;
+ const confidence=Math.round((coverage*0.55)+(criticalScore*100*0.45));
+ const pipelineRaw=document.getElementById('pipelineProb').value;
+ const hasPipeline=pipelineRaw!==''&&Number.isFinite(Number(pipelineRaw));
+ const pipeline=hasPipeline?Number(pipelineRaw):null;
+ const forecast=hasPipeline?Math.round(pipeline*confidence/100):null;
+ setText('coveragePct',coverage+'%');
+ setText('dmuConfidence',confidence+'%');
+ setText('pipelineDisplay',hasPipeline?pipeline+'%':'—');
+ setText('mgmtForecast',hasPipeline?forecast+'%':'—');
+ const b=document.getElementById('forecastBadge');
+ b.className='badge '+(!hasPipeline?'gray':forecast>=65?'green':forecast>=35?'yellow':'red');
+ b.textContent=!hasPipeline?'Forecast TBC':forecast>=65?'Green Forecast':forecast>=35?'Yellow Forecast':'Red Forecast';
+ refreshExecutiveDealBrief();
+ drawRadar(rows)
+}
+function drawRadar(rows){const svg=document.getElementById('radar'),cx=210,cy=165,R=118;const canonical=['End User','User Manager','Operations Influencer','Technical Influencer','Safety / EHS','Procurement','Decision Maker','Economic Buyer','Champion'];const vals=canonical.map(role=>{const matches=rows.filter(x=>x.role===role&&!x.aiObserved);if(!matches.length)return null;return Math.max(...matches.map(roleReadiness))});const n=canonical.length;let h='';for(let ring=1;ring<=5;ring++){let pts=[];for(let i=0;i<n;i++){let a=-Math.PI/2+i*2*Math.PI/n,rr=R*ring/5;pts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`)}h+=`<polygon points="${pts.join(' ')}" fill="none" stroke="#d9e1ec"/>`}for(let i=0;i<n;i++){let a=-Math.PI/2+i*2*Math.PI/n;h+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*R}" y2="${cy+Math.sin(a)*R}" stroke="#e2e8f0"/>`;let lr=R+26;const label=canonical[i]+(vals[i]===null?' • TBC':'');h+=`<text x="${cx+Math.cos(a)*lr}" y="${cy+Math.sin(a)*lr}" font-size="9" text-anchor="middle" dominant-baseline="middle" fill="${vals[i]===null?'#94a3b8':'#475569'}">${esc(label)}</text>`}let pts=[];vals.forEach((v,i)=>{let a=-Math.PI/2+i*2*Math.PI/n,rr=R*(v===null?0:v)/5;pts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`)});h+=`<polygon points="${pts.join(' ')}" fill="rgba(23,58,99,.18)" stroke="#173a63" stroke-width="2"/>`;h+=`<text x="${cx}" y="${cy+R+48}" font-size="10" text-anchor="middle" fill="#64748b">TBC = no human-confirmed readiness score</text>`;svg.innerHTML=h}
+function syncOpportunity(){let o=state.opportunities.find(x=>x.id===state.current);if(!o){o={};state.opportunities.push(o)}o.id=document.getElementById('oppId').value.trim()||state.current;o.customer=document.getElementById('customer').value;o.sales=document.getElementById('salesOwner').value;o.quoteNo=document.getElementById('quoteNo').value;o.offer=document.getElementById('offer').value;o.stage=document.getElementById('stage').value;o.prob=+document.getElementById('pipelineProb').value||0;o.competitors=document.getElementById('competitors').value;o.keyContact=document.getElementById('keyContact').value;o.keyContactRole=document.getElementById('keyContactRole').value;state.current=o.id}
+
+function sheetRows(ws){return XLSX.utils.sheet_to_json(ws,{defval:''})}
+async function syncLegacyExcel(){setDealsView('historical');return loadArchivedQuotations();}
+function legacyActivitiesForCurrent(){
+ const o=state.opportunities.find(x=>x.id===state.current)||{}; const out=[];
+ if(o.quoteNo){for(const a of state.legacy.quotationUpdates.filter(x=>x.quotation_no===o.quoteNo)){out.push({id:'LQ-'+(a.created_at||a.followup_date||Math.random()),oppId:state.current,date:String(a.followup_date||a.created_at||'').slice(0,10),type:a.followup_type||'Quotation Follow-up',note:[a.note,a.update_reason,a.next_action].filter(x=>x&&x!=='255').join(' • '),legacy:true})}}
+ const c=state.legacy.customers.find(x=>x.company_name===o.customer); const code=o.customerCode||(c&&c.customer_code);
+ if(code){for(const a of state.legacy.customerUpdates.filter(x=>x.customer_code===code)){out.push({id:'LC-'+(a.created_at||a.update_date||Math.random()),oppId:state.current,date:String(a.update_date||a.created_at||'').slice(0,10),type:a.update_type||'Customer Activity',note:[a.step_name,a.update_note,a.next_action].filter(x=>x&&x!=='255').join(' • '),legacy:true})}}
+ return out;
+}
+async function legacySaveAllRest(){if(phase6LiveReadOnly){flashConn(true,'Governed read-only • no manual CRM write');return;}syncOpportunity();syncDMU();saveStrategy();setLocal();renderOppSelector();calc();if(location.hostname.endsWith('sharepoint.com')){try{await saveToSharePoint();flashConn(true,'Saved to SharePoint')}catch(e){flashConn(false,'Saved locally — SharePoint lists not ready');alert('Saved locally. SharePoint write requires lists named: '+Object.values(CONFIG.lists).join(', ')+'\n\n'+e.message)}}else{flashConn(false,'Saved locally')}}
+async function legacyTestSharePointRest(){if(!location.hostname.endsWith('sharepoint.com')){flashConn(false,'Open from SharePoint to test');alert('กรุณาเปิดไฟล์นี้จาก SharePoint เพื่อทดสอบการเชื่อมต่อจริง');return}try{const r=await fetch(`${CONFIG.siteUrl}/_api/web?$select=Title`,{headers:{Accept:'application/json;odata=nometadata'}});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();flashConn(true,'Connected: '+j.Title)}catch(e){flashConn(false,'Connection failed');alert(e.message)}}
+async function legacySaveToSharePointRest(){// production adapter: requires lists already created with expected columns
+ const digest=await getDigest();
+ // Upsert DMU rows by Title = unique row id. This intentionally avoids deleting unknown records.
+ const rows=state.dmu.filter(x=>x.oppId===state.current);
+ for(const r of rows){await upsertListItem(CONFIG.lists.dmu,'Title',r.id,{Title:r.id,OpportunityID:r.oppId,DMURole:r.role,PersonFunction:r.person,Power:r.power,Support:r.support,CareAbout:r.care,WinCriteria:r.win,HEXAStrategy:r.strategy,DMUStatus:r.status},digest)}
+ const acts=state.activities.filter(x=>x.oppId===state.current);
+ for(const a of acts){await upsertListItem(CONFIG.lists.activities,'Title',a.id,{Title:a.id,OpportunityID:a.oppId,ActivityDate:a.date,ActivityType:a.type,ActivityNote:a.note},digest)}
+}
+async function getDigest(){const r=await fetch(`${CONFIG.siteUrl}/_api/contextinfo`,{method:'POST',headers:{Accept:'application/json;odata=nometadata'}});if(!r.ok)throw new Error('Cannot get SharePoint request digest: '+r.status);const j=await r.json();return j.FormDigestValue}
+async function upsertListItem(listName,keyField,keyValue,fields,digest){const q=`${CONFIG.siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(listName).replace(/%20/g,' ')}')/items?$filter=${keyField}%20eq%20'${String(keyValue).replace(/'/g,"''")}'&$top=1`;let r=await fetch(q,{headers:{Accept:'application/json;odata=nometadata'}});if(!r.ok)throw new Error(`List ${listName} unavailable (${r.status})`);let j=await r.json();if(j.value&&j.value.length){const id=j.value[0].Id;r=await fetch(`${CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${id})`,{method:'POST',headers:{Accept:'application/json;odata=nometadata','Content-Type':'application/json;odata=nometadata','X-RequestDigest':digest,'IF-MATCH':'*','X-HTTP-Method':'MERGE'},body:JSON.stringify(fields)})}else{r=await fetch(`${CONFIG.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`,{method:'POST',headers:{Accept:'application/json;odata=nometadata','Content-Type':'application/json;odata=nometadata','X-RequestDigest':digest},body:JSON.stringify(fields)})}if(!r.ok)throw new Error(`Cannot write ${listName}: ${r.status}`)}
+function flashConn(ok,text){document.getElementById('connDot').style.background=ok?'#16a34a':'#d97706';document.getElementById('connText').textContent=text}
+function setVal(id,v){document.getElementById(id).value=v??''}function setText(id,v){document.getElementById(id).textContent=v}function esc(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+document.getElementById('stage').addEventListener('change',e=>{document.getElementById('pipelineProb').value=stageProb[e.target.value]??0;calc()});document.getElementById('pipelineProb').addEventListener('input',calc);['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>document.addEventListener('input',e=>{if(e.target.id===id){saveStrategy();setLocal()}}));
+init();
+
+/* Teams web-host adapter: stores the V4.1 DMU state in Sales Opportunity. */
+const HEXA_GRAPH={host:'hexahessmanth.sharepoint.com',path:'/sites/Sales_23o7yb',list:'Sales Opportunity',title:'HEXA-DMU-V4'};
+const hexaMsal=new msal.PublicClientApplication({auth:{clientId:'591f1516-77ba-4cc1-8ed2-bb86c58520bc',authority:'https://login.microsoftonline.com/822395f9-53a5-4241-86bc-b333b2218342',redirectUri:location.origin+'/teams/dmu',navigateToLoginRequestUrl:true},cache:{cacheLocation:'localStorage'}});
+const PHASE5_REVIEW_SCOPE='api://2442eaf5-a5bb-4956-be62-c8ddfb9a89c4/Phase5.Review';
+const PHASE5_REVIEW_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase5ReviewProposal';
+const PHASE6_DMU_READ_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6DmuReadModel';
+const PHASE6_CONTEXT_REVIEW_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6ContextReviewModel';
+const PHASE6_HUMAN_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay';
+const HEXA_LAST_USERNAME_KEY='hexa.lastUsername';
+const HEXA_LAST_HOME_ACCOUNT_ID_KEY='hexa.lastHomeAccountId';
+let hexaAccount=null,hexaSiteId=null,hexaListId=null;
+const HEXA_STRUCTURED={
+  lists:{customers:'CustomerDatabase',contacts:'CWSalesKeyContact',records:'CWSalesRecords'},
+  listIds:{},
+  status:{loaded:false,records:0,customers:0,contacts:0}
+};
+function addSignIn(){const c=document.querySelector('header .conn');if(!c||document.getElementById('hexaSignIn'))return;const b=document.createElement('button');b.id='hexaSignIn';b.className='btn accent';b.textContent='Sign in with HEXA';b.onclick=connectHEXA;c.appendChild(b)}
+const PHASE5_REVIEW_TEST_PROPOSAL='PR-IX-EV-3f49b811b1009aaf0d41-1';
+const PHASE5_REVIEW_UI_KEY='hexa.phase5.review.'+PHASE5_REVIEW_TEST_PROPOSAL;
+function phase5ReviewDetails(payload){const x=payload&&((payload.proposal||payload.result||payload.review||payload.fields)||payload)||{};return {status:x.Status??x.status??'',approver:x.Approver??x.approver??'',decisionAt:x.DecisionAt??x.decisionAt??'',decisionNote:x.DecisionNote??x.decisionNote??''}}
+function phase5TerminalStatus(status){return /^(Rejected|Approved)$/i.test(String(status||''))}
+function phase5ReviewFeedback(message,details,isError=false){const c=document.querySelector('header .conn');if(!c)return;let el=document.getElementById('phase5ReviewFeedback');if(!el){el=document.createElement('div');el.id='phase5ReviewFeedback';el.setAttribute('role','status');el.style.cssText='width:100%;margin-top:6px;font-size:12px;line-height:1.45';c.appendChild(el)}el.style.color=isError?'#b91c1c':'#166534';el.textContent=message+(details&&details.status?` • Status: ${details.status} • Approver: ${details.approver||'—'} • DecisionAt: ${details.decisionAt||'—'} • DecisionNote: ${details.decisionNote||'—'}`:'')}
+function lockPhase5ReviewButton(button,details){button.disabled=true;button.textContent=(details.status||'Review')+' — review complete';phase5ReviewFeedback((details.status||'Review')+' successfully',details)}
+function addPhase5RejectTest(){const c=document.querySelector('header .conn');if(!c||document.getElementById('phase5RejectTest'))return;const b=document.createElement('button');b.id='phase5RejectTest';b.className='btn';b.textContent='Test Phase 5 Reject';const prior=JSON.parse(sessionStorage.getItem(PHASE5_REVIEW_UI_KEY)||'null');if(prior&&phase5TerminalStatus(prior.status)){lockPhase5ReviewButton(b,prior)}b.onclick=async()=>{if(b.disabled||!confirm('Submit the controlled Phase 5 reject test?'))return;b.disabled=true;phase5ReviewFeedback('Submitting review…');try{const payload=await submitPhase5Review(PHASE5_REVIEW_TEST_PROPOSAL,'reject','Controlled Phase 5 persistence validation - no deterministic OpportunityID match.');const details=phase5ReviewDetails(payload);sessionStorage.setItem(PHASE5_REVIEW_UI_KEY,JSON.stringify(details));if(phase5TerminalStatus(details.status)){lockPhase5ReviewButton(b,details)}else{b.textContent='Review submitted';phase5ReviewFeedback('Rejected successfully',details)}}catch(e){b.disabled=false;b.textContent='Test Phase 5 Reject';phase5ReviewFeedback('Phase 5 review failed: '+e.message,null,true)}};c.appendChild(b)}
+async function graphToken(){const a=hexaAccount||hexaMsal.getAllAccounts()[0];if(!a)throw new Error('Sign in with HEXA first');hexaAccount=a;try{return (await hexaMsal.acquireTokenSilent({account:a,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All']})).accessToken}catch(e){flashConn(false,'Finishing Microsoft sign-in…');await hexaMsal.acquireTokenRedirect({account:a,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All'],prompt:'select_account'});return new Promise(()=>{})}}
+function rememberHexaAccount(account){if(!account)return null;try{if(account.username)localStorage.setItem(HEXA_LAST_USERNAME_KEY,String(account.username));if(account.homeAccountId)localStorage.setItem(HEXA_LAST_HOME_ACCOUNT_ID_KEY,String(account.homeAccountId))}catch(e){}return account}
+function cachedHexaAccount(){const accounts=hexaMsal.getAllAccounts();if(!accounts.length)return null;let username='',homeAccountId='';try{username=localStorage.getItem(HEXA_LAST_USERNAME_KEY)||'';homeAccountId=localStorage.getItem(HEXA_LAST_HOME_ACCOUNT_ID_KEY)||''}catch(e){}return rememberHexaAccount(accounts.find(a=>homeAccountId&&a.homeAccountId===homeAccountId)||accounts.find(a=>username&&String(a.username).toLowerCase()===username.toLowerCase())||accounts[0])}
+async function recoverHexaAccountSilently(){const cached=cachedHexaAccount();if(cached)return cached;let loginHint='';try{loginHint=localStorage.getItem(HEXA_LAST_USERNAME_KEY)||''}catch(e){}try{const request={scopes:[PHASE5_REVIEW_SCOPE],...(loginHint?{loginHint}:{})};const result=await hexaMsal.ssoSilent(request);return rememberHexaAccount(result&&result.account)}catch(e){console.warn('HEXA silent SSO unavailable',e);return null}}
+async function phase5ReviewToken(){const a=hexaAccount||cachedHexaAccount();if(!a)throw new Error('Sign in with HEXA first');hexaAccount=rememberHexaAccount(a);try{return (await hexaMsal.acquireTokenSilent({account:a,scopes:[PHASE5_REVIEW_SCOPE]})).accessToken}catch(firstError){try{const silent=await hexaMsal.ssoSilent({scopes:[PHASE5_REVIEW_SCOPE],loginHint:a.username||undefined});if(silent&&silent.account)hexaAccount=rememberHexaAccount(silent.account);if(silent&&silent.accessToken)return silent.accessToken}catch(silentError){console.warn('HEXA API silent token recovery unavailable',silentError)}await hexaMsal.acquireTokenRedirect({account:a,scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});return new Promise(()=>{})}}
+function valueOf(...values){return values.find(v=>v!==undefined&&v!==null&&v!=='')||''}
+function idOf(x){return String(x?.OpportunityID||x?.opportunityId||x?.OpportunityId||x?.id||x?.ID||'').trim()}
+function rowsOf(x){return Array.isArray(x)?x:(Array.isArray(x?.items)?x.items:(Array.isArray(x?.opportunities)?x.opportunities:(Array.isArray(x?.value)?x.value:[])))}
+function liveDeal(id){return rowsOf(phase6ReadModel?.deals).find(x=>idOf(x)===id)||null}
+function detailFor(selectedOpportunityId){return Array.isArray(phase6ReadModel?.deal360)?phase6ReadModel.deal360.find(x=>x?.OpportunityID===selectedOpportunityId)||null:null}
+function quotationOffer(d360){const q=d360?.LatestQuotation;if(!q)return '';let capacity=String(valueOf(q.Capacity)).replace(/,/g,'').replace(/^3500\s*kg$/i,'3.5T');return [valueOf(q.Brand),valueOf(q.Model),capacity].filter(Boolean).join(' ')+(q.QuotationType?' — '+q.QuotationType:'')}
+function renderQuotationHistory(d360){const box=document.getElementById('quotationHistory');if(!box)return;const rows=rowsOf(d360?.QuotationHistory).slice().sort((a,b)=>String(b.QuotationDate||b.SentAt||'').localeCompare(String(a.QuotationDate||a.SentAt||'')));box.hidden=rows.length===0;box.textContent=rows.length?'Quotation history: '+rows.map(q=>q.QuotationNo).filter(Boolean).join(', '):''}
+function contextReviewModel(){return phase6ContextReview?.reviewModel||phase6ContextReview||{}}
+function contextStoryFor(selectedOpportunityId){return rowsOf(contextReviewModel()?.managementStories?.existingOpportunities).find(x=>String(x?.OpportunityID||'').trim()===selectedOpportunityId)||null}
+function contextActivitiesFor(selectedOpportunityId){
+ const story=contextStoryFor(selectedOpportunityId);if(!story)return [];
+ const date=String(valueOf(story.LatestOccurredAt,story.SourceOccurredAt,'')).slice(0,10);
+ const highlights=rowsOf(story.BusinessHighlights);
+ if(highlights.length)return highlights.map((note,i)=>({id:'CTX-'+selectedOpportunityId+'-'+i,oppId:selectedOpportunityId,date,type:'AI Update',note:String(note)}));
+ return rowsOf(story.Actions).map((x,i)=>({id:'CTX-'+selectedOpportunityId+'-'+i,oppId:selectedOpportunityId,date:String(valueOf(x.SourceOccurredAt,story.LatestOccurredAt,'')).slice(0,10),type:valueOf(x.Category,'AI Update'),note:valueOf(x.Action,'Sales update')}));
+}
+function activityFor(selectedOpportunityId){
+ const d360=detailFor(selectedOpportunityId);
+ const base=rowsOf(d360?.ActivityTimeline).map((x,i)=>({id:'AI-'+selectedOpportunityId+'-'+i,oppId:selectedOpportunityId,date:String(valueOf(x.Date,x.ActivityDate,x.occurredAt,x.date,'')).slice(0,10),type:valueOf(x.Type,x.ActivityType,x.type,'Activity'),note:valueOf(x.Note,x.ActivityNote,x.note,x.summary,'Sales update')}));
+ return [...contextActivitiesFor(selectedOpportunityId),...base];
+}
+function clearLiveDealBinding(){['oppId','customer','salesOwner','quoteNo','offer','stage','pipelineProb','competitors','keyContact','keyContactRole','diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>setVal(id,''));['quotationHistory','contactPhone','salesActions'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=''});['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>{const el=document.getElementById(id);el.readOnly=false;el.classList.remove('goldenLock')});const ai=document.getElementById('latestAiPanel');ai.style.display='none';ai.innerHTML='';document.getElementById('salesClosePlan').innerHTML=''}
+function missingFieldAction(label){return 'No source-grounded '+label+' yet — validate this in the next customer contact.'}
+function controlTowerValue(d360,key,label){const value=String(d360?.ControlTower?.[key]??'').trim();return value||missingFieldAction(label)}
+function renderSalesActions(d360){const box=document.getElementById('salesActions');if(!box)return;const actions=rowsOf(d360?.SalesActions);if(!actions.length){box.innerHTML='';return}box.innerHTML='<b>Sales actions</b>'+actions.map(a=>{const action=valueOf(a.Action,a.action,a.Title,a.title,a.NextAction,a.nextAction);const owner=valueOf(a.Owner,a.owner,a.AssignedTo,a.assignedTo);const due=valueOf(a.DueDate,a.dueDate,a.Due,a.due);return '<div style="margin-top:4px">'+esc(action)+(owner?' • '+esc(owner):'')+(due?' • '+esc(String(due).slice(0,10)):'')+'</div>'}).join('')}
+function applyAiControlTower(d360){const fields=[['diagnosis','CurrentDiagnosis','current diagnosis'],['nextAction','RecommendedNextAction','recommended next action'],['championTest','ChampionTest','champion test'],['decisionProcess','DecisionProcess','decision process'],['winTheme','WinTheme','win theme'],['missingInfo','CriticalMissingInfo','critical missing information']];fields.forEach(([id,key,label])=>setVal(id,controlTowerValue(d360,key,label)));renderSalesActions(d360)}
+function goldenBaselineFor(d360){
+ const g=d360?.ControlTower?.GoldenBaseline||d360?.GoldenBaseline||null;
+ if(!g)return null;
+ return {diagnosis:valueOf(g.CurrentDiagnosis),nextAction:valueOf(g.RecommendedNextAction),championTest:valueOf(g.ChampionTest),decisionProcess:valueOf(g.DecisionProcess),winTheme:valueOf(g.WinTheme),missingInfo:valueOf(g.CriticalMissingInfo)};
+}
+function applyGoldenBaseline(d360){
+ const golden=goldenBaselineFor(d360);if(!golden)return false;
+ ['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>{const el=document.getElementById(id);setVal(id,golden[id]);el.readOnly=true;el.classList.add('goldenLock');el.title='Trusted baseline — locked'});
+ return true;
+}
+function renderContextLatestUpdate(opportunityId,append=false){
+ const story=contextStoryFor(opportunityId),box=document.getElementById('latestAiPanel');if(!box||!story)return;
+ const highlights=rowsOf(story.BusinessHighlights);
+ const actions=rowsOf(story.Actions);
+ const date=valueOf(story.LatestOccurredAt,story.SourceOccurredAt);
+ const body=highlights.length
+   ?'<ul style="margin:8px 0 0 18px">'+highlights.map(x=>'<li>'+esc(String(x))+'</li>').join('')+'</ul>'
+   :actions.length
+     ?'<ul style="margin:8px 0 0 18px">'+actions.slice(0,6).map(x=>'<li>'+esc(String(valueOf(x.Action,'Sales update')))+'</li>').join('')+'</ul>'
+     :'<div class="small">No newer source-grounded update.</div>';
+ const html='<div class="contextLatestUpdate"><h3>Latest AI Update'+(date?' • '+esc(formatSourceDate(date)):'')+'</h3>'+body+
+   '<div class="small" style="margin-top:7px"><b>Next:</b> '+esc(String(valueOf(story.RecommendedNextAction,'Review latest customer status.')))+
+   (story.ReviewRequired===true?' • Needs Review':' • Linked')+'</div></div>';
+ box.style.display='block';
+ box.innerHTML=append?box.innerHTML+html:html;
+}
+function applyControlTower(opportunityId,d360){
+ if(opportunityId===CMI_OPPORTUNITY_ID){
+   applyGoldenBaseline(d360);renderLatestAiRevision(d360);renderContextLatestUpdate(opportunityId,true);renderSalesActions(d360);return
+ }
+ loadStrategy(opportunityId);if(d360)applyAiControlTower(d360);renderContextLatestUpdate(opportunityId,false)
+}
+function renderLatestAiRevision(d360){const box=document.getElementById('latestAiPanel'),latest=d360?.ControlTower?.LatestAIUpdate||d360?.LatestAIUpdate||{},golden=goldenBaselineFor(d360)||{};const fields=[['Current Diagnosis','CurrentDiagnosis','diagnosis'],['Recommended Next Action','RecommendedNextAction','nextAction'],['Champion Test','ChampionTest','championTest'],['Decision Process','DecisionProcess','decisionProcess'],['Win Theme','WinTheme','winTheme'],['Critical Missing Info','CriticalMissingInfo','missingInfo']];const changed=fields.map(([label,key,goldenKey])=>({label,value:String(latest[key]||'').trim(),golden:String(golden[goldenKey]||'').trim()})).filter(x=>x.value&&x.value!==x.golden);box.style.display='block';box.innerHTML='<h3>Latest AI Update / Suggested Revision</h3>'+(changed.length?changed.map(x=>'<div class="revisionRow"><strong>'+esc(x.label)+':</strong> '+esc(x.value)+'</div>').join(''):'<div class="small">No newer source-grounded revision.</div>')}
+const CLOSE_MILESTONES=[
+ {label:'QUOTE / PRICE SEND',aliases:['QuotePriceSend','QuoteSend','PriceSend'],confirm:'Confirm the quotation / price send date.'},
+ {label:'PRICE CLOSE',aliases:['PriceClose'],confirm:'Confirm the target price close date.'},
+ {label:'NEXT CONTACT',aliases:['NextContact','NextActionDue'],confirm:'Confirm the next customer contact date.'},
+ {label:'PO EXPECTED',aliases:['POExpected','PoExpected'],confirm:'Confirm the expected PO date.'},
+ {label:'DELIVERY / READY',aliases:['DeliveryReady','Delivery'],confirm:'Confirm the delivery / ready date.'},
+ {label:'START USE / GO-LIVE',aliases:['StartUse','UsageStart','GoLive'],confirm:'Confirm the start-use / go-live date.'}
+];
+function normMilestone(v){return String(v||'').replace(/[^a-z0-9]/gi,'').toLowerCase()}
+function timelineSource(d360){const candidates=[d360?.SalesClosePlan,d360?.CommercialTimeline,d360?.ControlTower?.SalesClosePlan,d360?.ControlTower?.CommercialTimeline];return candidates.find(x=>Array.isArray(x)||(x&&typeof x==='object'))||[]}
+function findMilestone(source,spec){const aliases=[spec.label,...spec.aliases];if(Array.isArray(source))return source.find(x=>aliases.some(a=>normMilestone(valueOf(x.Milestone,x.Name,x.Type,x.Key))===normMilestone(a)))||{};for(const key of Object.keys(source||{})){if(aliases.some(a=>normMilestone(key)===normMilestone(a)))return typeof source[key]==='object'?source[key]:{TargetDate:source[key]}}return {}}
+function formatSourceDate(value){const raw=String(value||'').trim();if(!raw)return 'TBC';const d=new Date(raw);if(Number.isNaN(d.getTime()))return raw;return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})}
+function milestoneDate(row){const start=valueOf(row.TargetDate,row.Date,row.ExpectedDate,row.DueDate),end=valueOf(row.WindowEndDate,row.EndDate);if(!start)return 'TBC';return end&&String(end)!==String(start)?formatSourceDate(start)+' – '+formatSourceDate(end):formatSourceDate(start)}
+function renderSalesClosePlan(d360){const source=timelineSource(d360),cards=CLOSE_MILESTONES.map(spec=>{const row=findMilestone(source,spec),date=milestoneDate(row),unknown=date==='TBC',status=String(valueOf(row.Status,row.State,unknown?'RequiredConfirmation':'Scheduled')),confirmation=String(valueOf(row.RequiredConfirmation,row.ConfirmationRequired,spec.confirm)),basis=row.Basis?'<div class="small">'+esc(row.Basis)+'</div>':'';return '<div class="closeMilestone"><div class="milestoneName">'+esc(spec.label)+'</div><div class="milestoneDate">'+esc(date)+'</div><div class="milestoneStatus">'+esc(status)+'</div>'+basis+(unknown?'<div class="requiredConfirmation"><strong>RequiredConfirmation:</strong> '+esc(confirmation)+'</div>':'')+'</div>'}).join('');document.getElementById('salesClosePlan').innerHTML='<h3>Sales Close Plan</h3><div class="closePlanGrid">'+cards+'</div>'}
+function applyProductionDeals(){const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id);state.opportunities=deals;if(!deals.length){state.current=null;renderOppSelector();renderDealCards();return}if(!deals.some(d=>d.id===state.current))state.current=deals[0].id;renderOppSelector();loadSelectedOpportunity()}
+async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
+ const token=await phase5ReviewToken();
+ const headers={Authorization:'Bearer '+token,Accept:'application/json'};
+ const [dmuResponse,contextResponse]=await Promise.all([
+   fetch(PHASE6_DMU_READ_ENDPOINT,{headers}),
+   fetch(PHASE6_CONTEXT_REVIEW_ENDPOINT,{headers})
+ ]);
+ const dmuPayload=await dmuResponse.json().catch(()=>null);
+ const contextPayload=await contextResponse.json().catch(()=>null);
+ if(!dmuResponse.ok)throw new Error('DMU read HTTP '+dmuResponse.status);
+ phase6ReadModel=dmuPayload?.readModel||dmuPayload;
+ phase6ContextReview=contextResponse.ok?contextPayload:null;
+ if(!contextResponse.ok)console.warn('Context review unavailable: HTTP '+contextResponse.status);
+ setPhase6LiveReadOnly(true);
+ applyProductionDeals();
+ if(state.current&&!skipHumanOverlay)await loadHumanOverlay(state.current);
+ if(state.current)loadSelectedOpportunity();
+ renderManagementStories();
+ renderSourceFreshness(detailFor(state.current));
+ flashConn(true,contextResponse.ok?'Connected • Sales data + team updates':'Connected • Sales data loaded; AI review unavailable');
+}
+async function submitPhase5Review(proposalId,decision,decisionNote){const token=await phase5ReviewToken();const r=await fetch(PHASE5_REVIEW_ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({proposalId,decision:{action:decision,comment:decisionNote}})});if(!r.ok){const e=await r.json().catch(()=>null);throw new Error(e&&e.detail||'Phase 5 review '+r.status)}return r.json()}
+async function humanOverlayRequest(method,body=null,opportunityId=''){
+ const token=await phase5ReviewToken();
+ const url=method==='GET'
+   ?PHASE6_HUMAN_OVERLAY_ENDPOINT+'?opportunityId='+encodeURIComponent(opportunityId)
+   :PHASE6_HUMAN_OVERLAY_ENDPOINT;
+ const r=await fetch(url,{method,headers:{Authorization:'Bearer '+token,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const payload=await r.json().catch(()=>null);
+ if(!r.ok)throw new Error(String(payload?.error||('Human overlay HTTP '+r.status)));
+ return payload;
+}
+async function loadHumanOverlay(opportunityId){
+ if(!opportunityId||!hexaAccount)return;
+ const payload=await humanOverlayRequest('GET',null,opportunityId);
+ const dmu=rowsOf(payload?.dmu).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+ const activities=rowsOf(payload?.activities).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+ state.dmu=state.dmu.filter(x=>x.oppId!==opportunityId||x.humanConfirmed!==true).concat(dmu);
+ state.activities=state.activities.filter(x=>x.oppId!==opportunityId||x.humanConfirmed!==true).concat(activities);
+ state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==opportunityId);
+ setLocal();
+}
+async function persistHumanOverlayCommand(command){
+ return humanOverlayRequest('POST',command);
+}
+async function graph(url,opts={}){const token=await graphToken();const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok)throw new Error('SharePoint '+r.status);return r.status===204?null:r.json()}
+async function graphIds(){if(hexaListId)return;const site=await graph('/sites/'+HEXA_GRAPH.host+':'+HEXA_GRAPH.path);hexaSiteId=site.id;const lists=await graph('/sites/'+hexaSiteId+'/lists?$select=id,displayName');const list=lists.value.find(x=>x.displayName===HEXA_GRAPH.list);if(!list)throw new Error('Sales Opportunity list not found');hexaListId=list.id}
+async function getDmuItem(){await graphIds();const j=await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items?expand=fields');return j.value.find(x=>x.fields&&x.fields.Title===HEXA_GRAPH.title)}
+async function structuredListId(name){
+  await graphIds();
+  if(HEXA_STRUCTURED.listIds[name])return HEXA_STRUCTURED.listIds[name];
+  const lists=await graph('/sites/'+hexaSiteId+'/lists?$select=id,displayName');
+  const list=lists.value.find(x=>x.displayName===name);
+  if(!list)throw new Error(name+' list not found');
+  HEXA_STRUCTURED.listIds[name]=list.id;
+  return list.id;
+}
+async function structuredItems(name,fields,filter){
+  const id=await structuredListId(name);
+  const select=fields.map(encodeURIComponent).join(',');
+  const where=filter?'&$filter='+encodeURIComponent(filter):'';
+  const j=await graph('/sites/'+hexaSiteId+'/lists/'+id+'/items?$top=200&expand=fields($select='+select+')'+where);
+  return j.value||[];
+}
+function applyStructuredOverlay(records,customers,contacts){
+  // Compatibility only: structured records may fill absent display fields, never
+  // replace a V4 value and never write the merged result back to SharePoint.
+  const customerById=new Map(customers.map(x=>[x.fields.CustomerID,x.fields]));
+  const contactById=new Map(contacts.map(x=>[x.fields.ContactID,x.fields]));
+  for(const item of records){
+    const r=item.fields||{},o=state.opportunities.find(x=>x.id===r.OpportunityID);
+    if(!o)continue;
+    const c=customerById.get(r.CustomerID)||{},p=contactById.get(r.PrimaryContactID)||{};
+    if(!o.customer&&(c.Customer_x0020_Name||c['Customer Name']))o.customer=c.Customer_x0020_Name||c['Customer Name'];
+    if(!o.offer&&r.SolutionSummary)o.offer=r.SolutionSummary;
+    if(!o.stage&&r.StageCode)o.stage=r.StageCode;
+    if(!o.keyContact&&p.Title)o.keyContact=p.Title;
+    if(!o.keyContactRole&&p.Designation)o.keyContactRole=p.Designation;
+    o.structured={customerId:r.CustomerID||'',primaryContactId:r.PrimaryContactID||'',wonLostStatus:r.WonLostStatus||'',revenueRealizedAmount:r.RevenueRealizedAmount||null,resultEvidenceId:r.ResultEvidenceID||''};
+  }
+}
+async function hydrateStructuredReadOnly(){
+  const records=await structuredItems(HEXA_STRUCTURED.lists.records,['OpportunityID','CustomerID','PrimaryContactID','SolutionSummary','StageCode','WonLostStatus','RevenueRealizedAmount','ResultEvidenceID']);
+  const customerIds=[...new Set(records.map(x=>x.fields&&x.fields.CustomerID).filter(Boolean))];
+  const contactIds=[...new Set(records.map(x=>x.fields&&x.fields.PrimaryContactID).filter(Boolean))];
+  const [customerRows,contactRows]=await Promise.all([
+    Promise.all(customerIds.map(id=>structuredItems(HEXA_STRUCTURED.lists.customers,['CustomerID','Customer_x0020_Name'],"fields/CustomerID eq '"+String(id).replace(/'/g,"''")+"'"))),
+    Promise.all(contactIds.map(id=>structuredItems(HEXA_STRUCTURED.lists.contacts,['ContactID','Title','Designation'],"fields/ContactID eq '"+String(id).replace(/'/g,"''")+"'")))
+  ]);
+  const customers=customerRows.flat(),contacts=contactRows.flat();
+  applyStructuredOverlay(records,customers,contacts);
+  HEXA_STRUCTURED.status={loaded:true,records:records.length,customers:customers.length,contacts:contacts.length};
+}
+function authErrorDetail(e){return String(e?.errorCode||e?.code||e?.subError||e?.message||'unknown error').slice(0,220)}
+async function connectHEXA(){try{const recovered=await recoverHexaAccountSilently();if(recovered){hexaAccount=recovered;const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected';await loadAuthenticatedAi();return}flashConn(false,'Opening Microsoft sign-in…');await hexaMsal.loginRedirect({scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});return new Promise(()=>{})}catch(e){const detail=authErrorDetail(e);flashConn(false,'Sign-in failed: '+detail);console.error('HEXA sign-in failed',e)}}
+async function hydrateFromSharePoint(){try{const item=await getDmuItem();if(item&&item.fields.DMUAppData){const remote=JSON.parse(item.fields.DMUAppData);if(remote&&remote.opportunities)state=remote}await hydrateStructuredReadOnly();renderOppSelector();loadSelectedOpportunity();renderDealCards();flashConn(true,'Connected • V4 + structured read-only');const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected'}catch(e){flashConn(false,'SharePoint connection failed');alert(e.message)}}
+async function saveToSharePoint(){await graphIds();const payload=JSON.stringify(state);const item=await getDmuItem();if(item)await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items/'+item.id+'/fields',{method:'PATCH',body:JSON.stringify({DMUAppData:payload})});else await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items',{method:'POST',body:JSON.stringify({fields:{Title:HEXA_GRAPH.title,DMUAppData:payload}})});flashConn(true,'Saved to SharePoint')}
+async function saveAll(){if(phase6LiveReadOnly){flashConn(true,'Governed read-only • no manual CRM write');return;}syncOpportunity();syncDMU();saveStrategy();setLocal();renderOppSelector();calc();if(!hexaAccount){alert('Please select Sign in with HEXA before saving to SharePoint');return}try{await saveToSharePoint()}catch(e){flashConn(false,'Save failed');alert(e.message)}}
+async function testSharePoint(){if(!hexaAccount){await connectHEXA();return}await hydrateFromSharePoint()}
+const HUMAN_SAVE_PENDING_KEY='hexa.pendingHumanSave';
+function humanSavePending(){try{return localStorage.getItem(HUMAN_SAVE_PENDING_KEY)==='1'||sessionStorage.getItem(HUMAN_SAVE_PENDING_KEY)==='1'}catch(e){try{return sessionStorage.getItem(HUMAN_SAVE_PENDING_KEY)==='1'}catch(_){return false}}}
+function setHumanSavePending(){try{localStorage.setItem(HUMAN_SAVE_PENDING_KEY,'1')}catch(e){}try{sessionStorage.setItem(HUMAN_SAVE_PENDING_KEY,'1')}catch(e){}}
+function clearHumanSavePending(){try{localStorage.removeItem(HUMAN_SAVE_PENDING_KEY)}catch(e){}try{sessionStorage.removeItem(HUMAN_SAVE_PENDING_KEY)}catch(e){}}
+async function saveHumanUpdate(){
+  if(!humanOverlayOpportunityReady()){flashConn(false,'บันทึก DMU ได้เมื่อเลือกงานขายที่ยืนยันแล้ว');return;}
+  syncDMU();setLocal();renderDealCards();calc();
+  if(!hexaAccount){setHumanSavePending();await connectHEXA();return;}
+  setHumanSavePending();
+  try{
+    const opportunityId=state.current;
+    const deletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId===opportunityId);
+    for(const item of deletes){
+      await persistHumanOverlayCommand({kind:item.kind,action:'delete',opportunityId,rowId:item.rowId});
+    }
+    const dmuRows=state.dmu.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
+    for(const row of dmuRows){
+      await persistHumanOverlayCommand({kind:'dmu',action:'upsert',opportunityId,rowId:row.id,payload:{role:row.role,person:row.person,power:row.power,support:row.support,care:row.care,win:row.win,strategy:row.strategy,status:row.status}});
+    }
+    const activities=state.activities.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
+    for(const row of activities){
+      await persistHumanOverlayCommand({kind:'activity',action:'upsert',opportunityId,rowId:row.id,payload:{date:row.date,type:row.type,note:row.note}});
+    }
+    state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==opportunityId);
+    await loadHumanOverlay(opportunityId);
+    loadSelectedOpportunity();
+    clearHumanSavePending();
+    flashConn(true,'Saved • Team update confirmed');
+  }catch(e){
+    const detail=authErrorDetail(e);
+    flashConn(false,'Save pending: '+detail);
+    console.error('Human DMU overlay save failed',e);
+  }
+}
+addSignIn();
+// Teams Desktop blocks authentication popups. Redirect authentication opens in the
+// browser tab Teams provides, then returns here with the user token.
+(async function finishHEXAAuthentication(){
+  try{
+    const result=await hexaMsal.handleRedirectPromise();
+    hexaAccount=rememberHexaAccount((result&&result.account)||cachedHexaAccount())||await recoverHexaAccountSilently();
+    if(hexaAccount){
+      rememberHexaAccount(hexaAccount);
+      const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected';
+      const pending=humanSavePending();
+      await loadAuthenticatedAi({skipHumanOverlay:pending});
+      if(pending){
+        await saveHumanUpdate();
+      }
+    }else{
+      flashConn(false,'Sign in with HEXA');
+    }
+  }catch(e){
+    const detail=authErrorDetail(e);
+    flashConn(false,'Sign-in failed: '+detail);
+    console.error('HEXA authentication completion failed',e);
+  }
+})();
+
+function setCustomerSearch(value){window.hexaCustomerQuery=String(value||'').trim().toLowerCase();renderDealCards()}
+function setDealStageFilter(value){window.hexaDealStageFilter=String(value||'').trim();renderDealCards()}
+function setDealOwnerFilter(value){window.hexaDealOwnerFilter=String(value||'').trim();renderDealCards()}
+function setDecisionGapFilter(enabled){window.hexaDecisionGapOnly=!!enabled;renderDealCards()}
+function setDecisionRoleFilter(role){
+ const next=String(role||'').trim();
+ window.hexaDecisionRoleFilter=window.hexaDecisionRoleFilter===next?'':next;
+ renderDealCards();
+}
+function setDealSort(value){window.hexaDealSort=String(value||'customer-asc');renderDealCards()}
+function clearDealFilters(){
+ window.hexaCustomerQuery='';
+ window.hexaDealStageFilter='';
+ window.hexaDealOwnerFilter='';
+ window.hexaDecisionGapOnly=false;
+ window.hexaDecisionRoleFilter='';
+ const q=document.getElementById('customerSearch');if(q)q.value='';
+ const st=document.getElementById('dealStageFilter');if(st)st.value='';
+ const owner=document.getElementById('dealOwnerFilter');if(owner)owner.value='';
+ const gap=document.getElementById('decisionGapFilter');if(gap)gap.checked=false;
+ window.hexaDealSort='customer-asc';
+ const sort=document.getElementById('dealSort');if(sort)sort.value='customer-asc';
+ renderDealCards();
+}
+function refreshDealStageFilter(){
+ const sel=document.getElementById('dealStageFilter');if(!sel)return;
+ const current=String(window.hexaDealStageFilter||'');
+ const stages=[...new Set(state.opportunities.map(o=>String(o.stage||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ sel.innerHTML='<option value="">All stages</option>'+stages.map(stage=>'<option value="'+esc(stage)+'">'+esc(stage)+'</option>').join('');
+ if(current&&stages.includes(current))sel.value=current;else{sel.value='';window.hexaDealStageFilter=''}
+}
+function refreshDealOwnerFilter(){
+ const sel=document.getElementById('dealOwnerFilter');if(!sel)return;
+ const current=String(window.hexaDealOwnerFilter||'');
+ const owners=[...new Set(state.opportunities.map(o=>String(o.sales||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const unavailable=document.getElementById('dealOwnerUnavailable');
+ sel.innerHTML='<option value="">All owners</option>'+owners.map(owner=>'<option value="'+esc(owner)+'">'+esc(owner)+'</option>').join('');
+ if(current&&owners.includes(current))sel.value=current;else{sel.value='';window.hexaDealOwnerFilter=''}
+ sel.disabled=owners.length===0;
+ if(unavailable)unavailable.style.display=owners.length===0?'block':'none';
+}
+function decisionGapRoles(opportunityId){
+ const rows=scoringRowsForOpportunity(opportunityId);
+ const critical=['Procurement','Decision Maker','Economic Buyer','Champion'];
+ return critical.filter(role=>!rows.some(r=>r.role===role&&!r.aiObserved&&String(r.person||'').trim()&&/^(Confirmed|Known)$/i.test(String(r.status||''))));
+}
+function decisionCoverageCount(opportunityId){
+ return 4-decisionGapRoles(opportunityId).length;
+}
+function dealMatchesFilters(o){
+ const query=String(window.hexaCustomerQuery||'').trim().toLowerCase();
+ const stage=String(window.hexaDealStageFilter||'').trim();
+ const owner=String(window.hexaDealOwnerFilter||'').trim();
+ const customer=String(o?.customer||'').trim().toLowerCase();
+ const needsDecisionTeam=window.hexaDecisionGapOnly===true;
+ const missingRole=String(window.hexaDecisionRoleFilter||'').trim();
+ return (!query||customer.includes(query))
+   &&(!stage||String(o?.stage||'').trim()===stage)
+   &&(!owner||String(o?.sales||'').trim()===owner)
+   &&(!needsDecisionTeam||decisionCoverageCount(o.id)<4)
+   &&(!missingRole||decisionGapRoles(o.id).includes(missingRole));
+}
+function sortDealsForPortfolio(deals){
+ const mode=String(window.hexaDealSort||'customer-asc');
+ const rows=[...deals];
+ const byCustomer=(a,b)=>String(a.customer||'').localeCompare(String(b.customer||''),undefined,{sensitivity:'base'});
+ const byStage=(a,b)=>String(a.stage||'').localeCompare(String(b.stage||''),undefined,{sensitivity:'base'})||byCustomer(a,b);
+ const byCoverage=(a,b)=>decisionCoverageCount(a.id)-decisionCoverageCount(b.id)||byCustomer(a,b);
+ if(mode==='stage-asc')return rows.sort(byStage);
+ if(mode==='coverage-asc')return rows.sort(byCoverage);
+ if(mode==='coverage-desc')return rows.sort((a,b)=>decisionCoverageCount(b.id)-decisionCoverageCount(a.id)||byCustomer(a,b));
+ return rows.sort(byCustomer);
+}
+function refreshPortfolioSummary(filteredDeals){
+ const total=state.opportunities.length;
+ const decisionGap=state.opportunities.filter(o=>decisionCoverageCount(o.id)<4).length;
+ const roleGapCount=role=>state.opportunities.filter(o=>decisionGapRoles(o.id).includes(role)).length;
+ setText('portfolioTotalDeals',total);
+ setText('portfolioVisibleDeals',filteredDeals.length);
+ setText('portfolioDecisionGap',decisionGap);
+ setText('portfolioDecisionComplete',Math.max(0,total-decisionGap));
+ setText('gapCountProcurement',roleGapCount('Procurement'));
+ setText('gapCountDecisionMaker',roleGapCount('Decision Maker'));
+ setText('gapCountEconomicBuyer',roleGapCount('Economic Buyer'));
+ setText('gapCountChampion',roleGapCount('Champion'));
+ document.querySelectorAll('#decisionGapBreakdown .decisionGapChip').forEach(btn=>btn.classList.toggle('active',btn.dataset.role===String(window.hexaDecisionRoleFilter||'')));
+}
+function renderDecisionTeamActionQueue(filteredDeals){
+ const box=document.getElementById('decisionActionQueueList');if(!box)return;
+ const candidates=[...filteredDeals]
+   .filter(o=>decisionCoverageCount(o.id)<4)
+   .sort((a,b)=>decisionCoverageCount(a.id)-decisionCoverageCount(b.id)||String(a.customer||'').localeCompare(String(b.customer||''),undefined,{sensitivity:'base'}));
+ const shown=candidates.slice(0,5);
+ setText('decisionActionQueueCount',candidates.length+' deals need decision-team action');
+ if(!shown.length){box.innerHTML='<div class="small">No decision-team gaps in the current filtered view.</div>';return}
+ box.innerHTML=shown.map(o=>{
+   const missing=decisionGapRoles(o.id);
+   const d360=detailFor(o.id);
+   const next=valueOf(d360?.ControlTower?.RecommendedNextAction,contextStoryFor(o.id)?.RecommendedNextAction,'Review and confirm next action.');
+   return '<div class="decisionActionItem">'+
+     '<div><div class="customer">'+esc(o.customer)+'</div><div class="small">'+esc(o.stage||'')+'</div></div>'+
+     '<div class="gap">'+esc(decisionCoverageSummary(o.id))+' • Missing '+esc(missing.join(', '))+'</div>'+
+     '<div class="action"><b>Next:</b> '+esc(String(next))+'</div>'+
+     '<div><button class="btn secondary" type="button" onclick="openDealCard(\''+esc(o.id)+'\')">Open Customer</button></div>'+
+   '</div>';
+ }).join('');
+}
+function renderDealCards(){
+ const box=document.getElementById('dealCards');if(!box)return;
+ refreshDealStageFilter();
+ refreshDealOwnerFilter();
+ const gap=document.getElementById('decisionGapFilter');if(gap)gap.checked=window.hexaDecisionGapOnly===true;
+ if(!state.opportunities.length){setText('dealVisibleCount','0 of 0 customers');refreshPortfolioSummary([]);renderDecisionTeamActionQueue([]);box.innerHTML='<div class="small">Sign in with HEXA to load customers and active deals.</div>';return}
+ const filteredDeals=state.opportunities.filter(dealMatchesFilters);
+ const sortedDeals=sortDealsForPortfolio(filteredDeals);
+ refreshPortfolioSummary(filteredDeals);
+ renderDecisionTeamActionQueue(filteredDeals);
+ const sort=document.getElementById('dealSort');if(sort)sort.value=String(window.hexaDealSort||'customer-asc');
+ setText('dealVisibleCount',filteredDeals.length+' of '+state.opportunities.length+' customers');
+ if(!sortedDeals.length){box.innerHTML='<div class="small">No customers match the current search/filter.</div>';return}
+ box.innerHTML=sortedDeals.map(o=>{
+   const critical=decisionGapRoles(o.id);
+   const hasProb=o.prob!==null&&o.prob!==undefined&&o.prob!==''&&Number.isFinite(Number(o.prob));
+   const cls=hasProb&&Number(o.prob)>=70?'yellow':hasProb&&Number(o.prob)>=50?'blue':'gray';
+   const d360=detailFor(o.id);
+   const next=valueOf(d360?.ControlTower?.RecommendedNextAction,contextStoryFor(o.id)?.RecommendedNextAction,'Review and confirm next action.');
+   const coverage=decisionCoverageSummary(o.id);
+   return `<div class="dealCard" onclick="openDealCard('${esc(o.id)}')">
+     <div class="name">${esc(o.customer)}</div>
+     <div class="meta">${esc(o.offer||'Sales opportunity')}</div>
+     <div style="margin-top:7px"><span class="badge ${cls}">${esc(o.stage||'')} • ${hasProb?Number(o.prob)+'%':'—'}</span></div>
+     <div class="missingPills">${critical.length?critical.map(x=>`<span>Missing: ${esc(x)}</span>`).join(''):'<span class="complete">Decision Team Complete</span>'}</div>
+     <div class="dealCardAction">
+       <div class="coverage"><b>Decision Coverage:</b> ${esc(coverage)}</div>
+       <div class="next"><b>Next:</b> ${esc(String(next))}</div>
+       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button></div>
+     </div>
+   </div>`;
+ }).join('');
+}
+function normalizeHistoricalQuotationNo(value){return String(value||'').trim().toUpperCase()}
+function normalizeHistoricalCustomer(value){return String(value||'').normalize('NFC').replace(/\s+/g,' ').trim().toLocaleLowerCase()}
+function buildHistoricalQuotationRecords(sourceRows,canonicalQuotes,activeDeals){
+ const active=Array.isArray(activeDeals)?activeDeals:[];
+ const activeById=new Set(active.map(function(item){return String(item&&item.OpportunityID||'').trim().toUpperCase()}).filter(Boolean));
+ const byQuote=new Map();
+ (Array.isArray(canonicalQuotes)?canonicalQuotes:[]).forEach(function(item){
+   const quoteNo=normalizeHistoricalQuotationNo(item&&(item.QuotationNo||item.quotation_no||item.Title));
+   const opportunityId=String(item&&(item.OpportunityID||item.opportunityId)||'').trim().toUpperCase();
+   if(!quoteNo||!opportunityId)return;
+   const ids=byQuote.get(quoteNo)||new Set();ids.add(opportunityId);byQuote.set(quoteNo,ids);
+ });
+ const source=Array.isArray(sourceRows)?sourceRows:[];
+ const quoteCounts=new Map();
+ source.forEach(function(row){const n=normalizeHistoricalQuotationNo(row&&(row.quotation_no||row.QuotationNo));if(n)quoteCounts.set(n,(quoteCounts.get(n)||0)+1)});
+ const quoteSeen=new Map(),linkedCounts=new Map();
+ source.forEach(function(row){
+   const no=normalizeHistoricalQuotationNo(row&&(row.quotation_no||row.QuotationNo));
+   const explicit=String(row&&(row.OpportunityID||row.opportunityId)||'').trim().toUpperCase();
+   const options=explicit?[explicit]:Array.from(byQuote.get(no)||new Set());
+   const duplicate=(quoteCounts.get(no)||0)>1;
+   const conflict=(byQuote.get(no)||new Set()).size>1||(explicit&&Array.from(byQuote.get(no)||new Set()).some(function(id){return id!==explicit}));
+   if(!duplicate&&!conflict&&options.length===1&&activeById.has(options[0]))linkedCounts.set(options[0],(linkedCounts.get(options[0])||0)+1);
+ });
+ return source.map(function(row,index){
+   const item=row||{},quoteNo=normalizeHistoricalQuotationNo(item.quotation_no||item.QuotationNo);
+   const sourceOpportunityId=String(item.OpportunityID||item.opportunityId||'').trim().toUpperCase();
+   const possibleIds=Array.from(byQuote.get(quoteNo)||new Set());
+   const duplicate=!!quoteNo&&(quoteCounts.get(quoteNo)||0)>1;
+   const occurrence=(quoteSeen.get(quoteNo)||0)+1;if(quoteNo)quoteSeen.set(quoteNo,occurrence);
+   const exactIds=sourceOpportunityId?[sourceOpportunityId]:possibleIds;
+   const exactConflict=possibleIds.length>1||(sourceOpportunityId&&possibleIds.some(function(id){return id!==sourceOpportunityId}));
+   const exactOpportunity=exactIds.length===1&&activeById.has(exactIds[0])&&!exactConflict&&!duplicate?exactIds[0]:'';
+   const customer=String(item.company_name||item.Customer||'').trim();
+   const matchingDeals=active.filter(function(deal){return normalizeHistoricalCustomer(deal&&(deal.Customer||deal.CustomerName||deal.Company))===normalizeHistoricalCustomer(customer)});
+   const reviewRequired=!quoteNo||duplicate||exactConflict||(exactIds.length>0&&!exactOpportunity)||(!exactOpportunity&&matchingDeals.length>0);
+   const amountText=item.net_amount??item.NetAmount;
+   const amount=String(amountText??'').trim()===''?NaN:Number(amountText);
+   return Object.freeze({
+     HistoricalQuotationID:'SMARTSALE-'+(quoteNo||'UNNUMBERED-'+String(index+1))+(duplicate?'-'+String(occurrence):''),
+     QuotationNo:quoteNo,
+     QuotationDate:item.quotation_date||item.QuotationDate||'',
+     Customer:customer,
+     Product:String(item.quotation_title||item.Product||item.product||'').trim(),
+     ProductCategory:String(item.product_category||item.ProductCategory||'').trim(),
+     QuotationType:String(item.quotation_type||item.QuotationType||'').trim(),
+     Status:String(item.status||item.QuoteStatus||'').trim(),
+     Quantity:item.quantity??item.Quantity??'',
+     UnitPrice:item.unit_price??item.UnitPrice??'',
+     TotalAmount:item.total_amount??item.TotalAmount??'',
+     DiscountAmount:item.discount_amount??item.DiscountAmount??'',
+     NetAmount:Number.isFinite(amount)?amount:null,
+     ExpectedCloseDate:item.expected_close_date||item.ExpectedCloseDate||'',
+     PONumber:String(item.po_no||item.PONumber||'').trim(),
+     PODate:item.po_date||item.PODate||'',
+     DeliveryStatus:String(item.delivery_status||item.DeliveryStatus||'').trim(),
+     LostReason:String(item.lost_reason||item.LostReason||'').trim(),
+     SalesOwner:String(item.owner||item.SalesOwner||item.sales_owner||'').trim(),
+     OpportunityID:exactOpportunity,
+     MappingDisposition:exactOpportunity?'Linked to existing Opportunity':reviewRequired?'Review Required':'Historical / Unlinked',
+     ReviewRequired:reviewRequired,
+     DuplicateQuotationNo:duplicate,
+     OpportunityQuotationCount:exactOpportunity?(linkedCounts.get(exactOpportunity)||1):0
+   });
+ });
+}
+function exactCanonicalHistoricalQuotes(readModel){
+ const result=[];
+ const add=function(rows,parentOpportunityId){(Array.isArray(rows)?rows:[]).forEach(function(q){
+   if(!q)return;
+   const rowOpportunityId=String(q.OpportunityID||q.opportunityId||'').trim().toUpperCase();
+   const parentId=String(parentOpportunityId||'').trim().toUpperCase();
+   if(parentId&&rowOpportunityId&&rowOpportunityId!==parentId){
+     result.push(q);
+     result.push(Object.assign({},q,{OpportunityID:parentId}));
+   }else if(parentId&&!rowOpportunityId){
+     result.push(Object.assign({},q,{OpportunityID:parentId}));
+   }else result.push(q);
+ })};
+ add(readModel&&readModel.quotations);
+ (Array.isArray(readModel&&readModel.deal360)?readModel.deal360:[]).forEach(function(deal){
+   add(deal&&deal.QuotationHistory,deal&&(deal.OpportunityID||deal.opportunityId));
+ });
+ return result;
+}
+function setDealsView(view){
+ const historical=view==='historical';
+ const active=document.getElementById('activeDealsView'),archive=document.getElementById('archivedHistoricalView');
+ if(active)active.hidden=historical;if(archive)archive.hidden=!historical;
+ const activeTab=document.getElementById('activeDealsTab'),archiveTab=document.getElementById('archivedHistoricalTab');
+ if(activeTab){activeTab.classList.toggle('activeTab',!historical);activeTab.setAttribute('aria-selected',String(!historical))}
+ if(archiveTab){archiveTab.classList.toggle('activeTab',historical);archiveTab.setAttribute('aria-selected',String(historical))}
+ if(historical&&!archivedQuotationRows.length&&!archivedQuotationLoadPromise)loadArchivedQuotations();
+}
+function formatHistoricalAmount(value){
+ const amount=Number(value);if(!Number.isFinite(amount))return '—';
+ try{return new Intl.NumberFormat('th-TH',{maximumFractionDigits:2}).format(amount)}catch(e){return String(amount)}
+}
+function historicalDateText(value){
+ const text=value instanceof Date?value.toISOString():String(value||'').trim();
+ const match=text.match(/^(\d{4}-\d{2}-\d{2})/);if(match)return match[1];
+ if(typeof XLSX!=='undefined'&&Number.isFinite(Number(value))&&Number(value)>20000){const parsed=XLSX.SSF.parse_date_code(Number(value));if(parsed)return String(parsed.y).padStart(4,'0')+'-'+String(parsed.m).padStart(2,'0')+'-'+String(parsed.d).padStart(2,'0')}
+ const date=new Date(text);return Number.isNaN(date.getTime())?'':date.toISOString().slice(0,10);
+}
+async function loadArchivedQuotations(){
+ if(archivedQuotationLoadPromise)return archivedQuotationLoadPromise;
+ const status=document.getElementById('archivedQuotationStatus');if(status)status.textContent='Loading source workbook…';
+ archivedQuotationLoadPromise=(async function(){
+   try{
+     if(typeof XLSX==='undefined')throw new Error('Workbook parser is unavailable.');
+     const token=await graphToken();
+     const url='https://graph.microsoft.com/v1.0/drives/'+encodeURIComponent(SMART_SALE_DRIVE_ID)+'/items/'+encodeURIComponent(SMART_SALE_ITEM_ID)+'/content';
+     const response=await fetch(url,{headers:{Authorization:'Bearer '+token}});
+     if(!response.ok)throw new Error('Smart Sale workbook read failed: HTTP '+response.status);
+     const bytes=await response.arrayBuffer();
+     const workbook=XLSX.read(bytes,{type:'array',cellDates:true});
+     const sheet=workbook.Sheets.Quotations;if(!sheet)throw new Error('The source workbook has no Quotations sheet.');
+     const sourceRows=XLSX.utils.sheet_to_json(sheet,{defval:''});
+     archivedQuotationRows=buildHistoricalQuotationRecords(sourceRows,exactCanonicalHistoricalQuotes(phase6ReadModel),rowsOf(phase6ReadModel&&phase6ReadModel.deals));
+     const products=[...new Set(archivedQuotationRows.map(function(row){return row.ProductCategory}).filter(Boolean))].sort();
+     const statuses=[...new Set(archivedQuotationRows.map(function(row){return row.Status}).filter(Boolean))].sort();
+     const productSelect=document.getElementById('historyProductFilter'),statusSelect=document.getElementById('historyStatusFilter'),ownerSelect=document.getElementById('historyOwnerFilter');
+     if(productSelect)productSelect.innerHTML='<option value="">All products</option>'+products.map(function(value){return '<option value="'+esc(value)+'">'+esc(value)+'</option>'}).join('');
+     if(statusSelect)statusSelect.innerHTML='<option value="">All statuses</option>'+statuses.map(function(value){return '<option value="'+esc(value)+'">'+esc(value)+'</option>'}).join('');
+     const owners=[...new Set(archivedQuotationRows.map(function(row){return row.SalesOwner}).filter(Boolean))].sort();
+     if(ownerSelect&&owners.length){ownerSelect.disabled=false;ownerSelect.innerHTML='<option value="">All owners</option>'+owners.map(function(value){return '<option value="'+esc(value)+'">'+esc(value)+'</option>'}).join('')}
+     if(status)status.textContent='Read-only source loaded • '+archivedQuotationRows.length+' quotations';
+     renderArchivedQuotations();
+   }catch(error){if(status)status.textContent='Could not load historical source: '+String(error&&error.message||'Read failed')}
+   finally{archivedQuotationLoadPromise=null}
+ })();
+ return archivedQuotationLoadPromise;
+}
+function historicalQuotationDetails(row){
+ const fields=[['Quotation type',row.QuotationType],['Product category',row.ProductCategory],['Quantity',row.Quantity],['Unit price (บาท)',row.UnitPrice],['Total amount (บาท)',row.TotalAmount],['Discount (บาท)',row.DiscountAmount],['Net amount (บาท)',row.NetAmount],['Expected close date',historicalDateText(row.ExpectedCloseDate)],['Sales / Owner',row.SalesOwner],['PO number',row.PONumber],['PO date',historicalDateText(row.PODate)],['Delivery status',row.DeliveryStatus],['Lost reason',row.LostReason]];
+ const entries=fields.filter(function(entry){return entry[1]!==''&&entry[1]!==null&&entry[1]!==undefined});
+ return '<details class="historicalDetails"><summary>Open details</summary><dl>'+entries.map(function(entry){return '<dt>'+esc(entry[0])+'</dt><dd>'+esc(String(entry[1]))+'</dd>'}).join('')+'</dl></details>';
+}
+function renderArchivedQuotations(){
+ const body=document.getElementById('historicalQuotationRows');if(!body)return;
+ const get=function(id){const el=document.getElementById(id);return el?String(el.value||'').trim():''};
+ const customer=get('historyCustomerSearch').toLocaleLowerCase(),quote=get('historyQuoteSearch').toLocaleUpperCase(),owner=get('historyOwnerFilter'),from=get('historyDateFrom'),to=get('historyDateTo'),product=get('historyProductFilter'),productQuery=get('historyProductSearch').toLocaleLowerCase(),status=get('historyStatusFilter'),opportunity=get('historyOpportunitySearch').toUpperCase();
+ const filtered=archivedQuotationRows.filter(function(row){
+   const date=historicalDateText(row.QuotationDate);
+   return (!customer||row.Customer.toLocaleLowerCase().includes(customer))&&(!quote||row.QuotationNo.toUpperCase().includes(quote))&&(!owner||row.SalesOwner===owner)&&(!from||date>=from)&&(!to||date<=to)&&(!product||row.ProductCategory===product)&&(!productQuery||(row.Product+' '+row.ProductCategory).toLocaleLowerCase().includes(productQuery))&&(!status||row.Status===status)&&(!opportunity||row.OpportunityID.toUpperCase().includes(opportunity));
+ }).sort(function(a,b){return historicalDateText(b.QuotationDate).localeCompare(historicalDateText(a.QuotationDate))||a.QuotationNo.localeCompare(b.QuotationNo)});
+ const quoteCount=document.getElementById('archivedQuotationCountTab');if(quoteCount)quoteCount.textContent=String(archivedQuotationRows.length);
+ const total=document.getElementById('historicalQuotationTotal');if(total)total.textContent=String(archivedQuotationRows.length);const review=document.getElementById('historicalQuotationReviewCount');if(review)review.textContent=String(archivedQuotationRows.filter(function(row){return row.ReviewRequired}).length);
+ const value=document.getElementById('historicalQuotationValue');if(value)value.textContent='฿'+formatHistoricalAmount(archivedQuotationRows.reduce(function(sum,row){return sum+(Number.isFinite(row.NetAmount)?row.NetAmount:0)},0));
+ const dates=archivedQuotationRows.map(function(row){return historicalDateText(row.QuotationDate)}).filter(Boolean).sort();
+ const range=document.getElementById('historicalQuotationDates');if(range)range.textContent=dates.length?dates[0]+' – '+dates[dates.length-1]:'—';
+ const count=document.getElementById('historicalQuotationResultCount');if(count)count.textContent=filtered.length+' of '+archivedQuotationRows.length+' quotations';
+ if(!filtered.length){body.innerHTML='<tr><td colspan="8" class="small">No historical quotations match these filters.</td></tr>';return}
+ const groups=new Map();
+ filtered.forEach(function(row){const key=row.OpportunityID?'OPP:'+row.OpportunityID:'ROW:'+row.HistoricalQuotationID;const items=groups.get(key)||[];items.push(row);groups.set(key,items)});
+ const output=[];
+ groups.forEach(function(items,key){
+   if(key.indexOf('OPP:')===0)output.push('<tr class="historicalGroup"><td colspan="8">Quotation History • '+esc(items[0].OpportunityID)+' • '+esc(String(items[0].OpportunityQuotationCount||items.length))+' linked quotations <button class="btn secondary historicalOpenOpportunity" type="button" data-historical-opportunity="'+esc(items[0].OpportunityID)+'">Open Opportunity</button></td></tr>');
+   items.forEach(function(row){
+     const mapping=row.OpportunityID?'<span class="historicalLinked">Linked</span> '+esc(row.OpportunityID):row.ReviewRequired?'<span class="historicalReview">Review Required</span>':'<span class="historicalStandalone">Historical</span>';
+     output.push('<tr><td><strong>'+esc(row.QuotationNo||'Unnumbered source row')+'</strong></td><td>'+esc(row.Customer||'—')+'</td><td>'+esc(historicalDateText(row.QuotationDate)||'—')+'</td><td>'+esc([row.ProductCategory,row.Product].filter(Boolean).join(' • ')||'—')+'</td><td>'+esc(row.Status||'—')+'</td><td>'+(row.NetAmount===null?'—':'฿'+formatHistoricalAmount(row.NetAmount))+'</td><td>'+mapping+'</td><td>'+historicalQuotationDetails(row)+'</td></tr>');
+   });
+ });
+ body.innerHTML=output.join('');
+ body.querySelectorAll('.historicalOpenOpportunity').forEach(function(button){button.addEventListener('click',function(){const opportunityId=button.getAttribute('data-historical-opportunity');setDealsView('active');openDealCard(opportunityId)})});
+}
+function clearHistoricalQuotationFilters(){
+ ['historyCustomerSearch','historyQuoteSearch','historyDateFrom','historyDateTo','historyProductSearch','historyProductFilter','historyStatusFilter','historyOpportunitySearch','historyOwnerFilter'].forEach(function(id){const el=document.getElementById(id);if(el)el.value=''});
+ renderArchivedQuotations();
+}
+async function openDealCard(id){
+ state.current=id;const sel=document.getElementById('oppSelect');if(sel)sel.value=id;
+ if(hexaAccount)await loadHumanOverlay(id);
+ loadSelectedOpportunity();navTo('viewDMU');renderDealCards();
+}
+function scrollToId(id){const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'})}
+function goQuickActivity(){navTo('viewActivity'); setTimeout(()=>scrollToId('actNote'),250)}
+function navTo(id,btn){
+ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+ document.querySelectorAll('#mobileNav button').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active');
+}
+
+</script>
+</body>
+</html>
