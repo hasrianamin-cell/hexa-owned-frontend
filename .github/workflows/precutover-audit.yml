@@ -79,11 +79,11 @@ jobs:
             cat audit/cors-summary.txt
             echo
             echo "[ROOT_HEADERS]"
-            tr -d '' < audit/staging-root-headers.txt | grep -Ei '^(HTTP/|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:)' || true
+            tr -d '\\r' < audit/staging-root-headers.txt | grep -Ei '^(HTTP/|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:)' || true
             echo
             for f in audit/*-cors-headers.txt; do
               echo "[$f]"
-              tr -d '' < "$f" | grep -Ei '^(HTTP/|access-control-allow-origin:|access-control-allow-methods:|access-control-allow-headers:|vary:)' || true
+              tr -d '\\r' < "$f" | grep -Ei '^(HTTP/|access-control-allow-origin:|access-control-allow-methods:|access-control-allow-headers:|vary:)' || true
             done
             echo "postPerformed=false"
             echo "formSubmitted=false"
