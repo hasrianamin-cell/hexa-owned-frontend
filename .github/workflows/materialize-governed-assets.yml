@@ -3,7 +3,7 @@ name: Materialize governed public assets
 on:
   push:
     branches:
-      - path2-materialize-20261011
+      - main
     paths:
       - '.github/workflows/materialize-governed-assets.yml'
       - '.github/materialize-governed-assets.once'
