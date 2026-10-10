@@ -1,0 +1,29 @@
+{
+  "routes": [
+    {
+      "route": "/teams/dmu",
+      "rewrite": "/teams/dmu/index.html"
+    },
+    {
+      "route": "/teams/dmu/",
+      "rewrite": "/teams/dmu/index.html"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/assets/*",
+      "/styles.css",
+      "/gate.css",
+      "/brands.css",
+      "/script.js",
+      "/teams/dmu/*"
+    ]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  }
+}
