@@ -1,0 +1,7 @@
+confirmation=HEXA-OWNED-FRONTEND-ASSET-MATERIALIZATION-20261011
+source=public-live-site
+verify=git-blob-sha
+custom-domain=false
+dns=false
+backend=false
+guards=false
