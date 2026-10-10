@@ -1,0 +1,134 @@
+name: Verify production cutover
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
+  EXPECTED_DMU_SHA256: 098176577dc665259a59fccd31357afff3e5bdb3c522b4b51c1d99cb0a562720
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify DNS points to GitHub Pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p verify
+          dig +short A hexahessman-th.com | sort -u > verify/apex-a.txt
+          cat > verify/expected-a.txt <<'EOF'
+          185.199.108.153
+          185.199.109.153
+          185.199.110.153
+          185.199.111.153
+          EOF
+          sort -u verify/expected-a.txt -o verify/expected-a.txt
+          diff -u verify/expected-a.txt verify/apex-a.txt
+          {
+            echo "dnsA=PASS"
+            cat verify/apex-a.txt
+          } > verify/dns-summary.txt
+
+      - name: Verify TLS certificate covers production domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl s_client -connect hexahessman-th.com:443 -servername hexahessman-th.com </dev/null 2>/dev/null             | openssl x509 -noout -subject -issuer -dates -ext subjectAltName > verify/tls.txt
+          grep -Fq 'DNS:hexahessman-th.com' verify/tls.txt
+
+      - name: Verify production routes and exact bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://hexahessman-th.com'
+          root_http="$(curl -L -sS -o verify/index.html -D verify/root-headers.txt -w '%{http_code}' --connect-timeout 15 --max-time 60 "$base/")"
+          script_http="$(curl -L -sS -o verify/script.js -w '%{http_code}' --connect-timeout 15 --max-time 60 "$base/script.js")"
+          dmu_slash_http="$(curl -L -sS -o verify/dmu-slash.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "$base/teams/dmu/")"
+          dmu_noslash_http="$(curl -L -sS -o verify/dmu-noslash.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "$base/teams/dmu")"
+
+          test "$root_http" = "200"
+          test "$script_http" = "200"
+          test "$dmu_slash_http" = "200"
+          test "$dmu_noslash_http" = "200"
+
+          test "$(sha256sum verify/script.js | awk '{print $1}')" = "$EXPECTED_WEBSITE_SCRIPT_SHA256"
+          test "$(sha256sum verify/dmu-slash.html | awk '{print $1}')" = "$EXPECTED_DMU_SHA256"
+          test "$(sha256sum verify/dmu-noslash.html | awk '{print $1}')" = "$EXPECTED_DMU_SHA256"
+
+          grep -q 'phase6WebsitePublicIntake' verify/script.js
+          grep -q 'crypto.randomUUID' verify/script.js
+          ! grep -q '/api/website-enquiry' verify/script.js
+          grep -q "location.origin+'/teams/dmu'" verify/dmu-slash.html
+          grep -q 'phase6DmuReadModel' verify/dmu-slash.html
+
+          {
+            echo "rootHttp=$root_http"
+            echo "scriptHttp=$script_http"
+            echo "dmuSlashHttp=$dmu_slash_http"
+            echo "dmuNoSlashHttp=$dmu_noslash_http"
+            echo "websiteScriptSha256=$(sha256sum verify/script.js | awk '{print $1}')"
+            echo "dmuSha256=$(sha256sum verify/dmu-slash.html | awk '{print $1}')"
+          } > verify/http-summary.txt
+
+      - name: Verify production-origin CORS without POST
+        shell: bash
+        run: |
+          set -euo pipefail
+          origin='https://hexahessman-th.com'
+          website='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6WebsitePublicIntake'
+          dmu='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6DmuReadModel'
+          context='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6ContextReviewModel'
+          overlay='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay'
+
+          preflight() {
+            name="$1"
+            url="$2"
+            method="$3"
+            headers="$4"
+            code="$(curl -sS -D "verify/${name}-cors-headers.txt" -o "verify/${name}-cors-body.txt"               -w '%{http_code}' --request OPTIONS               -H "Origin: $origin"               -H "Access-Control-Request-Method: $method"               -H "Access-Control-Request-Headers: $headers"               --connect-timeout 15 --max-time 60 "$url")"
+            test "$code" = "204"
+            grep -Fqi "Access-Control-Allow-Origin: $origin" "verify/${name}-cors-headers.txt"
+            echo "$name=$code" >> verify/cors-summary.txt
+          }
+
+          : > verify/cors-summary.txt
+          preflight website "$website" POST content-type
+          preflight dmu "$dmu" GET authorization
+          preflight context "$context" GET authorization
+          preflight overlay "$overlay" GET authorization
+
+      - name: Summarize production cutover verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "HEXA_PRODUCTION_CUTOVER_VERIFY=PASS"
+            cat verify/dns-summary.txt
+            echo
+            cat verify/http-summary.txt
+            echo
+            echo "[CORS]"
+            cat verify/cors-summary.txt
+            echo
+            echo "[TLS]"
+            cat verify/tls.txt
+            echo
+            echo "[ROOT_HEADERS]"
+            sed 's/\r$//' verify/root-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|strict-transport-security:|cache-control:|location:)' || true
+            echo
+            echo "postPerformed=false"
+            echo "formSubmitted=false"
+            echo "guardMutationPerformed=false"
+            echo "backendMutationPerformed=false"
+          } | tee verify/production-cutover-summary.txt
+
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-owned-frontend-production-cutover-verification
+          path: verify
+          retention-days: 30
