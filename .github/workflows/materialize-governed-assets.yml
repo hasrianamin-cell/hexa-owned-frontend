@@ -1,0 +1,88 @@
+name: Materialize governed public assets
+
+on:
+  push:
+    branches:
+      - path2-materialize-20261011
+    paths:
+      - '.github/workflows/materialize-governed-assets.yml'
+      - '.github/materialize-governed-assets.once'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hexa-owned-frontend-materialize-assets
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout materialization branch
+        uses: actions/checkout@v4
+        with:
+          ref: path2-materialize-20261011
+
+      - name: Validate governed text package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = "f5cf4f01ede7a670f376bf9b09ca4feefe992b1d"
+          test "$(git hash-object script.js)" = "d1669110506aeaa62372fa76031dcf7a7754bd7a"
+          test "$(git hash-object styles.css)" = "3e131d9c3ae746c3bb6c8da3d5720b2fa47c4ce7"
+          test "$(git hash-object brands.css)" = "e92fb70362473740388164ae5762329f53020eaf"
+          test "$(git hash-object gate.css)" = "f5666ecaa3a254b1ab07f6504ffa697c25d381da"
+          test "$(git hash-object staticwebapp.config.json)" = "1a743a595dffc8a8c9b589bea7182b894aefd958"
+          test "$(git hash-object teams/dmu/index.html)" = "6b86d922aff02c086014669c5e296a3843cb84f8"
+          test "$(sha256sum script.js | awk '{print $1}')" = "c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877"
+          test "$(sha256sum teams/dmu/index.html | awk '{print $1}')" = "098176577dc665259a59fccd31357afff3e5bdb3c522b4b51c1d99cb0a562720"
+          grep -q 'phase6WebsitePublicIntake' script.js
+          grep -q 'crypto.randomUUID' script.js
+          ! grep -R -q '/api/website-enquiry' --include='*.html' --include='*.js' --include='*.css' .
+          ! grep -R -q '/cdn-cgi/challenge-platform/' index.html
+
+      - name: Download and verify exact public assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          base='https://hexahessman-th.com/assets'
+          declare -A expected=(
+            [dfm-fleet-overview.png]='3ebffd9ba16a01d37851b85155152d868ec6fe47'
+            [dfm-maintenance-dashboard.png]='10cb9d6df8d17d45f2ccb8fe093c48adb096d1c9'
+            [dtc-gps-location.png]='d203d7b2f44017bd3670f4367584b062c8530a78'
+            [forklift-dynamic.png]='266fb69c6881eb99bfdfdf6b5f8fb9cbc0dae227'
+            [forklift-future-white.png]='d8913c2204221c25326c415a2c48b1c623d4f7df'
+            [hexa-logo.png]='a8a967b74732e099f0a6868758fc3d668020b205'
+            [noblelift-standard-range.png]='b52f6401914c7ae5aa8d4a46f9dd88ffae481aa6'
+            [zowell-special-range.png]='ae9ad7e22cd97842b101ec958c770026d020b180'
+          )
+          : > asset-verification.txt
+          for f in "${!expected[@]}"; do
+            curl --fail --location --silent --show-error --retry 3 --connect-timeout 20 --max-time 120               "$base/$f" -o "assets/$f"
+            actual="$(git hash-object "assets/$f")"
+            printf '%s  expected=%s  actual=%s\n' "$f" "${expected[$f]}" "$actual" | tee -a asset-verification.txt
+            test "$actual" = "${expected[$f]}"
+          done
+
+      - name: Commit exact governed assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets
+          if git diff --cached --quiet; then
+            echo 'Assets already materialized exactly.'
+          else
+            git commit -m 'Materialize exact governed public assets'
+            git push origin HEAD:path2-materialize-20261011
+          fi
+
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-owned-frontend-asset-verification
+          path: asset-verification.txt
+          retention-days: 30
