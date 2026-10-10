@@ -1,0 +1,6 @@
+confirmation=HEXA-PATH2-CUTOVER-READONLY-INVENTORY-20261011
+mutation=false
+dns=false
+custom_domain=false
+guards=false
+backend=false
