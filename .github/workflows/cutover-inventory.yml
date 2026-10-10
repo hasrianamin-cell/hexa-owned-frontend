@@ -59,10 +59,10 @@ jobs:
             cat inventory/http-current.txt
             echo
             echo "[PROD_ROOT_HEADERS]"
-            sed 's/$//' inventory/prod-root-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
+            sed 's/\\r$//' inventory/prod-root-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
             echo
             echo "[PROD_DMU_NOSLASH_HEADERS]"
-            sed 's/$//' inventory/prod-dmu-noslash-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
+            sed 's/\\r$//' inventory/prod-dmu-noslash-headers.txt | grep -Ei '^(HTTP/|server:|content-type:|content-security-policy:|strict-transport-security:|x-content-type-options:|x-frame-options:|referrer-policy:|permissions-policy:|cache-control:|location:)' || true
             echo
             echo "[DNS]"
             cat inventory/dns-current.txt
