@@ -1,0 +1,113 @@
+name: GitHub Pages TLS diagnostic
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/tls-diagnostic.yml'
+      - '.github/tls-diagnostic.once'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture DNS from authoritative and public resolvers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p diagnostic
+          {
+            echo "[AUTHORITATIVE_NS]"
+            dig +short NS hexahessman-th.com
+            echo "[AUTHORITATIVE_A_NS01]"
+            dig +short @ns01.domaincontrol.com A hexahessman-th.com
+            echo "[AUTHORITATIVE_A_NS02]"
+            dig +short @ns02.domaincontrol.com A hexahessman-th.com
+            echo "[CLOUDFLARE_A]"
+            dig +short @1.1.1.1 A hexahessman-th.com
+            echo "[GOOGLE_A]"
+            dig +short @8.8.8.8 A hexahessman-th.com
+            echo "[AAAA]"
+            dig +short @1.1.1.1 AAAA hexahessman-th.com
+            echo "[CAA]"
+            dig +short @1.1.1.1 CAA hexahessman-th.com
+            echo "[WWW_CNAME]"
+            dig +short @1.1.1.1 CNAME www.hexahessman-th.com
+            echo "[WWW_A]"
+            dig +short @1.1.1.1 A www.hexahessman-th.com
+            echo "[GITHUB_PAGES_CHALLENGE_TXT]"
+            dig +short @1.1.1.1 TXT _github-pages-challenge-hasrianamin-cell.hexahessman-th.com
+          } | tee diagnostic/dns.txt
+
+      - name: Capture certificate currently served
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in hexahessman-th.com www.hexahessman-th.com; do
+            {
+              echo "[$host]"
+              timeout 20 openssl s_client -connect "$host:443" -servername "$host" </dev/null 2>/dev/null                 | openssl x509 -noout -subject -issuer -serial -fingerprint -sha256 -dates -ext subjectAltName 2>/dev/null                 || true
+              echo
+            } | tee -a diagnostic/certificates.txt
+          done
+
+      - name: Probe current HTTP and HTTPS routing without certificate trust
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "[HTTP_APEX]"
+            curl -sS -I --connect-timeout 15 --max-time 45 http://hexahessman-th.com/ || true
+            echo
+            echo "[HTTPS_APEX_INSECURE]"
+            curl -k -sS -I --connect-timeout 15 --max-time 45 https://hexahessman-th.com/ || true
+            echo
+            echo "[HTTPS_SCRIPT_INSECURE]"
+            curl -k -sS -o /tmp/script.js -D - --connect-timeout 15 --max-time 45 https://hexahessman-th.com/script.js || true
+            if [ -f /tmp/script.js ]; then
+              echo "scriptSha256=$(sha256sum /tmp/script.js | awk '{print $1}')"
+            fi
+            echo
+            echo "[GITHUB_IO_STAGING]"
+            curl -sS -I --connect-timeout 15 --max-time 45 https://hasrianamin-cell.github.io/hexa-owned-frontend/ || true
+          } | tee diagnostic/http.txt
+
+      - name: Probe each GitHub Pages IPv4 with production SNI
+        shell: bash
+        run: |
+          set -euo pipefail
+          for ip in 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153; do
+            {
+              echo "[$ip]"
+              curl -k -sS -I --resolve "hexahessman-th.com:443:$ip"                 --connect-timeout 15 --max-time 45 https://hexahessman-th.com/ || true
+              timeout 20 openssl s_client -connect "$ip:443" -servername hexahessman-th.com </dev/null 2>/dev/null                 | openssl x509 -noout -subject -issuer -serial -dates -ext subjectAltName 2>/dev/null                 || true
+              echo
+            } | tee -a diagnostic/per-ip.txt
+          done
+
+      - name: Summarize TLS diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "HEXA_GITHUB_PAGES_TLS_DIAGNOSTIC=COMPLETE"
+            echo "mutationPerformed=false"
+            echo
+            cat diagnostic/dns.txt
+            echo
+            cat diagnostic/certificates.txt
+            echo
+            cat diagnostic/http.txt
+          } | tee diagnostic/summary.txt
+
+      - name: Upload diagnostic evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-owned-frontend-tls-diagnostic
+          path: diagnostic
+          retention-days: 30
