@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - path2-governed-dmu-vnext-20261012
+      - fix/dmu-archive-customer-id-resolution-20261012
   workflow_dispatch:
 
 permissions:
