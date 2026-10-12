@@ -114,6 +114,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-customer-coverage" content="HEXA_DMU_CUSTOMER_COVERAGE_2026_10_08_1">
 <meta name="hexa-dmu-lead-review-inbox" content="HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1">
 <meta name="hexa-dmu-management-intelligence" content="HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1">
+<meta name="hexa-dmu-archive-resolver" content="HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1">
 </head>
 <body>
 <header>
@@ -1246,21 +1247,37 @@ async function recallCustomer(customerId){
    flashConn(true,'Customer recalled to Active views');
  }catch(e){flashConn(false,'Recall failed: '+authErrorDetail(e));console.error('Customer recall failed',e)}
 }
+function normalizeArchiveCustomerName(value){return String(value||'').normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase()}
+function resolveArchiveCustomerId(deal){
+ const direct=String(deal?.customerId||'').trim().toUpperCase();
+ if(/^CUS-\\d{6}$/.test(direct))return direct;
+ if(!customerCoverageAvailable||!phase6CustomerCoverage)return '';
+ const key=normalizeArchiveCustomerName(deal?.customer);
+ if(!key)return '';
+ const ids=[];
+ for(const row of [...rowsOf(phase6CustomerCoverage?.directoryCustomers),...rowsOf(phase6CustomerCoverage?.quotedCustomers)]){
+   if(normalizeArchiveCustomerName(valueOf(row?.Customer,row?.CustomerName))!==key)continue;
+   const id=String(valueOf(row?.CustomerID,row?.customerId,row?.CustomerId)).trim().toUpperCase();
+   if(/^CUS-\\d{6}$/.test(id))ids.push(id);
+ }
+ const unique=[...new Set(ids)];
+ return unique.length===1?unique[0]:'';
+}
 async function archiveCurrentCustomer(){
  const deal=state.opportunities.find(o=>o.id===state.current);
  if(!deal){flashConn(false,'Select an active customer first.');return}
- await archiveCustomer(deal.customerId);
+ await archiveCustomer(resolveArchiveCustomerId(deal));
 }
 function refreshArchiveCurrentCustomerButton(){
  const btn=document.getElementById('archiveCurrentCustomerButton');if(!btn)return;
  const deal=state.opportunities.find(o=>o.id===state.current);
- const hasId=!!(deal&&/^CUS-\d{6}$/.test(String(deal.customerId||'').trim().toUpperCase()));
- const ready=customerArchiveAvailable&&hasId;
+ const archiveId=resolveArchiveCustomerId(deal);
+ const ready=customerArchiveAvailable&&!!archiveId;
  btn.disabled=!ready;
- btn.title=!customerArchiveAvailable?(customerArchiveStatus||'Archive service unavailable.'):ready?'Archive this customer from Active views. Recall remains available.':'Archive requires canonical CustomerID.';
+ btn.title=!customerArchiveAvailable?(customerArchiveStatus||'Archive service unavailable.'):ready?'Archive this customer from Active views. Recall remains available.':'Archive requires one exact canonical CustomerID match.';
 }
 function applyProductionDeals(){
- const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customerId:String(valueOf(d.CustomerID,d.customerId,d.CustomerId)).trim().toUpperCase(),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id);
+ const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customerId:String(valueOf(d.CustomerID,d.customerId,d.CustomerId)).trim().toUpperCase(),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id).map(d=>({...d,customerId:resolveArchiveCustomerId(d)||d.customerId}));
  phase6CanonicalDeals=deals;
  const active=deals.filter(d=>!d.customerId||!isArchivedCustomerId(d.customerId));
  state.opportunities=active;
@@ -1786,7 +1803,7 @@ function renderDealCards(){
      <div class="dealCardAction">
        <div class="coverage"><b>DMU Readiness:</b> ${esc(coverage)} • Confidence ${dmuMetrics.confidence}%</div>
        <div class="next"><b>Next:</b> ${esc(String(next))}</div>
-       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button> <button class="btn secondary" type="button" ${customerArchiveAvailable&&o.customerId?'':'disabled'} title="${customerArchiveAvailable?(o.customerId?'Archive this customer from Active views.':'Archive requires canonical CustomerID.'):(customerArchiveStatus||'Archive service unavailable.')}" onclick="event.stopPropagation();archiveCustomer('${esc(o.customerId||'')}')">Archive Customer</button></div>
+       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button> <button class="btn secondary" type="button" ${customerArchiveAvailable&&resolveArchiveCustomerId(o)?'':'disabled'} title="${customerArchiveAvailable?(resolveArchiveCustomerId(o)?'Archive this customer from Active views.':'Archive requires one exact canonical CustomerID match.'):(customerArchiveStatus||'Archive service unavailable.')}" onclick="event.stopPropagation();archiveCustomer('${esc(resolveArchiveCustomerId(o))}')">Archive Customer</button></div>
      </div>
    </div>`;
  }).join('');
