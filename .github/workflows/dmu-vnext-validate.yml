@@ -1,0 +1,104 @@
+name: Validate governed DMU VNext
+
+on:
+  push:
+    branches:
+      - path2-governed-dmu-vnext-20261012
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_SOURCE_BLOB_SHA: aa3397d56bef792a2ff306f63f8cd91302f496b0
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate branch
+        uses: actions/checkout@v4
+
+      - name: Validate exact governed candidate identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object teams/dmu/index.html)" = "$EXPECTED_SOURCE_BLOB_SHA"
+          sha256sum teams/dmu/index.html | tee dmu-vnext-sha256.txt
+
+      - name: Validate governed feature markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=teams/dmu/index.html
+          grep -q 'HEXA_DMU_RADAR_DYNAMIC_2026_10_06_1' "$file"
+          grep -q 'HEXA_DMU_DYNAMIC_COVERAGE_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_WORKSITE_OFFICIAL_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_CUSTOMER_COVERAGE_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_AUTH_RESILIENCE_2026_10_08_FUNCTION_1' "$file"
+          grep -q 'function radarSeriesFromRows(rows)' "$file"
+          grep -q 'series.length<3' "$file"
+          grep -q 'filter(row=>row&&!row.aiObserved)' "$file"
+          grep -q 'phase6CustomerArchive' "$file"
+          grep -q 'phase6CustomerCoverage' "$file"
+          grep -q 'phase6LeadReviewPromote' "$file"
+          grep -q 'DMU_AUTO_REFRESH_MS=5\*60\*1000' "$file"
+
+      - name: Validate Production host auth routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=teams/dmu/index.html
+          grep -q "redirectUri:location.origin+'/teams/dmu'" "$file"
+          grep -q "const HEXA_AUTH_BRIDGE_URI=location.origin+'/teams/dmu'" "$file"
+          ! grep -q "redirectUri:location.origin+'/api/phase6Dmu'" "$file"
+          grep -q 'api/phase6DmuReadModel' "$file"
+          grep -q 'api/phase6ContextReviewModel' "$file"
+          grep -q 'api/phase6HumanOverlay' "$file"
+          grep -q 'api/phase6CustomerArchive' "$file"
+          grep -q 'api/phase6CustomerCoverage' "$file"
+          grep -q 'api/phase6LeadReviewPromote' "$file"
+
+      - name: Parse inline JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const vm=require('vm');
+          const html=fs.readFileSync('teams/dmu/index.html','utf8');
+          const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+          if(!scripts.length) throw new Error('no inline scripts found');
+          scripts.forEach((src,i)=>new vm.Script(src,{filename:'dmu-vnext-inline-'+i+'.js'}));
+          console.log('INLINE_JS_PARSE=PASS scripts='+scripts.length);
+          NODE
+
+      - name: Summarize
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "HEXA_DMU_VNEXT_VALIDATION=PASS"
+            echo "sourceBlobSha=$(git hash-object teams/dmu/index.html)"
+            echo "sha256=$(sha256sum teams/dmu/index.html | awk '{print $1}')"
+            echo "dynamicRadar=true"
+            echo "dynamicCoverage=true"
+            echo "customerCoverage=true"
+            echo "leadReview=true"
+            echo "managementIntelligence=true"
+            echo "productionHostAuthRouting=true"
+            echo "productionPublished=false"
+            echo "backendMutationPerformed=false"
+            echo "guardMutationPerformed=false"
+          } | tee dmu-vnext-validation.txt
+
+      - name: Upload validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexa-dmu-vnext-validation
+          path: |
+            dmu-vnext-sha256.txt
+            dmu-vnext-validation.txt
+          retention-days: 30
