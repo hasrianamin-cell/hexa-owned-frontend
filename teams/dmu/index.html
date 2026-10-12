@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HEXA Sales DMU App — Build 6B11 Archived Quotes</title>
+<title>HEXA Sales DMU App — Build 6B9R2</title>
 <style>
 :root{--navy:#0f2a4a;--navy2:#173a63;--orange:#f59e0b;--bg:#f5f7fb;--line:#dfe5ee;--txt:#1f2937;--muted:#6b7280;--green:#16a34a;--yellow:#d97706;--red:#dc2626;--white:#fff}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Tahoma,sans-serif;background:var(--bg);color:var(--txt)}
@@ -25,7 +25,7 @@ table{width:100%;border-collapse:collapse;font-size:12px}th{background:var(--nav
 .mobileNav button.active{background:#fff7ed;color:#9a3412;border-top:3px solid var(--orange)}
 .quickbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .quickbar .btn{min-height:42px}
-.portfolioSummary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.portfolioMetric{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfcfe}.portfolioMetric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:700}.portfolioMetric b{display:block;margin-top:4px;font-size:20px;color:var(--navy)}.decisionGapBreakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.decisionGapChip{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;text-align:left;cursor:pointer;color:var(--navy)}.decisionGapChip:hover{border-color:var(--orange)}.decisionGapChip.active{border-color:var(--orange);background:#fff7ed}.decisionGapChip span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.decisionGapChip b{display:block;font-size:17px;margin-top:3px}.decisionActionQueue{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:10px}.decisionActionQueueHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.decisionActionQueueHead strong{color:var(--navy);font-size:12px}.decisionActionQueueList{display:grid;gap:7px;margin-top:8px}.decisionActionItem{display:grid;grid-template-columns:minmax(150px,1fr) auto minmax(220px,1.4fr) auto;gap:8px;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff}.decisionActionItem .customer{font-size:12px;font-weight:800;color:var(--navy)}.decisionActionItem .gap{font-size:11px;color:#991b1b}.decisionActionItem .action{font-size:11px;line-height:1.35;color:#334155}.dealCards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.dealFilters{display:grid;grid-template-columns:1.25fr .72fr .72fr auto auto auto;gap:8px;align-items:end;margin-top:10px}.dealFocusToggle{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #cfd7e3;border-radius:8px;background:#fff;font-size:11px;font-weight:700;color:var(--navy);min-height:35px}.dealFocusToggle input{margin:0}.dealFilters .field{min-width:0}.dealFilterCount{font-size:11px;color:var(--muted);white-space:nowrap;align-self:center;padding-bottom:8px}
+.portfolioSummary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px}.portfolioMetric{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fbfcfe}.portfolioMetric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:700}.portfolioMetric b{display:block;margin-top:4px;font-size:20px;color:var(--navy)}.decisionGapBreakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}.decisionGapChip{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;text-align:left;cursor:pointer;color:var(--navy)}.decisionGapChip:hover{border-color:var(--orange)}.decisionGapChip.active{border-color:var(--orange);background:#fff7ed}.decisionGapChip span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.decisionGapChip b{display:block;font-size:17px;margin-top:3px}.decisionActionQueue{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fbfcfe;padding:10px}.decisionActionQueueHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.decisionActionQueueHead strong{color:var(--navy);font-size:12px}.decisionActionQueueList{display:grid;gap:7px;margin-top:8px}.decisionActionItem{display:grid;grid-template-columns:minmax(150px,1fr) auto minmax(220px,1.4fr) auto;gap:8px;align-items:center;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff}.decisionActionItem .customer{font-size:12px;font-weight:800;color:var(--navy)}.decisionActionItem .gap{font-size:11px;color:#991b1b}.decisionActionItem .action{font-size:11px;line-height:1.35;color:#334155}.decisionCoverageMatrix{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fff}.decisionCoverageMatrix summary{cursor:pointer;padding:10px;font-size:12px;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;gap:8px;align-items:center}.decisionCoverageMatrix summary::-webkit-details-marker{display:none}.decisionCoverageMatrixBody{padding:0 10px 10px;overflow:auto}.decisionCoverageTable{width:100%;border-collapse:collapse;font-size:11px;min-width:720px}.decisionCoverageTable th{position:static;background:#f8fafc;color:var(--navy);border-bottom:1px solid var(--line);padding:7px}.decisionCoverageTable td{padding:7px;border-bottom:1px solid #edf1f5}.decisionCoverageTable tr[data-opp]{cursor:pointer}.decisionCoverageTable tr[data-opp]:hover td{background:#fff7ed}.coverageState{display:inline-block;border-radius:999px;padding:3px 7px;font-size:10px;font-weight:800}.coverageState.covered{background:#dcfce7;color:#166534}.coverageState.missing{background:#fee2e2;color:#991b1b}.commercialCoverage{margin-top:10px;border:1px solid #dbe3ee;border-radius:10px;background:#fbfcfe}.commercialCoverage summary{cursor:pointer;padding:10px;font-size:12px;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;align-items:center;gap:8px}.commercialCoverage summary::-webkit-details-marker{display:none}.commercialCoverageBody{padding:0 10px 10px}.coverageIntro{font-size:11px;color:var(--muted);margin-bottom:8px}.coverageCard{border:1px solid #dbe3ee;border-radius:10px;padding:10px;background:#fff}.coverageCard .name{font-weight:800;color:var(--navy);font-size:13px}.coverageCard .meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}.coverageCard .amount{font-size:15px;font-weight:800;color:var(--navy);margin-top:6px}.coverageCard .review{display:inline-block;margin-top:7px;border-radius:999px;padding:4px 8px;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800}.coverageCard .linked{background:#dcfce7;color:#166534}.directorySearch{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.directoryResults{display:grid;gap:7px;margin-top:8px}.directoryRow{display:flex;justify-content:space-between;gap:12px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#fff}.directoryRow .name{font-size:12px;font-weight:800;color:var(--navy)}.directoryRow .meta{font-size:10px;color:var(--muted);margin-top:3px}.archivePanel{margin-top:10px;border:1px solid var(--line);border-radius:10px;background:#fff}.archivePanel summary{cursor:pointer;padding:10px;font-size:12px;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;align-items:center;gap:8px}.archivePanel summary::-webkit-details-marker{display:none}.archivePanelBody{padding:0 10px 10px}.archiveList{display:grid;gap:7px}.archiveRow{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #e2e8f0;border-radius:8px;padding:8px;background:#f8fafc}.archiveRow .name{font-size:12px;font-weight:800;color:var(--navy)}.archiveRow .meta{font-size:10px;color:var(--muted);margin-top:2px}.dealCards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.dealFilters{display:grid;grid-template-columns:1.25fr .72fr .72fr auto auto auto;gap:8px;align-items:end;margin-top:10px}.dealFocusToggle{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #cfd7e3;border-radius:8px;background:#fff;font-size:11px;font-weight:700;color:var(--navy);min-height:35px}.dealFocusToggle input{margin:0}.dealFilters .field{min-width:0}.dealFilterCount{font-size:11px;color:var(--muted);white-space:nowrap;align-self:center;padding-bottom:8px}
 .dealCard{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer}
 .dealCard:hover{border-color:var(--orange);box-shadow:0 2px 8px rgba(15,42,74,.08)}
 .dealCard .name{font-weight:800;color:var(--navy);font-size:14px}
@@ -61,8 +61,12 @@ body.phase6LiveReadOnly .humanWriteControl input,
 body.phase6LiveReadOnly .humanWriteControl textarea,
 body.phase6LiveReadOnly .humanWriteControl select{background:#fff;color:var(--txt)}
 @media(max-width:760px){.aiStoryGrid{grid-template-columns:1fr}}
+.identityWarning{display:none;margin:10px 0;padding:10px 12px;border:1px solid #f59e0b;border-radius:9px;background:#fffbeb;color:#92400e;font-size:12px;font-weight:700}
+.identityWarning.show{display:block}
+.overlayStatus{margin-top:6px;font-size:11px;color:var(--muted)}
+.overlayStatus.warn{color:#b45309;font-weight:700}
  .influenceControl{display:flex;align-items:center;gap:6px;white-space:nowrap}.influenceControl output{min-width:1.4em;text-align:center;font-weight:700}
-.historicalTabs{display:flex;gap:8px;margin:12px 0}.historicalTabs .activeTab{background:var(--navy);color:#fff}.historicalPanel{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.historicalStats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}.historicalStat{border:1px solid var(--line);border-radius:8px;padding:9px;background:#fbfcfe}.historicalStat span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.historicalStat b{display:block;margin-top:4px;color:var(--navy);font-size:18px}.historicalFilters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:8px;margin:12px 0}.historicalTableWrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:8px}.historicalTable{min-width:1020px}.historicalTable th{position:sticky;top:0}.historicalGroup td{background:#eef4fb;color:var(--navy);font-weight:800}.historicalDetails{min-width:160px}.historicalDetails dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:8px 0;font-size:11px}.historicalDetails dt{color:var(--muted);font-weight:700}.historicalDetails dd{margin:0;overflow-wrap:anywhere}.historicalReview{display:inline-block;padding:3px 7px;border-radius:99px;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800}.historicalLinked{display:inline-block;padding:3px 7px;border-radius:99px;background:#dcfce7;color:#166534;font-size:10px;font-weight:800}.historicalStandalone{display:inline-block;padding:3px 7px;border-radius:99px;background:#e5e7eb;color:#374151;font-size:10px;font-weight:800}
+.historicalTabs{display:flex;gap:8px;margin:12px 0}.historicalTabs .activeTab{background:var(--navy);color:#fff}.historicalPanel{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.historicalStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}.historicalStat{border:1px solid var(--line);border-radius:8px;padding:9px;background:#fbfcfe}.historicalStat span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase}.historicalStat b{display:block;margin-top:4px;color:var(--navy);font-size:18px}.historicalFilters{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:8px;margin:12px 0}.historicalTableWrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:8px}.historicalTable{min-width:1020px}.historicalTable th{position:sticky;top:0}.historicalGroup td{background:#eef4fb;color:var(--navy);font-weight:800}.historicalDetails{min-width:160px}.historicalDetails dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 10px;margin:8px 0;font-size:11px}.historicalDetails dt{color:var(--muted);font-weight:700}.historicalDetails dd{margin:0;overflow-wrap:anywhere}.historicalReview{display:inline-block;padding:3px 7px;border-radius:99px;background:#fef3c7;color:#92400e;font-size:10px;font-weight:800}.historicalLinked{display:inline-block;padding:3px 7px;border-radius:99px;background:#dcfce7;color:#166534;font-size:10px;font-weight:800}.historicalStandalone{display:inline-block;padding:3px 7px;border-radius:99px;background:#e5e7eb;color:#374151;font-size:10px;font-weight:800}
 @media(max-width:760px){.historicalStats{grid-template-columns:1fr 1fr}.historicalFilters{grid-template-columns:1fr 1fr}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
@@ -98,7 +102,18 @@ function legacyNavTo(id,btn){
 
 </script>
 <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
-<meta name="hexa-dmu-build" content="HEXA_DMU_BUILD_2026_10_03_6B11_ARCHIVED_QUOTES">
+<meta name="hexa-dmu-build" content="HEXA_DMU_BUILD_2026_09_28_6B9R2">
+<meta name="hexa-dmu-radar" content="HEXA_DMU_RADAR_DYNAMIC_2026_10_06_1">
+<meta name="hexa-dmu-dynamic-coverage" content="HEXA_DMU_DYNAMIC_COVERAGE_2026_10_08_1">
+<meta name="hexa-dmu-worksite-official" content="HEXA_DMU_WORKSITE_OFFICIAL_2026_10_08_1">
+<meta name="hexa-dmu-function-production" content="HEXA_DMU_FUNCTION_PROD_2026_09_29_1">
+<meta name="hexa-dmu-teams-auth" content="HEXA_DMU_TEAMS_AUTH_2026_10_02_1">
+<meta name="hexa-dmu-production-release" content="HEXA_DMU_FUNCTION_PRODUCTION_MASSPRO_2026_10_08_1">
+<meta name="hexa-dmu-auth-resilience" content="HEXA_DMU_AUTH_RESILIENCE_2026_10_08_FUNCTION_1">
+<meta name="hexa-dmu-masspro-hardening" content="HEXA_DMU_FUNCTION_PRODUCTION_MASSPRO_HARDENING_2026_10_08_1">
+<meta name="hexa-dmu-customer-coverage" content="HEXA_DMU_CUSTOMER_COVERAGE_2026_10_08_1">
+<meta name="hexa-dmu-lead-review-inbox" content="HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1">
+<meta name="hexa-dmu-management-intelligence" content="HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1">
 </head>
 <body>
 <header>
@@ -108,6 +123,20 @@ function legacyNavTo(id,btn){
 <div class="wrap"><div id="sandboxNote" style="display:none;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;padding:9px 12px;border-radius:8px;margin-bottom:10px;font-size:12px">
 โหมดชั่วคราว: App ยังใช้งานได้ และข้อมูลที่ยืนยันจะบันทึกผ่านระบบส่วนกลางเมื่อเชื่อมต่อสำเร็จ
 </div><div class="grid">
+<section class="card full viewSection" id="managementIntelligence">
+<h2>Management Intelligence</h2>
+<div class="small">Read-only executive summary from governed Opportunities, DMU coverage, AI sales stories and commercial customer coverage.</div>
+<div class="portfolioSummary" id="managementIntelligenceSummary">
+  <div class="portfolioMetric"><span>Active Deals</span><b id="mgmtActiveDeals">0</b></div>
+  <div class="portfolioMetric"><span>Priority Actions</span><b id="mgmtPriorityActions">0</b></div>
+  <div class="portfolioMetric"><span>Closing</span><b id="mgmtClosingActions">0</b></div>
+  <div class="portfolioMetric"><span>Follow-up</span><b id="mgmtFollowupActions">0</b></div>
+  <div class="portfolioMetric"><span>Risk / Blocker</span><b id="mgmtRiskActions">0</b></div>
+  <div class="portfolioMetric"><span>DMU Ready</span><b id="mgmtDecisionComplete">0</b></div>
+</div>
+<div class="small" id="managementIntelligenceCoverageNote" style="margin-top:8px">Commercial coverage will load after HEXA sign-in. Revenue / target metrics will be added only when authoritative finance and target sources are connected.</div>
+</section>
+
 <section class="card full viewSection" id="managementAttention">
 <h2>Priority Actions</h2>
 <div class="small">AI สรุปเฉพาะเรื่องธุรกิจที่ต้องติดตามจากข้อมูลฝ่ายขายที่มีแหล่งอ้างอิง — ซ่อนข้อมูลเทคนิคที่ผู้ใช้ไม่จำเป็นต้องเห็น</div>
@@ -122,46 +151,121 @@ function legacyNavTo(id,btn){
 
 <section class="card full viewSection" id="viewDeals">
 <h2>Customers / Active Deals</h2>
-<div class="small">เลือกชื่อบริษัทเพื่อดู DMU, กิจกรรม และแผนการขายของลูกค้ารายนั้น</div><div class="historicalTabs" role="tablist" aria-label="Commercial records"><button class="btn primary activeTab" id="activeDealsTab" type="button" role="tab" aria-selected="true" onclick="setDealsView('active')">Active Deals</button><button class="btn secondary" id="archivedHistoricalTab" type="button" role="tab" aria-selected="false" onclick="setDealsView('historical')">Archived / Historical <span id="archivedQuotationCountTab">0</span></button></div><div id="activeDealsView">
+<div class="small">เลือกชื่อบริษัทเพื่อดู DMU, กิจกรรม และแผนการขายของลูกค้ารายนั้น</div>
+<div class="historicalTabs" role="tablist" aria-label="Commercial records">
+  <button class="btn primary activeTab" id="activeDealsTab" type="button" role="tab" aria-selected="true" onclick="setDealsView('active')">Active Deals</button>
+  <button class="btn secondary" id="archivedHistoricalTab" type="button" role="tab" aria-selected="false" onclick="setDealsView('historical')">Archived / Historical <span id="archivedQuotationCountTab">0</span></button>
+</div>
+<div id="activeDealsView">
 <div class="portfolioSummary" id="portfolioSummary">
   <div class="portfolioMetric"><span>Active Deals</span><b id="portfolioTotalDeals">0</b></div>
   <div class="portfolioMetric"><span>Visible</span><b id="portfolioVisibleDeals">0</b></div>
-  <div class="portfolioMetric"><span>Needs Decision Team</span><b id="portfolioDecisionGap">0</b></div>
-  <div class="portfolioMetric"><span>Decision Team Complete</span><b id="portfolioDecisionComplete">0</b></div>
+  <div class="portfolioMetric"><span>Needs DMU Attention</span><b id="portfolioDecisionGap">0</b></div>
+  <div class="portfolioMetric"><span>DMU Ready</span><b id="portfolioDecisionComplete">0</b></div>
+  <div class="portfolioMetric"><span>Quoted Customers</span><b id="portfolioQuotedCustomers">0</b></div>
+  <div class="portfolioMetric"><span>Customer Directory</span><b id="portfolioDirectoryCustomers">0</b></div>
 </div>
-<div class="decisionGapBreakdown" id="decisionGapBreakdown" aria-label="Decision team gap breakdown">
-  <button class="decisionGapChip" type="button" data-role="Procurement" onclick="setDecisionRoleFilter('Procurement')"><span>Missing Procurement</span><b id="gapCountProcurement">0</b></button>
-  <button class="decisionGapChip" type="button" data-role="Decision Maker" onclick="setDecisionRoleFilter('Decision Maker')"><span>Missing Decision Maker</span><b id="gapCountDecisionMaker">0</b></button>
-  <button class="decisionGapChip" type="button" data-role="Economic Buyer" onclick="setDecisionRoleFilter('Economic Buyer')"><span>Missing Economic Buyer</span><b id="gapCountEconomicBuyer">0</b></button>
-  <button class="decisionGapChip" type="button" data-role="Champion" onclick="setDecisionRoleFilter('Champion')"><span>Missing Champion</span><b id="gapCountChampion">0</b></button>
+<div class="decisionGapBreakdown" id="decisionGapBreakdown" aria-label="Dynamic DMU readiness breakdown">
+  <button class="decisionGapChip" type="button" data-role="no-roles" onclick="setDecisionRoleFilter('no-roles')"><span>No DMU Roles</span><b id="gapCountNoRoles">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="thin" onclick="setDecisionRoleFilter('thin')"><span>Only 1–2 Roles</span><b id="gapCountThin">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="low" onclick="setDecisionRoleFilter('low')"><span>Readiness &lt; 60%</span><b id="gapCountLow">0</b></button>
+  <button class="decisionGapChip" type="button" data-role="ready" onclick="setDecisionRoleFilter('ready')"><span>DMU Ready ≥ 60%</span><b id="gapCountReady">0</b></button>
 </div>
 <div class="decisionActionQueue" id="decisionActionQueue">
   <div class="decisionActionQueueHead">
-    <strong>Decision Team Actions</strong>
-    <span class="small" id="decisionActionQueueCount">0 deals need decision-team action</span>
+    <strong>DMU Attention Actions</strong>
+    <span class="small" id="decisionActionQueueCount">0 deals need DMU attention</span>
   </div>
   <div class="decisionActionQueueList" id="decisionActionQueueList"></div>
 </div>
+<details class="decisionCoverageMatrix" id="decisionCoverageMatrix">
+  <summary><span>Dynamic DMU Coverage Matrix</span><span class="small" id="decisionCoverageMatrixCount">0 visible deals</span></summary>
+  <div class="decisionCoverageMatrixBody">
+    <table class="decisionCoverageTable">
+      <thead><tr><th>Customer</th><th>Sales Stage</th><th>Roles</th><th>Readiness</th><th>Confidence</th><th>Attention</th></tr></thead>
+      <tbody id="decisionCoverageMatrixBody"></tbody>
+    </table>
+  </div>
+</details>
 <div class="dealFilters" id="dealFilters">
   <div class="field"><label>Search Customer</label><input id="customerSearch" type="search" placeholder="Search company..." oninput="setCustomerSearch(this.value)"></div>
   <div class="field"><label>Sales Stage</label><select id="dealStageFilter" onchange="setDealStageFilter(this.value)"><option value="">All stages</option></select></div>
   <div class="field" id="dealOwnerFilterWrap"><label>Sales Owner</label><select id="dealOwnerFilter" onchange="setDealOwnerFilter(this.value)"><option value="">All owners</option></select><div class="small" id="dealOwnerUnavailable" style="display:none;margin-top:4px">Sales Owner data not available in governed deal sources.</div></div>
-  <label class="dealFocusToggle"><input id="decisionGapFilter" type="checkbox" onchange="setDecisionGapFilter(this.checked)">Needs Decision Team</label>
+  <label class="dealFocusToggle"><input id="decisionGapFilter" type="checkbox" onchange="setDecisionGapFilter(this.checked)">Needs DMU Attention</label>
   <div class="field"><label>Sort</label><select id="dealSort" onchange="setDealSort(this.value)">
     <option value="customer-asc">Customer A–Z</option>
     <option value="stage-asc">Sales Stage A–Z</option>
-    <option value="coverage-asc">Decision Coverage Low → High</option>
-    <option value="coverage-desc">Decision Coverage High → Low</option>
+    <option value="coverage-asc">DMU Readiness Low → High</option>
+    <option value="coverage-desc">DMU Readiness High → Low</option>
   </select></div>
   <button class="btn secondary" type="button" onclick="clearDealFilters()">Clear</button>
   <div class="dealFilterCount"><span id="dealVisibleCount">0 of 0 customers</span></div>
 </div>
 <div id="dealCards" class="dealCards" style="margin-top:10px"></div>
-</div><div id="archivedHistoricalView" hidden><div class="historicalPanel"><h3 style="margin:0;color:var(--navy)">Archived / Historical Quotations</h3><p class="small">Read-only Smart Sale quotation history. Quotation records are not Opportunities and do not change active deal counts, pipeline, forecast, or deal probability.</p><div class="quickbar"><button class="btn primary" id="loadArchivedQuotationsButton" type="button" onclick="loadArchivedQuotations()">Load / Refresh Historical Quotations</button><span class="small" id="archivedQuotationStatus" aria-live="polite">Not loaded</span></div><div class="historicalStats"><div class="historicalStat"><span>Historical Quotations</span><b id="historicalQuotationTotal">0</b></div><div class="historicalStat"><span>Review Required</span><b id="historicalQuotationReviewCount">0</b></div><div class="historicalStat"><span>Quoted Value (THB)</span><b id="historicalQuotationValue">—</b></div><div class="historicalStat"><span>Quotation Date Range</span><b id="historicalQuotationDates">—</b></div></div><div class="historicalFilters"><div class="field"><label>Customer</label><input id="historyCustomerSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search customer"></div><div class="field"><label>Quotation Number</label><input id="historyQuoteSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search quotation"></div><div class="field"><label>Sales / Owner</label><select id="historyOwnerFilter" onchange="renderArchivedQuotations()" disabled><option value="">Owner unavailable in source</option></select><div class="small" id="historicalOwnerUnavailable">Owner field is not present in this workbook.</div></div><div class="field"><label>Product / Specification</label><input id="historyProductSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search product or specification"></div><div class="field"><label>Product Category</label><select id="historyProductFilter" onchange="renderArchivedQuotations()"><option value="">All categories</option></select></div><div class="field"><label>Quotation Date From</label><input id="historyDateFrom" type="date" onchange="renderArchivedQuotations()"></div><div class="field"><label>Quotation Date To</label><input id="historyDateTo" type="date" onchange="renderArchivedQuotations()"></div><div class="field"><label>Status</label><select id="historyStatusFilter" onchange="renderArchivedQuotations()"><option value="">All statuses</option></select></div><div class="field"><label>Opportunity ID</label><input id="historyOpportunitySearch" type="search" oninput="renderArchivedQuotations()" placeholder="Governed exact link"></div><button class="btn secondary" type="button" onclick="clearHistoricalQuotationFilters()">Clear filters</button></div><div class="small" id="historicalQuotationResultCount" aria-live="polite">0 quotations</div><div class="historicalTableWrap" style="margin-top:8px"><table class="historicalTable"><thead><tr><th>Quotation</th><th>Customer</th><th>Date</th><th>Product / Specification</th><th>Status</th><th>Quoted Value (THB)</th><th>Opportunity</th><th>Details</th></tr></thead><tbody id="historicalQuotationRows"></tbody></table></div></div></div></section>
+
+<details class="commercialCoverage" id="quotedCustomerCoveragePanel" open>
+  <summary><span>Quoted Customers / Commercial Coverage</span><span class="small" id="quotedCoverageCount">Loading…</span></summary>
+  <div class="commercialCoverageBody">
+    <div class="coverageIntro">ลูกค้าที่มีหลักฐานใบเสนอราคาจริง แต่ยังไม่มี canonical Opportunity จะยังแสดงที่นี่เป็น Review Required • ไม่ถูกนับใน Active Pipeline / Forecast / Radar จนกว่าจะ link ด้วย OpportunityID ที่ยืนยันแล้ว</div>
+    <div id="quotedCoverageCards" class="dealCards"></div>
+  </div>
+</details>
+
+<details class="commercialCoverage" id="customerDirectoryPanel">
+  <summary><span>Customer Directory</span><span class="small" id="customerDirectoryCount">Loading…</span></summary>
+  <div class="commercialCoverageBody">
+    <div class="directorySearch">
+      <div class="field"><label>Search all customers</label><input id="directoryCustomerSearch" type="search" placeholder="Search company, Customer ID, province..." oninput="renderCommercialCustomerCoverage()"></div>
+      <div class="small">Read-only customer master</div>
+    </div>
+    <div id="directoryCustomerResults" class="directoryResults"></div>
+  </div>
+</details>
+
+<details class="archivePanel" id="archivedCustomersPanel">
+  <summary><span>Archived Customers</span><span class="small" id="archivedCustomerCount">0 archived</span></summary>
+  <div class="archivePanelBody">
+    <div id="archivedCustomerList" class="archiveList"></div>
+  </div>
+</details>
+</div>
+<div id="archivedHistoricalView" hidden>
+  <div class="historicalPanel">
+    <h3 style="margin:0;color:var(--navy)">Archived / Historical Quotations</h3>
+    <p class="small">Read-only Smart Sale quotation history. Quotation records are not Opportunities and do not change active deal counts, pipeline, forecast, or deal probability.</p>
+    <div class="quickbar"><button class="btn primary" id="loadArchivedQuotationsButton" type="button" onclick="loadArchivedQuotations()">Load / Refresh Historical Quotations</button><span class="small" id="archivedQuotationStatus" aria-live="polite">Not loaded</span></div>
+    <div class="historicalStats">
+      <div class="historicalStat"><span>Historical Quotations</span><b id="historicalQuotationTotal">0</b></div>
+      <div class="historicalStat"><span>Review Required</span><b id="historicalQuotationReviewCount">0</b></div>
+      <div class="historicalStat"><span>Quoted Value (THB)</span><b id="historicalQuotationValue">—</b></div>
+      <div class="historicalStat"><span>Quotation Date Range</span><b id="historicalQuotationDates">—</b></div>
+    </div>
+    <div class="historicalFilters">
+      <div class="field"><label>Customer</label><input id="historyCustomerSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search customer"></div>
+      <div class="field"><label>Quotation Number</label><input id="historyQuoteSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search quotation"></div>
+      <div class="field"><label>Sales / Owner</label><select id="historyOwnerFilter" onchange="renderArchivedQuotations()" disabled><option value="">Owner unavailable in source</option></select><div class="small" id="historicalOwnerUnavailable">Owner field is not present in this workbook.</div></div>
+      <div class="field"><label>Product / Specification</label><input id="historyProductSearch" type="search" oninput="renderArchivedQuotations()" placeholder="Search product or specification"></div>
+      <div class="field"><label>Product Category</label><select id="historyProductFilter" onchange="renderArchivedQuotations()"><option value="">All categories</option></select></div>
+      <div class="field"><label>Quotation Date From</label><input id="historyDateFrom" type="date" onchange="renderArchivedQuotations()"></div>
+      <div class="field"><label>Quotation Date To</label><input id="historyDateTo" type="date" onchange="renderArchivedQuotations()"></div>
+      <div class="field"><label>Status</label><select id="historyStatusFilter" onchange="renderArchivedQuotations()"><option value="">All statuses</option></select></div>
+      <div class="field"><label>Opportunity ID</label><input id="historyOpportunitySearch" type="search" oninput="renderArchivedQuotations()" placeholder="Governed exact link"></div>
+      <button class="btn secondary" type="button" onclick="clearHistoricalQuotationFilters()">Clear filters</button>
+    </div>
+    <div class="small" id="historicalQuotationResultCount" aria-live="polite">0 quotations</div>
+    <div class="historicalTableWrap" style="margin-top:8px"><table class="historicalTable"><thead><tr><th>Quotation</th><th>Customer</th><th>Date</th><th>Product / Specification</th><th>Status</th><th>Quoted Value (THB)</th><th>Opportunity</th><th>Details</th></tr></thead><tbody id="historicalQuotationRows"></tbody></table></div>
+  </div>
+</div>
+</section>
 
 <section class="card full viewSection" id="aiNewOpportunities">
 <h2>New Opportunities to Review</h2>
-<div class="small">รอตรวจสอบ — ทีมขายยืนยันก่อนเพิ่มเป็นลูกค้าหรืองานขายจริง</div>
+<div class="small">AI รวบรวม Lead ใหม่จากข้อมูลขายที่มีหลักฐาน • ต้องให้ทีมยืนยันก่อนสร้างหรือผูก Opportunity</div>
+<div class="actionrow" style="align-items:center">
+  <button class="btn secondary" type="button" onclick="refreshDmuNow()">Refresh now</button>
+  <span class="small" id="leadReviewSummary">Waiting for review inbox…</span>
+  <span class="small" id="leadReviewLastRefresh"></span>
+</div>
 <div id="newOpportunityStories" class="aiStoryGrid" style="margin-top:10px"></div>
 </section>
 
@@ -184,21 +288,24 @@ function legacyNavTo(id,btn){
   <div class="field" style="max-width:360px"><label>Customer</label><select id="oppSelect"></select></div>
   <button class="btn secondary legacyManualControl" onclick="loadSelectedOpportunity()">Load</button>
   <button class="btn primary legacyManualControl" onclick="saveAll()">Save</button>
-  <button class="btn secondary legacyManualControl" type="button" onclick="navTo('viewDeals');setDealsView('historical')">Archived / Historical</button>
-  
+  <button class="btn secondary legacyManualControl" onclick="testSharePoint()">Test SharePoint</button>
+  <button class="btn secondary legacyManualControl" type="button" onclick="syncLegacyExcel()">Archived / Historical</button>
 </div>
 <div class="execBrief" id="executiveDealBrief" aria-live="polite">
   <div class="briefItem"><span>Customer</span><b id="briefCustomer">—</b></div>
   <div class="briefItem"><span>Sales Stage</span><b id="briefStage">—</b></div>
   <div class="briefItem"><span>Recommended Next Action</span><b id="briefNextAction">—</b></div>
-  <div class="briefItem"><span>Decision Coverage</span><b id="briefDecisionCoverage">—</b></div>
+  <div class="briefItem"><span>Dynamic DMU Readiness</span><b id="briefDecisionCoverage">—</b></div>
 </div>
 <div class="quickbar humanWriteControl">
   <button class="btn accent" onclick="goQuickActivity()">+ Activity</button>
   <button class="btn secondary" onclick="addDMURow();scrollToId('dmuTable')">+ DMU Contact / Decision Maker</button>
   <button class="btn primary" onclick="saveHumanUpdate()">Save Human Update</button>
+  <button class="btn secondary" id="archiveCurrentCustomerButton" onclick="archiveCurrentCustomer()">Archive Customer</button>
 </div>
 <div class="small humanWriteControl" style="margin-top:6px">ข้อมูล DMU และกิจกรรมที่ทีมยืนยันเอง • ระบบจะไม่สร้างหรือแก้ข้อมูลลูกค้า/งานขายหลักอัตโนมัติ</div>
+<div id="teamOverlayStatus" class="overlayStatus" aria-live="polite"></div>
+<div id="identityWarning" class="identityWarning" role="alert" aria-live="assertive"></div>
 <div class="deal" style="margin-top:12px">
   <input id="oppId" type="hidden">
   <input id="quoteNo" type="hidden">
@@ -217,12 +324,12 @@ function legacyNavTo(id,btn){
 <section class="card full">
 <h2>Deal Health</h2>
 <div class="stats">
- <div class="stat"><b id="coveragePct">0%</b><span>Decision Coverage</span></div>
- <div class="stat"><b id="dmuConfidence">0%</b><span>Decision Confidence</span></div>
+ <div class="stat"><b id="coveragePct">0%</b><span>Dynamic DMU Readiness</span></div>
+ <div class="stat"><b id="dmuConfidence">0%</b><span>DMU Evidence Confidence</span></div>
  <div class="stat"><b id="pipelineDisplay">0%</b><span>Pipeline Probability</span></div>
  <div class="stat"><b id="mgmtForecast">0%</b><span>DMU-adjusted Forecast</span></div>
 </div>
-<div class="small" style="margin-top:8px">Forecast = Pipeline Probability × Decision Confidence. ใช้เป็น management challenge ไม่ได้แทน sales stage probability โดยตรง</div>
+<div class="small" style="margin-top:8px">Dynamic DMU Readiness = ค่าเฉลี่ย readiness ของ human-confirmed DMU roles ชุดเดียวกับ Radar • AI suggestion ไม่นับ • role ซ้ำใช้ค่าสูงสุด<br>Forecast = Pipeline Probability × DMU Evidence Confidence. ใช้เป็น management challenge ไม่ได้แทน sales stage probability โดยตรง</div>
 </section>
 
 <section class="card full">
@@ -234,7 +341,7 @@ function legacyNavTo(id,btn){
 <section class="card">
 <h2>DMU Radar</h2>
 <div class="radarWrap"><svg id="radar" width="420" height="360" viewBox="0 0 420 360"></svg></div>
-<div class="small">Radar แสดง coverage/readiness ของ DMU แต่ละ role ไม่ใช่ buying power</div>
+<div class="small">Radar สร้างแกนตาม DMU Role ที่ยืนยันแล้วของลูกค้ารายนี้โดยอัตโนมัติ • role ซ้ำใช้ readiness สูงสุด • ไม่ใช้ AI suggestion จนกว่าจะยืนยัน</div>
 </section>
 
 <section class="card viewSection" id="viewActivity">
@@ -252,7 +359,7 @@ function legacyNavTo(id,btn){
 <h2>Next Action & Close Plan</h2>
 <div class="deal">
  <div class="field span2"><label>Current Diagnosis</label><textarea id="diagnosis"></textarea></div>
- <div class="field span2"><label>Recommended Next Action</label><textarea id="nextAction"></textarea><div id="salesActions" class="small" aria-live="polite"></div></div>
+ <div class="field span2"><label>Recommended Next Action</label><textarea id="nextAction"></textarea><div id="nextActionProvenance" class="small" aria-live="polite"></div><div id="salesActions" class="small" aria-live="polite"></div></div>
  <div class="field"><label>Champion Test</label><textarea id="championTest"></textarea></div>
  <div class="field"><label>Decision Process</label><textarea id="decisionProcess"></textarea></div>
  <div class="field"><label>Win Theme</label><textarea id="winTheme"></textarea></div>
@@ -269,7 +376,7 @@ function legacyNavTo(id,btn){
  <button onclick="navTo('viewActivity',this)">+ Activity</button>
  <button onclick="navTo('viewControl',this)">Next Action</button>
 </nav>
-<!-- HEXA_DMU_BUILD_2026_09_28_6B8 --><!-- HEXA_DMU_AUTH_RESUME_2026_09_27_3 --><div class="footer">HEXA Sales DMU App • Sales Intelligence</div>
+<!-- HEXA_DMU_BUILD_2026_09_28_6B9R2 --><!-- HEXA_DMU_AUTH_RESUME_2026_09_27_3 --><div class="footer">HEXA Sales DMU App • Sales Intelligence</div>
 <script>
 const CONFIG={
  siteUrl:'https://hexahessmanth.sharepoint.com/sites/Sales_23o7yb',
@@ -280,6 +387,9 @@ const CONFIG={
 const stageProb={'Lead':10,'Qualified':20,'Requirement':30,'Site Survey':30,'Solution / Pricing':40,'Technical Validation':40,'Pricing':40,'Proposal':50,'Quotation':50,'Inspection / Visit':50,'Demo / Testing':60,'Decision':70,'Negotiation':70,'Verbal Commit':90,'Won':100,'Lost':0};
 let state={opportunities:[],current:null,dmu:[],activities:[],legacy:{customers:[],quotations:[],customerUpdates:[],quotationUpdates:[],lastSync:null}};
 let phase6ReadModel=null,phase6ContextReview=null,showAllActivities=false,phase6LiveReadOnly=false;
+let humanOverlayLoadEpoch=0,currentIdentitySafe=true;
+let phase6CustomerCoverage=null,customerCoverageAvailable=false,customerCoverageStatus='Customer coverage not connected';
+let phase6CanonicalDeals=[],customerArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
 const CMI_OPPORTUNITY_ID='OPP-2608-019';
 const CMI_GOLDEN=null;
 const SMART_SALE_DRIVE_ID='b!B-is1z_1_UqfbZzVyRnbHy6aaOLL2t5PlafMGwaUNmSVSPOv7ZpkS51SsnFx5aur';
@@ -343,7 +453,7 @@ function init(){
   const dateInput=document.getElementById('actDate');if(dateInput)dateInput.value=new Date().toISOString().slice(0,10);
   const freshness=document.getElementById('sourceFreshness');if(freshness)freshness.textContent='Sign in with HEXA to load latest sales data.';
 }
-function renderOppSelector(){const s=document.getElementById('oppSelect');if(!s)return;const counts=new Map();state.opportunities.forEach(o=>{const k=String(o.customer||'').trim().toLowerCase();counts.set(k,(counts.get(k)||0)+1)});s.innerHTML=state.opportunities.map(o=>{const customer=String(o.customer||'').trim()||'Unnamed customer';const duplicate=(counts.get(customer.toLowerCase())||0)>1;const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';const label=detail?customer+' · '+detail:customer;return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`}).join('');s.onchange=async()=>{loadSelectedOpportunity();if(hexaAccount&&state.current){await loadHumanOverlay(state.current);loadSelectedOpportunity()}}}
+function renderOppSelector(){const s=document.getElementById('oppSelect');if(!s)return;const counts=new Map();state.opportunities.forEach(o=>{const k=String(o.customer||'').trim().toLowerCase();counts.set(k,(counts.get(k)||0)+1)});s.innerHTML=state.opportunities.map(o=>{const customer=String(o.customer||'').trim()||'Unnamed customer';const duplicate=(counts.get(customer.toLowerCase())||0)>1;const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';const label=detail?customer+' · '+detail:customer;return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`}).join('');s.onchange=async()=>{loadSelectedOpportunity();if(hexaAccount&&state.current){const requested=state.current;try{const applied=await loadHumanOverlay(requested);if(applied&&state.current===requested)loadSelectedOpportunity()}catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay load failed',e)}}}}
 
 function setPhase6LiveReadOnly(enabled){
  phase6LiveReadOnly=!!enabled;
@@ -441,9 +551,6 @@ function openCustomerFromStory(opportunityId){
  loadSelectedOpportunity();
  navTo('viewDMU');
 }
-function decisionCoverageSummary(opportunityId){
- return decisionCoverageCount(opportunityId)+'/4 confirmed';
-}
 function renderStoryCard(story){
  const customer=String(valueOf(story.Customer,story.Topic,'Sales update'));
  const changed=String(valueOf(story.WhatChanged,'AI found a sales update.'));
@@ -467,6 +574,43 @@ function storyMoreButton(kind,total,shown){
  const fn=kind==='new'?'window.hexaShowAllNewStories=true;renderManagementStories()':'window.hexaShowAllOtherSalesTopics=true;renderManagementStories()';
  return '<div style="grid-column:1/-1"><button class="btn secondary" type="button" onclick="'+fn+'">Show '+remaining+' more</button></div>';
 }
+function managementExistingStories(){
+ const model=phase6ContextReview?.reviewModel||phase6ContextReview||{};
+ const stories=model.managementStories||{};
+ return rowsOf(stories.existingOpportunities)
+   .filter(story=>!isArchivedOpportunity(storyOpportunityId(story)))
+   .slice()
+   .sort((a,b)=>storyPriority(b)-storyPriority(a));
+}
+function refreshManagementIntelligence(existingStories=null){
+ const existing=Array.isArray(existingStories)?existingStories:managementExistingStories();
+ const total=state.opportunities.length;
+ const count=f=>existing.filter(x=>priorityStoryMatches(x,f)).length;
+ const decisionComplete=state.opportunities.filter(o=>dynamicDmuMetrics(o.id).ready).length;
+ setText('mgmtActiveDeals',total);
+ setText('mgmtPriorityActions',existing.length);
+ setText('mgmtClosingActions',count('closing'));
+ setText('mgmtFollowupActions',count('followup'));
+ setText('mgmtRiskActions',count('risk'));
+ setText('mgmtDecisionComplete',decisionComplete);
+ const coverage=coverageModel();
+ const quoted=rowsOf(coverage?.quotedCustomers);
+ const activeIds=new Set(state.opportunities.map(o=>String(o.id||'').trim()).filter(Boolean));
+ const reviewRequired=quoted.filter(item=>{
+   const opp=String(item?.CanonicalOpportunityID||'').trim();
+   return !opp||!activeIds.has(opp);
+ }).length;
+ const directoryCount=Number(coverage?.summary?.directoryCustomerCount||rowsOf(coverage?.directoryCustomers).length||0);
+ const quotedCount=Number(coverage?.summary?.quotedCustomerCount||quoted.length||0);
+ const note=document.getElementById('managementIntelligenceCoverageNote');
+ if(note){
+   const coverageText=customerCoverageAvailable
+     ?'Commercial coverage: '+reviewRequired+' quoted customers need Opportunity link • '+quotedCount+' quoted customers • '+directoryCount+' customers in directory.'
+     :'Commercial customer coverage unavailable; Active Deals and AI priority counts remain usable.';
+   note.textContent=coverageText+' Revenue / target metrics will be added only when authoritative finance and target sources are connected.';
+ }
+}
+
 function priorityStoryMatches(story,filter){
  if(filter==='all')return true;
  const categories=Array.isArray(story?.Categories)?story.Categories:[];
@@ -494,12 +638,145 @@ function priorityMoreButton(total,shown){
  const remaining=total-shown;
  return remaining>0?'<div class="priorityActionsFooter"><button class="btn secondary" type="button" onclick="window.hexaShowAllPriorityStories=true;renderManagementStories()">Show '+remaining+' more</button></div>':'';
 }
+function leadReviewItems(){return rowsOf(phase6ContextReview?.leadReviewInbox?.items)}
+function leadReviewItemById(reviewId){return leadReviewItems().find(x=>String(x?.ReviewID||'')===String(reviewId||''))||null}
+function leadReviewStateLabel(item){
+ const state=String(item?.ReviewState||'review-required');
+ if(state==='ready-for-human-confirmation')return 'Ready to Confirm';
+ if(state==='customer-confirmation-required')return 'Customer Confirmation Required';
+ if(state==='approved-awaiting-opportunity-promotion')return 'Confirmed • Awaiting Opportunity';
+ if(state==='approved-customer-confirmation-required')return 'Confirmed • Customer Required';
+ if(state==='approval-in-progress')return 'Confirming • Retry Available';
+ if(state==='rejection-in-progress')return 'Rejecting • Retry Available';
+ if(state==='review-decision-conflict')return 'Review Conflict • Manual Check';
+ return 'Review Required';
+}
+function leadReviewStateBadge(item){
+ const state=String(item?.ReviewState||'');
+ const cls=/^approved-/.test(state)?'green':state==='ready-for-human-confirmation'?'yellow':'red';
+ return '<span class="badge '+cls+'">'+esc(leadReviewStateLabel(item))+'</span>';
+}
+function renderLeadReviewCard(item){
+ const reviewId=String(item?.ReviewID||'');
+ const customer=valueOf(item?.CanonicalCustomerName,item?.CustomerCandidate,'New Lead');
+ const candidate=valueOf(item?.CustomerCandidate,'—');
+ const what=valueOf(item?.WhatChanged,'New commercial signal requires review.');
+ const next=valueOf(item?.RecommendedNextAction,'Review the lead and confirm whether it should enter the sales pipeline.');
+ const at=valueOf(item?.LatestOccurredAt,'');
+ const pending=rowsOf(item?.PendingProposalIDs);
+ const state=String(item?.ReviewState||'review-required');
+ const approved=/^approved-/.test(state);
+ const allowed=rowsOf(item?.AllowedActions);
+ const canApprove=pending.length>0&&allowed.includes('confirm-new-opportunity');
+ const canCustomerApprove=pending.length>0&&allowed.includes('confirm-customer-first');
+ const canReject=pending.length>0&&allowed.includes('reject');
+ const customerNote=item?.CustomerID
+   ?'Matched customer: '+esc(valueOf(item?.CanonicalCustomerName,item?.CustomerCandidate))+' • '+esc(item.CustomerID)
+   :'No exact canonical customer match yet.';
+ const buttons=[
+   (canApprove||canCustomerApprove)?'<button class="btn primary" type="button" onclick="reviewLeadProposals(\''+esc(reviewId)+'\',\'approve\')">Confirm Lead</button>':'',
+   canReject?'<button class="btn danger" type="button" onclick="reviewLeadProposals(\''+esc(reviewId)+'\',\'reject\')">Reject</button>':'',
+   approved&&state==='approved-awaiting-opportunity-promotion'?'<button class="btn primary" type="button" onclick="promoteLeadOpportunity(\''+esc(reviewId)+'\')">Create Opportunity</button>':'',
+   approved&&state==='approved-customer-confirmation-required'?'<button class="btn secondary" type="button" disabled>Confirm Customer First</button>':'',
+   state==='review-decision-conflict'?'<button class="btn danger" type="button" disabled>Manual Review Required</button>':''
+ ].filter(Boolean).join('');
+ return '<div class="aiStory">'+
+   '<h3>'+esc(customer)+'</h3>'+
+   '<div>'+leadReviewStateBadge(item)+'</div>'+
+   '<div class="storyMeta">AI candidate: '+esc(candidate)+(at?' • '+esc(formatSourceDate(at)):'')+'</div>'+
+   '<div style="margin-top:8px;font-size:12px;line-height:1.45">'+esc(what)+'</div>'+
+   '<div class="small" style="margin-top:7px">'+customerNote+'</div>'+
+   '<div class="small" style="margin-top:7px"><b>Next:</b> '+esc(next)+'</div>'+
+   '<div class="actionrow">'+buttons+'</div>'+
+ '</div>';
+}
+async function promoteLeadOpportunity(reviewId){
+ const item=leadReviewItemById(reviewId);
+ if(!item)throw new Error('Lead review item is no longer available. Refresh and try again.');
+ if(String(item?.ReviewState||'')!=='approved-awaiting-opportunity-promotion'){
+   throw new Error('Lead must be confirmed before Opportunity promotion.');
+ }
+ if(!item?.CustomerID||!item?.CanonicalCustomerName){
+   throw new Error('Exact canonical Customer match is required before Opportunity promotion.');
+ }
+ if(!confirm('Create a new Opportunity for '+valueOf(item.CanonicalCustomerName,item.CustomerCandidate)+' and link the confirmed sales intelligence?'))return;
+ const token=await phase5ReviewToken();
+ const response=await fetch(PHASE6_LEAD_REVIEW_PROMOTE_ENDPOINT,{
+   method:'POST',
+   headers:{Authorization:'Bearer '+token,Accept:'application/json','Content-Type':'application/json'},
+   body:JSON.stringify({
+     confirmation:PHASE6_LEAD_REVIEW_PROMOTION_CONFIRMATION,
+     action:'promote-new-opportunity',
+     reviewId:item.ReviewID,
+     customerCandidate:item.CustomerCandidate,
+     customerId:item.CustomerID,
+     canonicalCustomerName:item.CanonicalCustomerName,
+     intelligenceIds:rowsOf(item.IntelligenceIDs),
+     proposalIds:rowsOf(item.ProposalIDs),
+     whatChanged:item.WhatChanged||'',
+     recommendedNextAction:item.RecommendedNextAction||'',
+     businessHighlights:rowsOf(item.BusinessHighlights)
+   })
+ });
+ const payload=await response.json().catch(()=>null);
+ if(!response.ok){
+   const message=String(payload?.detail||payload?.error||('Lead promotion HTTP '+response.status));
+   throw new Error(message);
+ }
+ const opportunityId=String(payload?.OpportunityID||'');
+ await refreshDmuNow();
+ if(opportunityId&&state.opportunities.some(x=>x.id===opportunityId)){
+   state.current=opportunityId;
+   const select=document.getElementById('oppSelect');
+   if(select)select.value=opportunityId;
+   loadSelectedOpportunity();
+ }
+}
+async function reviewLeadProposals(reviewId,action){
+ const item=leadReviewItemById(reviewId);
+ if(!item)throw new Error('Lead review item is no longer available. Refresh and try again.');
+ const ids=rowsOf(item.PendingProposalIDs);
+ if(!ids.length){await refreshDmuNow();return}
+ const approve=action==='approve';
+ const promptText=approve
+   ?'Confirm this Lead signal? This approves the governed AI proposals but does not create a Customer or Opportunity automatically.'
+   :'Reject this Lead signal?';
+ if(!confirm(promptText))return;
+ const note=approve
+   ?'Confirmed in DMU Lead Review Inbox. Master-data promotion remains governed.'
+   :'Rejected in DMU Lead Review Inbox.';
+ for(const proposalId of ids){
+   await submitPhase5Review(proposalId,approve?'approve':'reject',note);
+ }
+ await refreshDmuNow();
+}
+let dmuAutoRefreshTimer=null;
+const DMU_AUTO_REFRESH_MS=5*60*1000;
+function startDmuAutoRefresh(){
+ if(dmuAutoRefreshTimer)clearInterval(dmuAutoRefreshTimer);
+ dmuAutoRefreshTimer=setInterval(()=>{
+   if(document.hidden||!hexaAccount)return;
+   loadAuthenticatedAi({skipHumanOverlay:true}).catch(error=>console.warn('DMU auto refresh failed',error));
+ },DMU_AUTO_REFRESH_MS);
+}
+async function refreshDmuNow(){
+ if(!hexaAccount){await connectHEXA();return}
+ const button=document.querySelector('#aiNewOpportunities button[onclick="refreshDmuNow()"]');
+ if(button)button.disabled=true;
+ try{
+   hexaReadInitializationPromise=null;
+   await loadAuthenticatedAi({skipHumanOverlay:true});
+ }finally{
+   if(button)button.disabled=false;
+ }
+}
 function renderManagementStories(){
  const model=phase6ContextReview?.reviewModel||phase6ContextReview||{};
  const stories=model.managementStories||{};
 
- const existing=rowsOf(stories.existingOpportunities).slice().sort((a,b)=>storyPriority(b)-storyPriority(a));
+ const existing=rowsOf(stories.existingOpportunities).filter(story=>!isArchivedOpportunity(storyOpportunityId(story))).slice().sort((a,b)=>storyPriority(b)-storyPriority(a));
  setPriorityCounts(existing);
+ refreshManagementIntelligence(existing);
  const priorityFilter=window.hexaPriorityFilter||'all';
  document.querySelectorAll('#priorityFilters .priorityFilter').forEach(b=>b.classList.toggle('active',b.dataset.filter===priorityFilter));
  const filteredAttention=existing.filter(x=>priorityStoryMatches(x,priorityFilter));
@@ -511,11 +788,20 @@ function renderManagementStories(){
    '<div class="small">No priority action in this filter.</div>';
 
  const newBox=document.getElementById('newOpportunityStories');
- const newRows=rowsOf(stories.newOpportunities).filter(credibleNewOpportunityStory).slice().sort((a,b)=>String(valueOf(b.LatestOccurredAt,b.SourceOccurredAt,'')).localeCompare(String(valueOf(a.LatestOccurredAt,a.SourceOccurredAt,'')))||storyPriority(b)-storyPriority(a));
- const newLimit=window.hexaShowAllNewStories?newRows.length:Math.min(12,newRows.length);
- if(newBox)newBox.innerHTML=newRows.slice(0,newLimit).map(renderStoryCard).join('')+
-   storyMoreButton('new',newRows.length,newLimit)||
-   '<div class="small">No new sales opportunity found.</div>';
+ const inbox=phase6ContextReview?.leadReviewInbox;
+ const inboxRows=leadReviewItems();
+ if(inbox&&Array.isArray(inbox.items)){
+   if(newBox)newBox.innerHTML=inboxRows.map(renderLeadReviewCard).join('')||'<div class="small">No Lead waiting for review.</div>';
+   setText('leadReviewSummary',String(inbox.count||0)+' waiting • '+String(inbox.readyForHumanConfirmationCount||0)+' ready to confirm • '+String(inbox.approvedAwaitingPromotionCount||0)+' confirmed / awaiting promotion');
+   setText('leadReviewLastRefresh',inbox.generatedAt?'Updated '+formatSourceDate(inbox.generatedAt):'');
+ }else{
+   const newRows=rowsOf(stories.newOpportunities).filter(credibleNewOpportunityStory).slice().sort((a,b)=>String(valueOf(b.LatestOccurredAt,b.SourceOccurredAt,'')).localeCompare(String(valueOf(a.LatestOccurredAt,a.SourceOccurredAt,'')))||storyPriority(b)-storyPriority(a));
+   const newLimit=window.hexaShowAllNewStories?newRows.length:Math.min(12,newRows.length);
+   if(newBox)newBox.innerHTML=newRows.slice(0,newLimit).map(renderStoryCard).join('')+
+     storyMoreButton('new',newRows.length,newLimit)||
+     '<div class="small">No new sales opportunity found.</div>';
+   setText('leadReviewSummary','Legacy review view • refresh backend to enable governed Inbox');
+ }
 
  const otherBox=document.getElementById('otherSalesTopicStories');
  const otherRows=rowsOf(stories.otherSalesTopics).slice().sort((a,b)=>String(valueOf(b.SourceOccurredAt,b.LatestOccurredAt,'')).localeCompare(String(valueOf(a.SourceOccurredAt,a.LatestOccurredAt,'')))||storyPriority(b)-storyPriority(a));
@@ -544,7 +830,7 @@ function refreshExecutiveDealBrief(){
  const o=state.opportunities.find(x=>x.id===state.current)||{};
  const customer=valueOf(document.getElementById('customer')?.value,o.customer,'—');
  const stage=valueOf(document.getElementById('stage')?.value,o.stage,'—');
- const next=valueOf(document.getElementById('nextAction')?.value,detailFor(state.current)?.ControlTower?.RecommendedNextAction,'—');
+ const next=currentIdentitySafe?valueOf(document.getElementById('nextAction')?.value,detailFor(state.current)?.ControlTower?.RecommendedNextAction,'—'):'Data reconciliation required';
  setText('briefCustomer',customer);
  setText('briefStage',stage);
  setText('briefNextAction',next);
@@ -557,15 +843,22 @@ function loadSelectedOpportunity(){
  if(!selectedOpportunityId){renderDealCards();return;}
  showAllActivities=false;
  clearLiveDealBinding();
- const o=state.opportunities.find(x=>x.id===selectedOpportunityId);if(!o)return;
- const live=liveDeal(selectedOpportunityId),d360=detailFor(selectedOpportunityId);
- const latestQuotation=d360?.LatestQuotation||null;
- setVal('oppId',o.id);setVal('customer',valueOf(d360?.Customer,d360?.CustomerName,live?.Customer,live?.CustomerName,o.customer));setVal('salesOwner',valueOf(d360?.Owner,latestQuotation?.Owner,live?.Owner,live?.SalesOwner,o.sales));setVal('quoteNo',valueOf(d360?.LatestQuotationNo,live?.LatestQuotationNo,live?.LatestQuoteNo,o.quoteNo));setVal('offer',quotationOffer(d360)||valueOf(live?.OpportunityName,live?.SolutionSummary,o.offer));setVal('stage',valueOf(live?.StageCode,live?.Stage,o.stage,'Lead'));setVal('pipelineProb',(live?.Probability!==undefined&&live?.Probability!==null&&live?.Probability!=='')?live.Probability:(o.prob!==undefined&&o.prob!==null?o.prob:''));setVal('competitors',valueOf(live?.Competitors,o.competitors));setVal('keyContact',valueOf(d360?.ContactPerson,latestQuotation?.ContactPerson,live?.ContactPerson,live?.ContactName,o.keyContact));setVal('keyContactRole',valueOf(d360?.ContactRole,live?.ContactRole,o.keyContactRole));
- renderQuotationHistory(d360);
- const contactPhone=valueOf(d360?.ContactPhone,latestQuotation?.ContactPhone,live?.ContactPhone);document.getElementById('contactPhone').textContent=contactPhone?'Contact phone: '+contactPhone:'';
- let d=state.dmu.filter(x=>x.oppId===o.id&&x.humanConfirmed===true);if(!phase6LiveReadOnly&&!d.length){d=seedForOpp(o.id);state.dmu.push(...d)}renderDMU(d,d360);renderActivities();
- applyControlTower(o.id,d360);renderSourceFreshness(d360);refreshExecutiveDealBrief();setTimeout(()=>renderSalesClosePlan(d360),0);
- if(d360&&!document.getElementById('competitors').value.trim())setVal('competitors',valueOf(d360.ControlTower?.CompetitorSignal));
+ const o=state.opportunities.find(x=>x.id===selectedOpportunityId);if(!o)return;refreshArchiveCurrentCustomerButton();
+ const live=liveDeal(selectedOpportunityId),d360=detailFor(selectedOpportunityId),story=contextStoryFor(selectedOpportunityId);
+ const identitySafe=validateDealBinding(selectedOpportunityId,o,live,d360,story);
+ currentIdentitySafe=identitySafe;
+ const latestQuotation=identitySafe?(d360?.LatestQuotation||null):null;
+ if(!identitySafe){
+   setVal('oppId',o.id);setVal('customer',o.customer||'Customer identity under review');setVal('salesOwner',o.sales||'');setVal('quoteNo',o.quoteNo||'');setVal('offer',o.offer||'');setVal('stage',o.stage||'Lead');setVal('pipelineProb',o.prob??'');setVal('competitors','');setVal('keyContact','');setVal('keyContactRole','');
+ }else{
+   setVal('oppId',o.id);setVal('customer',valueOf(d360?.Customer,d360?.CustomerName,live?.Customer,live?.CustomerName,o.customer));setVal('salesOwner',valueOf(d360?.Owner,latestQuotation?.Owner,live?.Owner,live?.SalesOwner,o.sales));setVal('quoteNo',valueOf(d360?.LatestQuotationNo,live?.LatestQuotationNo,live?.LatestQuoteNo,o.quoteNo));setVal('offer',quotationOffer(d360)||valueOf(live?.OpportunityName,live?.SolutionSummary,o.offer));setVal('stage',valueOf(live?.StageCode,live?.Stage,o.stage,'Lead'));setVal('pipelineProb',(live?.Probability!==undefined&&live?.Probability!==null&&live?.Probability!=='')?live.Probability:(o.prob!==undefined&&o.prob!==null?o.prob:''));setVal('competitors',valueOf(live?.Competitors,o.competitors));setVal('keyContact',valueOf(d360?.ContactPerson,latestQuotation?.ContactPerson,live?.ContactPerson,live?.ContactName,o.keyContact));setVal('keyContactRole',valueOf(d360?.ContactRole,live?.ContactRole,o.keyContactRole));
+ }
+ renderQuotationHistory(identitySafe?d360:null);
+ const contactPhone=identitySafe?valueOf(d360?.ContactPhone,latestQuotation?.ContactPhone,live?.ContactPhone):'';document.getElementById('contactPhone').textContent=contactPhone?'Contact phone: '+contactPhone:'';
+ let d=state.dmu.filter(x=>x.oppId===o.id&&x.humanConfirmed===true);if(!phase6LiveReadOnly&&!d.length){d=seedForOpp(o.id);state.dmu.push(...d)}renderDMU(d,identitySafe?d360:null);renderActivities();
+ if(identitySafe){applyControlTower(o.id,d360);renderSourceFreshness(d360);setTimeout(()=>renderSalesClosePlan(d360),0);if(d360&&!document.getElementById('competitors').value.trim())setVal('competitors',valueOf(d360.ControlTower?.CompetitorSignal))}
+ else{renderSourceFreshness(null)}
+ refreshExecutiveDealBrief();
  calc();setLocal();renderDealCards()
 }
 function seedForOpp(oppId){return standardRoles.map((r,i)=>({id:`${oppId}-R${i+1}`,oppId,role:r[0],person:r[1],power:r[2],support:r[3],care:r[4],win:r[5],strategy:r[6],status:r[7]}))}
@@ -602,20 +895,9 @@ function saveStrategy(){if(phase6LiveReadOnly)return;state['strategy_'+state.cur
 function calc(){
  syncDMU();
  const rows=scoringRowsForOpportunity(state.current);
- const canonical=['End User','User Manager','Operations Influencer','Technical Influencer','Safety / EHS','Procurement','Decision Maker','Economic Buyer','Champion'];
- const roleScores=canonical.map(role=>{
-   const matches=rows.filter(x=>x.role===role&&!x.aiObserved);
-   return matches.length?Math.max(...matches.map(roleReadiness)):0;
- });
- const coverage=Math.round((roleScores.reduce((a,b)=>a+b,0)/(canonical.length*5))*100);
- const criticalRoles=['Procurement','Decision Maker','Economic Buyer','Champion'];
- const criticalScore=criticalRoles.map(role=>{
-   const matches=rows.filter(x=>x.role===role&&!x.aiObserved);
-   if(!matches.length)return 0;
-   const best=matches.sort((a,b)=>roleReadiness(b)-roleReadiness(a))[0];
-   return best.status==='Confirmed'?1:best.status==='Known'?0.8:best.status==='To Confirm'?0.5:best.status==='Critical Unknown'?0.1:0.2;
- }).reduce((a,b)=>a+b,0)/criticalRoles.length;
- const confidence=Math.round((coverage*0.55)+(criticalScore*100*0.45));
+ const metrics=dynamicDmuMetricsFromRows(rows);
+ const coverage=metrics.coverage;
+ const confidence=metrics.confidence;
  const pipelineRaw=document.getElementById('pipelineProb').value;
  const hasPipeline=pipelineRaw!==''&&Number.isFinite(Number(pipelineRaw));
  const pipeline=hasPipeline?Number(pipelineRaw):null;
@@ -630,10 +912,87 @@ function calc(){
  refreshExecutiveDealBrief();
  drawRadar(rows)
 }
-function drawRadar(rows){const svg=document.getElementById('radar'),cx=210,cy=165,R=118;const canonical=['End User','User Manager','Operations Influencer','Technical Influencer','Safety / EHS','Procurement','Decision Maker','Economic Buyer','Champion'];const vals=canonical.map(role=>{const matches=rows.filter(x=>x.role===role&&!x.aiObserved);if(!matches.length)return null;return Math.max(...matches.map(roleReadiness))});const n=canonical.length;let h='';for(let ring=1;ring<=5;ring++){let pts=[];for(let i=0;i<n;i++){let a=-Math.PI/2+i*2*Math.PI/n,rr=R*ring/5;pts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`)}h+=`<polygon points="${pts.join(' ')}" fill="none" stroke="#d9e1ec"/>`}for(let i=0;i<n;i++){let a=-Math.PI/2+i*2*Math.PI/n;h+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*R}" y2="${cy+Math.sin(a)*R}" stroke="#e2e8f0"/>`;let lr=R+26;const label=canonical[i]+(vals[i]===null?' • TBC':'');h+=`<text x="${cx+Math.cos(a)*lr}" y="${cy+Math.sin(a)*lr}" font-size="9" text-anchor="middle" dominant-baseline="middle" fill="${vals[i]===null?'#94a3b8':'#475569'}">${esc(label)}</text>`}let pts=[];vals.forEach((v,i)=>{let a=-Math.PI/2+i*2*Math.PI/n,rr=R*(v===null?0:v)/5;pts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`)});h+=`<polygon points="${pts.join(' ')}" fill="rgba(23,58,99,.18)" stroke="#173a63" stroke-width="2"/>`;h+=`<text x="${cx}" y="${cy+R+48}" font-size="10" text-anchor="middle" fill="#64748b">TBC = no human-confirmed readiness score</text>`;svg.innerHTML=h}
+function decisionStatusConfidence(row){
+ if(!row||row.aiObserved)return 0;
+ if(row.status==='Confirmed')return 100;
+ if(row.status==='Known')return 80;
+ if(row.status==='To Confirm')return 50;
+ if(row.status==='Critical Unknown')return 10;
+ return 20;
+}
+function radarSeriesFromRows(rows){
+ const byRole=new Map();
+ (Array.isArray(rows)?rows:[]).filter(row=>row&&!row.aiObserved).forEach((row,index)=>{
+   const role=String(row.role||'').trim();
+   const person=String(row.person||'').trim();
+   const label=role||person||`Stakeholder ${index+1}`;
+   const key=label.toLocaleLowerCase();
+   const value=roleReadiness(row);
+   const current=byRole.get(key);
+   if(!current||value>current.value)byRole.set(key,{label,value,statusConfidence:decisionStatusConfidence(row),count:(current?.count||0)+1});
+   else current.count+=1;
+ });
+ return [...byRole.values()];
+}
+function dynamicDmuMetricsFromRows(rows){
+ const series=radarSeriesFromRows(rows);
+ if(!series.length)return {series,roleCount:0,coverage:0,confidence:0,ready:false};
+ const coverage=Math.round((series.reduce((sum,item)=>sum+Math.max(0,Math.min(5,Number(item.value)||0)),0)/(series.length*5))*100);
+ const confidence=Math.round(series.reduce((sum,item)=>sum+Math.max(0,Math.min(100,Number(item.statusConfidence)||0)),0)/series.length);
+ const roleCount=series.length;
+ return {series,roleCount,coverage,confidence,ready:roleCount>=3&&coverage>=60};
+}
+function dynamicDmuMetrics(opportunityId){
+ return dynamicDmuMetricsFromRows(scoringRowsForOpportunity(opportunityId));
+}
+function drawRadar(rows){
+ const svg=document.getElementById('radar');if(!svg)return;
+ const series=radarSeriesFromRows(rows);
+ svg.setAttribute('viewBox','0 0 520 360');
+ const cx=260,cy=165,R=series.length>9?104:114;
+ if(!series.length){
+   svg.innerHTML=`<text x="260" y="150" text-anchor="middle" font-size="13" fill="#64748b">No human-confirmed DMU roles yet</text><text x="260" y="174" text-anchor="middle" font-size="11" fill="#94a3b8">Add or confirm DMU rows to build the radar automatically</text>`;
+   return;
+ }
+ if(series.length<3){
+   let h=`<text x="260" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#0f2a4a">DMU readiness by current table roles</text>`;
+   series.forEach((item,i)=>{
+     const y=105+(i*92),barX=150,barW=240,filled=Math.max(0,Math.min(5,item.value))/5*barW;
+     h+=`<text x="140" y="${y+6}" text-anchor="end" font-size="11" fill="#334155">${esc(item.label)}</text>`;
+     h+=`<rect x="${barX}" y="${y-10}" width="${barW}" height="20" rx="10" fill="#e2e8f0"/>`;
+     h+=`<rect x="${barX}" y="${y-10}" width="${filled}" height="20" rx="10" fill="#1e3a5f"/>`;
+     h+=`<text x="${barX+barW+12}" y="${y+6}" font-size="11" fill="#334155">${item.value.toFixed(1)}/5</text>`;
+   });
+   h+=`<text x="260" y="330" text-anchor="middle" font-size="10" fill="#64748b">Radar switches to bars when fewer than 3 confirmed DMU roles exist</text>`;
+   svg.innerHTML=h;
+   return;
+ }
+ const n=series.length;
+ let h='';
+ for(let ring=1;ring<=5;ring++){
+   const pts=[];
+   for(let i=0;i<n;i++){
+     const a=(-Math.PI/2)+(i*2*Math.PI/n),rr=R*ring/5;
+     pts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`);
+   }
+   h+=`<polygon points="${pts.join(' ')}" fill="none" stroke="#dbe3ef"/>`;
+ }
+ const dataPts=[];
+ for(let i=0;i<n;i++){
+   const a=(-Math.PI/2)+(i*2*Math.PI/n);
+   h+=`<line x1="${cx}" y1="${cy}" x2="${cx+Math.cos(a)*R}" y2="${cy+Math.sin(a)*R}" stroke="#e2e8f0"/>`;
+   const lr=R+24,cos=Math.cos(a),anchor=cos>0.22?'start':cos<-0.22?'end':'middle';
+   const item=series[i];
+   h+=`<text x="${cx+cos*lr}" y="${cy+Math.sin(a)*lr}" text-anchor="${anchor}" dominant-baseline="middle" font-size="${n>9?9:10.5}" fill="#64748b">${esc(item.label)}</text>`;
+   const rr=R*Math.max(0,Math.min(5,item.value))/5;
+   dataPts.push(`${cx+Math.cos(a)*rr},${cy+Math.sin(a)*rr}`);
+ }
+ h+=`<polygon points="${dataPts.join(' ')}" fill="rgba(30,58,95,.18)" stroke="#1e3a5f" stroke-width="2"/>`;
+ h+=`<text x="260" y="342" text-anchor="middle" font-size="10" fill="#64748b">Axes follow human-confirmed DMU Role rows for this customer; duplicate roles use max readiness</text>`;
+ svg.innerHTML=h;
+}
 function syncOpportunity(){let o=state.opportunities.find(x=>x.id===state.current);if(!o){o={};state.opportunities.push(o)}o.id=document.getElementById('oppId').value.trim()||state.current;o.customer=document.getElementById('customer').value;o.sales=document.getElementById('salesOwner').value;o.quoteNo=document.getElementById('quoteNo').value;o.offer=document.getElementById('offer').value;o.stage=document.getElementById('stage').value;o.prob=+document.getElementById('pipelineProb').value||0;o.competitors=document.getElementById('competitors').value;o.keyContact=document.getElementById('keyContact').value;o.keyContactRole=document.getElementById('keyContactRole').value;state.current=o.id}
 
-function sheetRows(ws){return XLSX.utils.sheet_to_json(ws,{defval:''})}
 async function syncLegacyExcel(){setDealsView('historical');return loadArchivedQuotations();}
 function legacyActivitiesForCurrent(){
  const o=state.opportunities.find(x=>x.id===state.current)||{}; const out=[];
@@ -666,10 +1025,21 @@ const PHASE5_REVIEW_SCOPE='api://2442eaf5-a5bb-4956-be62-c8ddfb9a89c4/Phase5.Rev
 const PHASE5_REVIEW_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase5ReviewProposal';
 const PHASE6_DMU_READ_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6DmuReadModel';
 const PHASE6_CONTEXT_REVIEW_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6ContextReviewModel';
+const PHASE6_LEAD_REVIEW_PROMOTE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6LeadReviewPromote';
+const PHASE6_LEAD_REVIEW_PROMOTION_CONFIRMATION='PHASE6-LEAD-REVIEW-PROMOTION-V1';
 const PHASE6_HUMAN_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay';
+const PHASE6_CUSTOMER_ARCHIVE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerArchive';
+const PHASE6_CUSTOMER_COVERAGE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerCoverage';
 const HEXA_LAST_USERNAME_KEY='hexa.lastUsername';
 const HEXA_LAST_HOME_ACCOUNT_ID_KEY='hexa.lastHomeAccountId';
+const HEXA_AUTH_BRIDGE_URI=location.origin+'/teams/dmu';
+let hexaReadInitializationPromise=null,hexaReadInitializationAccountId='';
+let hexaTeamsAuthInFlight=null;
 let hexaAccount=null,hexaSiteId=null,hexaListId=null;
+function hexaEmbeddedFrame(){try{return window.self!==window.top}catch(e){return true}}
+function hexaSilentRequest(request){return hexaEmbeddedFrame()?{...request,redirectUri:HEXA_AUTH_BRIDGE_URI}:request}
+function hexaPopupRequest(request){return {...request,redirectUri:HEXA_AUTH_BRIDGE_URI}}
+function hexaEmbeddedInteractionRequired(){const error=new Error('Teams sign-in required. Select Sign in with HEXA to continue.');error.code='hexa_interaction_required';return error}
 const HEXA_STRUCTURED={
   lists:{customers:'CustomerDatabase',contacts:'CWSalesKeyContact',records:'CWSalesRecords'},
   listIds:{},
@@ -683,11 +1053,45 @@ function phase5TerminalStatus(status){return /^(Rejected|Approved)$/i.test(Strin
 function phase5ReviewFeedback(message,details,isError=false){const c=document.querySelector('header .conn');if(!c)return;let el=document.getElementById('phase5ReviewFeedback');if(!el){el=document.createElement('div');el.id='phase5ReviewFeedback';el.setAttribute('role','status');el.style.cssText='width:100%;margin-top:6px;font-size:12px;line-height:1.45';c.appendChild(el)}el.style.color=isError?'#b91c1c':'#166534';el.textContent=message+(details&&details.status?` • Status: ${details.status} • Approver: ${details.approver||'—'} • DecisionAt: ${details.decisionAt||'—'} • DecisionNote: ${details.decisionNote||'—'}`:'')}
 function lockPhase5ReviewButton(button,details){button.disabled=true;button.textContent=(details.status||'Review')+' — review complete';phase5ReviewFeedback((details.status||'Review')+' successfully',details)}
 function addPhase5RejectTest(){const c=document.querySelector('header .conn');if(!c||document.getElementById('phase5RejectTest'))return;const b=document.createElement('button');b.id='phase5RejectTest';b.className='btn';b.textContent='Test Phase 5 Reject';const prior=JSON.parse(sessionStorage.getItem(PHASE5_REVIEW_UI_KEY)||'null');if(prior&&phase5TerminalStatus(prior.status)){lockPhase5ReviewButton(b,prior)}b.onclick=async()=>{if(b.disabled||!confirm('Submit the controlled Phase 5 reject test?'))return;b.disabled=true;phase5ReviewFeedback('Submitting review…');try{const payload=await submitPhase5Review(PHASE5_REVIEW_TEST_PROPOSAL,'reject','Controlled Phase 5 persistence validation - no deterministic OpportunityID match.');const details=phase5ReviewDetails(payload);sessionStorage.setItem(PHASE5_REVIEW_UI_KEY,JSON.stringify(details));if(phase5TerminalStatus(details.status)){lockPhase5ReviewButton(b,details)}else{b.textContent='Review submitted';phase5ReviewFeedback('Rejected successfully',details)}}catch(e){b.disabled=false;b.textContent='Test Phase 5 Reject';phase5ReviewFeedback('Phase 5 review failed: '+e.message,null,true)}};c.appendChild(b)}
-async function graphToken(){const a=hexaAccount||hexaMsal.getAllAccounts()[0];if(!a)throw new Error('Sign in with HEXA first');hexaAccount=a;try{return (await hexaMsal.acquireTokenSilent({account:a,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All']})).accessToken}catch(e){flashConn(false,'Finishing Microsoft sign-in…');await hexaMsal.acquireTokenRedirect({account:a,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All'],prompt:'select_account'});return new Promise(()=>{})}}
+async function graphToken(){
+ const account=hexaAccount||hexaMsal.getAllAccounts()[0];
+ if(!account)throw new Error('Sign in with HEXA first');
+ hexaAccount=account;
+ try{return (await hexaMsal.acquireTokenSilent(hexaSilentRequest({account,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All']}))).accessToken}
+ catch(error){
+  flashConn(false,'Finishing Microsoft sign-in…');
+  if(hexaEmbeddedFrame())throw hexaEmbeddedInteractionRequired();
+  await hexaMsal.acquireTokenRedirect({account,scopes:['https://graph.microsoft.com/Sites.ReadWrite.All'],prompt:'select_account'});
+  return new Promise(()=>{});
+ }
+}
 function rememberHexaAccount(account){if(!account)return null;try{if(account.username)localStorage.setItem(HEXA_LAST_USERNAME_KEY,String(account.username));if(account.homeAccountId)localStorage.setItem(HEXA_LAST_HOME_ACCOUNT_ID_KEY,String(account.homeAccountId))}catch(e){}return account}
 function cachedHexaAccount(){const accounts=hexaMsal.getAllAccounts();if(!accounts.length)return null;let username='',homeAccountId='';try{username=localStorage.getItem(HEXA_LAST_USERNAME_KEY)||'';homeAccountId=localStorage.getItem(HEXA_LAST_HOME_ACCOUNT_ID_KEY)||''}catch(e){}return rememberHexaAccount(accounts.find(a=>homeAccountId&&a.homeAccountId===homeAccountId)||accounts.find(a=>username&&String(a.username).toLowerCase()===username.toLowerCase())||accounts[0])}
-async function recoverHexaAccountSilently(){const cached=cachedHexaAccount();if(cached)return cached;let loginHint='';try{loginHint=localStorage.getItem(HEXA_LAST_USERNAME_KEY)||''}catch(e){}try{const request={scopes:[PHASE5_REVIEW_SCOPE],...(loginHint?{loginHint}:{})};const result=await hexaMsal.ssoSilent(request);return rememberHexaAccount(result&&result.account)}catch(e){console.warn('HEXA silent SSO unavailable',e);return null}}
-async function phase5ReviewToken(){const a=hexaAccount||cachedHexaAccount();if(!a)throw new Error('Sign in with HEXA first');hexaAccount=rememberHexaAccount(a);try{return (await hexaMsal.acquireTokenSilent({account:a,scopes:[PHASE5_REVIEW_SCOPE]})).accessToken}catch(firstError){try{const silent=await hexaMsal.ssoSilent({scopes:[PHASE5_REVIEW_SCOPE],loginHint:a.username||undefined});if(silent&&silent.account)hexaAccount=rememberHexaAccount(silent.account);if(silent&&silent.accessToken)return silent.accessToken}catch(silentError){console.warn('HEXA API silent token recovery unavailable',silentError)}await hexaMsal.acquireTokenRedirect({account:a,scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});return new Promise(()=>{})}}
+async function recoverHexaAccountSilently(){
+ const cached=cachedHexaAccount();if(cached)return cached;
+ let loginHint='';try{loginHint=localStorage.getItem(HEXA_LAST_USERNAME_KEY)||''}catch(e){}
+ try{
+  const request=hexaSilentRequest({scopes:[PHASE5_REVIEW_SCOPE],...(loginHint?{loginHint}:{})});
+  const result=await hexaMsal.ssoSilent(request);
+  return rememberHexaAccount(result&&result.account);
+ }catch(error){console.warn('HEXA silent SSO unavailable',error);return null}
+}
+async function phase5ReviewToken(){
+ const account=hexaAccount||cachedHexaAccount();
+ if(!account)throw new Error('Sign in with HEXA first');
+ hexaAccount=rememberHexaAccount(account);
+ try{return (await hexaMsal.acquireTokenSilent(hexaSilentRequest({account,scopes:[PHASE5_REVIEW_SCOPE]}))).accessToken}
+ catch(firstError){
+  try{
+   const silent=await hexaMsal.ssoSilent(hexaSilentRequest({scopes:[PHASE5_REVIEW_SCOPE],loginHint:account.username||undefined}));
+   if(silent&&silent.account)hexaAccount=rememberHexaAccount(silent.account);
+   if(silent&&silent.accessToken)return silent.accessToken;
+  }catch(silentError){console.warn('HEXA API silent token recovery unavailable',silentError)}
+  if(hexaEmbeddedFrame())throw hexaEmbeddedInteractionRequired();
+  await hexaMsal.acquireTokenRedirect({account,scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});
+  return new Promise(()=>{});
+ }
+}
 function valueOf(...values){return values.find(v=>v!==undefined&&v!==null&&v!=='')||''}
 function idOf(x){return String(x?.OpportunityID||x?.opportunityId||x?.OpportunityId||x?.id||x?.ID||'').trim()}
 function rowsOf(x){return Array.isArray(x)?x:(Array.isArray(x?.items)?x.items:(Array.isArray(x?.opportunities)?x.opportunities:(Array.isArray(x?.value)?x.value:[])))}
@@ -705,15 +1109,40 @@ function contextActivitiesFor(selectedOpportunityId){
  return rowsOf(story.Actions).map((x,i)=>({id:'CTX-'+selectedOpportunityId+'-'+i,oppId:selectedOpportunityId,date:String(valueOf(x.SourceOccurredAt,story.LatestOccurredAt,'')).slice(0,10),type:valueOf(x.Category,'AI Update'),note:valueOf(x.Action,'Sales update')}));
 }
 function activityFor(selectedOpportunityId){
+ if(selectedOpportunityId===state.current&&!currentIdentitySafe)return [];
  const d360=detailFor(selectedOpportunityId);
  const base=rowsOf(d360?.ActivityTimeline).map((x,i)=>({id:'AI-'+selectedOpportunityId+'-'+i,oppId:selectedOpportunityId,date:String(valueOf(x.Date,x.ActivityDate,x.occurredAt,x.date,'')).slice(0,10),type:valueOf(x.Type,x.ActivityType,x.type,'Activity'),note:valueOf(x.Note,x.ActivityNote,x.note,x.summary,'Sales update')}));
  return [...contextActivitiesFor(selectedOpportunityId),...base];
 }
-function clearLiveDealBinding(){['oppId','customer','salesOwner','quoteNo','offer','stage','pipelineProb','competitors','keyContact','keyContactRole','diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>setVal(id,''));['quotationHistory','contactPhone','salesActions'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=''});['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>{const el=document.getElementById(id);el.readOnly=false;el.classList.remove('goldenLock')});const ai=document.getElementById('latestAiPanel');ai.style.display='none';ai.innerHTML='';document.getElementById('salesClosePlan').innerHTML=''}
+function renderTeamOverlayStatus(message='',warn=false){const el=document.getElementById('teamOverlayStatus');if(!el)return;el.textContent=message;el.classList.toggle('warn',!!warn)}
+function normalizeCustomerIdentity(v){return String(v||'').toLowerCase().replace(/บริษัท|จำกัด|มหาชน|company|co\.?|ltd\.?|limited|thailand/gi,' ').replace(/[^a-z0-9ก-๙]+/gi,' ').replace(/\s+/g,' ').trim()}
+function canonicalCustomerIdentity(opportunityId,v){
+ const n=normalizeCustomerIdentity(v);if(!n)return '';
+ if(opportunityId==='OPP-2608-019'&&(/\bcmi\b/.test(n)||/\bcm\s+industry\b/.test(n)||/ซีเอ็ม/.test(n)))return 'canonical:cmi';
+ if(opportunityId==='OPP-2609-001'&&(/\byara\s+power\b/.test(n)||/ยาร์ร่า\s*พาวเวอร์/.test(n)))return 'canonical:yara-power';
+ if(opportunityId==='OPP-2609-002'&&(/\bdic\b/.test(n)||/ดีไอซี/.test(n)))return 'canonical:dic';
+ return n;
+}
+function customerIdentityCompatible(a,b,opportunityId=''){const x=canonicalCustomerIdentity(opportunityId,a),y=canonicalCustomerIdentity(opportunityId,b);if(!x||!y||x===y||x.includes(y)||y.includes(x))return true;const xs=new Set(x.split(' ').filter(t=>t.length>1)),ys=new Set(y.split(' ').filter(t=>t.length>1));const overlap=[...xs].filter(t=>ys.has(t)).length;return overlap>=Math.min(2,Math.max(1,Math.min(xs.size,ys.size)))}
+function validateDealBinding(selectedOpportunityId,o,live,d360,story){
+ const warning=document.getElementById('identityWarning');if(warning){warning.textContent='';warning.classList.remove('show')}
+ const sourceRows=[['deal',live],['deal360',d360],['story',story]].filter(([,x])=>x);
+ const idMismatch=sourceRows.filter(([,x])=>{const id=idOf(x);return id&&id!==selectedOpportunityId});
+ const names=[['card',o?.customer],['deal',valueOf(live?.Customer,live?.CustomerName)],['deal360',valueOf(d360?.Customer,d360?.CustomerName)],['story',valueOf(story?.Customer,story?.CustomerName)]].filter(([,v])=>String(v||'').trim());
+ const nameMismatch=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++)if(!customerIdentityCompatible(names[i][1],names[j][1],selectedOpportunityId))nameMismatch.push(names[i][0]+' vs '+names[j][0]);
+ if(idMismatch.length||nameMismatch.length){
+   if(warning){warning.textContent='Data reconciliation required — this deal has conflicting identity evidence. Customer/contact fields are restricted to the selected canonical deal until reviewed.';warning.classList.add('show')}
+   console.warn('DMU identity reconciliation required',{selectedOpportunityId,idMismatch:idMismatch.map(x=>x[0]),nameMismatch});
+   return false;
+ }
+ return true;
+}
+function clearLiveDealBinding(){['oppId','customer','salesOwner','quoteNo','offer','stage','pipelineProb','competitors','keyContact','keyContactRole','diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>setVal(id,''));['quotationHistory','contactPhone','salesActions'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=''});['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(id=>{const el=document.getElementById(id);el.readOnly=false;el.classList.remove('goldenLock')});const ai=document.getElementById('latestAiPanel');ai.style.display='none';ai.innerHTML='';document.getElementById('salesClosePlan').innerHTML='';const warning=document.getElementById('identityWarning');if(warning){warning.textContent='';warning.classList.remove('show')}}
 function missingFieldAction(label){return 'No source-grounded '+label+' yet — validate this in the next customer contact.'}
 function controlTowerValue(d360,key,label){const value=String(d360?.ControlTower?.[key]??'').trim();return value||missingFieldAction(label)}
 function renderSalesActions(d360){const box=document.getElementById('salesActions');if(!box)return;const actions=rowsOf(d360?.SalesActions);if(!actions.length){box.innerHTML='';return}box.innerHTML='<b>Sales actions</b>'+actions.map(a=>{const action=valueOf(a.Action,a.action,a.Title,a.title,a.NextAction,a.nextAction);const owner=valueOf(a.Owner,a.owner,a.AssignedTo,a.assignedTo);const due=valueOf(a.DueDate,a.dueDate,a.Due,a.due);return '<div style="margin-top:4px">'+esc(action)+(owner?' • '+esc(owner):'')+(due?' • '+esc(String(due).slice(0,10)):'')+'</div>'}).join('')}
-function applyAiControlTower(d360){const fields=[['diagnosis','CurrentDiagnosis','current diagnosis'],['nextAction','RecommendedNextAction','recommended next action'],['championTest','ChampionTest','champion test'],['decisionProcess','DecisionProcess','decision process'],['winTheme','WinTheme','win theme'],['missingInfo','CriticalMissingInfo','critical missing information']];fields.forEach(([id,key,label])=>setVal(id,controlTowerValue(d360,key,label)));renderSalesActions(d360)}
+function renderNextActionProvenance(d360){const box=document.getElementById('nextActionProvenance');if(!box)return;const p=d360?.NextActionProvenance;if(!p){box.textContent='';return}const source=[p.SourceType,p.SourceTitle].filter(Boolean).join(' • ');const stamp=p.SourceTimestamp?formatSourceDate(p.SourceTimestamp):'source time unavailable';const refs=Array.isArray(p.SourceReferences)?p.SourceReferences.length:(p.SourceReference?1:0);box.textContent=(p.HumanConfirmed?'Human-confirmed':'AI/evidence-derived')+(p.ReviewRequired?' • Review Required':'')+(source?' • '+source:'')+' • '+stamp+' • '+refs+' source reference(s)'}
+function applyAiControlTower(d360){const fields=[['diagnosis','CurrentDiagnosis','current diagnosis'],['championTest','ChampionTest','champion test'],['decisionProcess','DecisionProcess','decision process'],['winTheme','WinTheme','win theme'],['missingInfo','CriticalMissingInfo','critical missing information']];fields.forEach(([id,key,label])=>setVal(id,controlTowerValue(d360,key,label)));setVal('nextAction',String(d360?.NextAction||controlTowerValue(d360,'RecommendedNextAction','recommended next action')).trim());renderNextActionProvenance(d360);renderSalesActions(d360)}
 function goldenBaselineFor(d360){
  const g=d360?.ControlTower?.GoldenBaseline||d360?.GoldenBaseline||null;
  if(!g)return null;
@@ -742,7 +1171,7 @@ function renderContextLatestUpdate(opportunityId,append=false){
 }
 function applyControlTower(opportunityId,d360){
  if(opportunityId===CMI_OPPORTUNITY_ID){
-   applyGoldenBaseline(d360);renderLatestAiRevision(d360);renderContextLatestUpdate(opportunityId,true);renderSalesActions(d360);return
+   applyGoldenBaseline(d360);renderLatestAiRevision(d360);renderContextLatestUpdate(opportunityId,true);renderNextActionProvenance(d360);renderSalesActions(d360);return
  }
  loadStrategy(opportunityId);if(d360)applyAiControlTower(d360);renderContextLatestUpdate(opportunityId,false)
 }
@@ -761,27 +1190,175 @@ function findMilestone(source,spec){const aliases=[spec.label,...spec.aliases];i
 function formatSourceDate(value){const raw=String(value||'').trim();if(!raw)return 'TBC';const d=new Date(raw);if(Number.isNaN(d.getTime()))return raw;return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})}
 function milestoneDate(row){const start=valueOf(row.TargetDate,row.Date,row.ExpectedDate,row.DueDate),end=valueOf(row.WindowEndDate,row.EndDate);if(!start)return 'TBC';return end&&String(end)!==String(start)?formatSourceDate(start)+' – '+formatSourceDate(end):formatSourceDate(start)}
 function renderSalesClosePlan(d360){const source=timelineSource(d360),cards=CLOSE_MILESTONES.map(spec=>{const row=findMilestone(source,spec),date=milestoneDate(row),unknown=date==='TBC',status=String(valueOf(row.Status,row.State,unknown?'RequiredConfirmation':'Scheduled')),confirmation=String(valueOf(row.RequiredConfirmation,row.ConfirmationRequired,spec.confirm)),basis=row.Basis?'<div class="small">'+esc(row.Basis)+'</div>':'';return '<div class="closeMilestone"><div class="milestoneName">'+esc(spec.label)+'</div><div class="milestoneDate">'+esc(date)+'</div><div class="milestoneStatus">'+esc(status)+'</div>'+basis+(unknown?'<div class="requiredConfirmation"><strong>RequiredConfirmation:</strong> '+esc(confirmation)+'</div>':'')+'</div>'}).join('');document.getElementById('salesClosePlan').innerHTML='<h3>Sales Close Plan</h3><div class="closePlanGrid">'+cards+'</div>'}
-function applyProductionDeals(){const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id);state.opportunities=deals;if(!deals.length){state.current=null;renderOppSelector();renderDealCards();return}if(!deals.some(d=>d.id===state.current))state.current=deals[0].id;renderOppSelector();loadSelectedOpportunity()}
+function archivedCustomerIdSet(){return new Set([...customerArchiveMap.keys()])}
+function isArchivedCustomerId(customerId){return archivedCustomerIdSet().has(String(customerId||'').trim().toUpperCase())}
+function canonicalDealById(opportunityId){return phase6CanonicalDeals.find(o=>o.id===String(opportunityId||'').trim())||null}
+function isArchivedOpportunity(opportunityId){const deal=canonicalDealById(opportunityId);return !!(deal&&deal.customerId&&isArchivedCustomerId(deal.customerId))}
+function setCustomerArchivePayload(payload){
+ customerArchiveMap=new Map(rowsOf(payload?.archives).map(row=>[String(row?.customerId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
+}
+function renderArchivedCustomers(){
+ const box=document.getElementById('archivedCustomerList');if(!box)return;
+ const rows=[...customerArchiveMap.values()].slice().sort((a,b)=>String(a.customerName||'').localeCompare(String(b.customerName||''),undefined,{sensitivity:'base'}));
+ setText('archivedCustomerCount',customerArchiveAvailable?(rows.length+' archived'):'Archive unavailable');
+ if(!customerArchiveAvailable){box.innerHTML='<div class="small">Archive service unavailable. Active customer views remain unchanged and Archive/Recall controls are disabled.</div>';return}
+ if(!rows.length){box.innerHTML='<div class="small">No archived customers.</div>';return}
+ box.innerHTML=rows.map(row=>{
+   const when=row.archivedAt?formatSourceDate(row.archivedAt):'';
+   const meta=[row.customerId,when?'Archived '+when:''].filter(Boolean).join(' • ');
+   return '<div class="archiveRow"><div><div class="name">'+esc(row.customerName||row.customerId)+'</div><div class="meta">'+esc(meta)+'</div></div><button class="btn secondary" type="button" onclick="recallCustomer(\''+esc(row.customerId)+'\')">Recall Customer</button></div>';
+ }).join('');
+}
+async function customerArchiveRequest(method,body=null){
+ if(!customerArchiveAvailable)throw new Error(customerArchiveStatus||'Archive service unavailable');
+ const token=await phase5ReviewToken();
+ const r=await fetch(PHASE6_CUSTOMER_ARCHIVE_ENDPOINT,{method,headers:{Authorization:'Bearer '+token,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const payload=await r.json().catch(()=>null);
+ if(!r.ok)throw new Error(String(payload?.error||('Customer archive HTTP '+r.status)));
+ return payload;
+}
+async function archiveCustomer(customerId){
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
+ const id=String(customerId||'').trim().toUpperCase();
+ if(!/^CUS-\d{6}$/.test(id)){flashConn(false,'Archive unavailable: canonical CustomerID is missing.');return}
+ const deal=phase6CanonicalDeals.find(o=>o.customerId===id);
+ const label=deal?.customer||customerArchiveMap.get(id)?.customerName||id;
+ if(!confirm('Archive '+label+'?\n\nThis hides the customer and all linked deals from Active views. No customer or opportunity data will be deleted, and the customer can be recalled later.'))return;
+ try{
+   const payload=await customerArchiveRequest('POST',{action:'archive',customerId:id});
+   setCustomerArchivePayload(payload);
+   applyProductionDeals();
+   renderManagementStories();
+   renderArchivedCustomers();
+   flashConn(true,'Archived • '+label+' can be recalled later');
+ }catch(e){flashConn(false,'Archive failed: '+authErrorDetail(e));console.error('Customer archive failed',e)}
+}
+async function recallCustomer(customerId){
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
+ const id=String(customerId||'').trim().toUpperCase();
+ if(!/^CUS-\d{6}$/.test(id))return;
+ try{
+   const payload=await customerArchiveRequest('POST',{action:'recall',customerId:id});
+   setCustomerArchivePayload(payload);
+   applyProductionDeals();
+   renderManagementStories();
+   renderArchivedCustomers();
+   flashConn(true,'Customer recalled to Active views');
+ }catch(e){flashConn(false,'Recall failed: '+authErrorDetail(e));console.error('Customer recall failed',e)}
+}
+async function archiveCurrentCustomer(){
+ const deal=state.opportunities.find(o=>o.id===state.current);
+ if(!deal){flashConn(false,'Select an active customer first.');return}
+ await archiveCustomer(deal.customerId);
+}
+function refreshArchiveCurrentCustomerButton(){
+ const btn=document.getElementById('archiveCurrentCustomerButton');if(!btn)return;
+ const deal=state.opportunities.find(o=>o.id===state.current);
+ const hasId=!!(deal&&/^CUS-\d{6}$/.test(String(deal.customerId||'').trim().toUpperCase()));
+ const ready=customerArchiveAvailable&&hasId;
+ btn.disabled=!ready;
+ btn.title=!customerArchiveAvailable?(customerArchiveStatus||'Archive service unavailable.'):ready?'Archive this customer from Active views. Recall remains available.':'Archive requires canonical CustomerID.';
+}
+function applyProductionDeals(){
+ const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customerId:String(valueOf(d.CustomerID,d.customerId,d.CustomerId)).trim().toUpperCase(),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id);
+ phase6CanonicalDeals=deals;
+ const active=deals.filter(d=>!d.customerId||!isArchivedCustomerId(d.customerId));
+ state.opportunities=active;
+ if(!active.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
+ if(!active.some(d=>d.id===state.current))state.current=active[0].id;
+ renderOppSelector();loadSelectedOpportunity();renderArchivedCustomers();refreshArchiveCurrentCustomerButton()
+}
 async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  const token=await phase5ReviewToken();
  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
- const [dmuResponse,contextResponse]=await Promise.all([
+ const [dmuResult,contextResult,archiveResult,coverageResult]=await Promise.allSettled([
    fetch(PHASE6_DMU_READ_ENDPOINT,{headers}),
-   fetch(PHASE6_CONTEXT_REVIEW_ENDPOINT,{headers})
+   fetch(PHASE6_CONTEXT_REVIEW_ENDPOINT,{headers}),
+   fetch(PHASE6_CUSTOMER_ARCHIVE_ENDPOINT,{headers}),
+   fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers})
  ]);
+ if(dmuResult.status!=='fulfilled'){
+   const detail=authErrorDetail(dmuResult.reason);
+   throw new Error('DMU read fetch failed: '+detail);
+ }
+ const dmuResponse=dmuResult.value;
  const dmuPayload=await dmuResponse.json().catch(()=>null);
- const contextPayload=await contextResponse.json().catch(()=>null);
  if(!dmuResponse.ok)throw new Error('DMU read HTTP '+dmuResponse.status);
  phase6ReadModel=dmuPayload?.readModel||dmuPayload;
- phase6ContextReview=contextResponse.ok?contextPayload:null;
- if(!contextResponse.ok)console.warn('Context review unavailable: HTTP '+contextResponse.status);
+
+ let contextAvailable=false;
+ if(contextResult.status==='fulfilled'){
+   const contextResponse=contextResult.value;
+   const contextPayload=await contextResponse.json().catch(()=>null);
+   contextAvailable=contextResponse.ok;
+   phase6ContextReview=contextAvailable?contextPayload:null;
+   if(!contextAvailable)console.warn('Context review unavailable: HTTP '+contextResponse.status);
+ }else{
+   phase6ContextReview=null;
+   console.warn('Context review fetch unavailable',contextResult.reason);
+ }
+
+ customerArchiveAvailable=false;
+ customerArchiveMap=new Map();
+ if(archiveResult.status==='fulfilled'){
+   const archiveResponse=archiveResult.value;
+   const archivePayload=await archiveResponse.json().catch(()=>null);
+   if(archiveResponse.ok){
+     customerArchiveAvailable=true;
+     customerArchiveStatus='Archive service connected';
+     setCustomerArchivePayload(archivePayload);
+   }else{
+     customerArchiveStatus=String(archivePayload?.error||('Archive service unavailable (HTTP '+archiveResponse.status+').'));
+     console.warn(customerArchiveStatus);
+   }
+ }else{
+   customerArchiveStatus='Archive service unavailable; active deals remain usable.';
+   console.warn('Archive service fetch unavailable',archiveResult.reason);
+ }
+
+ customerCoverageAvailable=false;
+ phase6CustomerCoverage=null;
+ if(coverageResult.status==='fulfilled'){
+   const coverageResponse=coverageResult.value;
+   const coveragePayload=await coverageResponse.json().catch(()=>null);
+   if(coverageResponse.ok){
+     customerCoverageAvailable=true;
+     customerCoverageStatus='Commercial customer coverage ready';
+     phase6CustomerCoverage=coveragePayload;
+   }else{
+     customerCoverageStatus=String(coveragePayload?.error||('Customer coverage unavailable (HTTP '+coverageResponse.status+').'));
+     console.warn(customerCoverageStatus);
+   }
+ }else{
+   customerCoverageStatus='Customer coverage unavailable; Active DMU Deals remain usable.';
+   console.warn('Customer coverage fetch unavailable',coverageResult.reason);
+ }
+
  setPhase6LiveReadOnly(true);
  applyProductionDeals();
- if(state.current&&!skipHumanOverlay)await loadHumanOverlay(state.current);
+ let overlayAvailable=true;
+ if(state.current&&!skipHumanOverlay){
+   try{await loadHumanOverlay(state.current)}
+   catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
+ }
  if(state.current)loadSelectedOpportunity();
  renderManagementStories();
  renderSourceFreshness(detailFor(state.current));
- flashConn(true,contextResponse.ok?'Connected • Sales data + team updates':'Connected • Sales data loaded; AI review unavailable');
+ const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
+ const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
+ flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus);
+ startDmuAutoRefresh();
+}
+function loadAuthenticatedAiOnce(options={}){
+ const accountId=String(hexaAccount?.homeAccountId||hexaAccount?.username||'');
+ if(!accountId)return Promise.reject(new Error('Sign in with HEXA first'));
+ if(hexaReadInitializationPromise&&hexaReadInitializationAccountId===accountId)return hexaReadInitializationPromise;
+ hexaReadInitializationAccountId=accountId;
+ hexaReadInitializationPromise=loadAuthenticatedAi(options).catch(error=>{
+  if(hexaReadInitializationAccountId===accountId)hexaReadInitializationPromise=null;
+  throw error;
+ });
+ return hexaReadInitializationPromise;
 }
 async function submitPhase5Review(proposalId,decision,decisionNote){const token=await phase5ReviewToken();const r=await fetch(PHASE5_REVIEW_ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({proposalId,decision:{action:decision,comment:decisionNote}})});if(!r.ok){const e=await r.json().catch(()=>null);throw new Error(e&&e.detail||'Phase 5 review '+r.status)}return r.json()}
 async function humanOverlayRequest(method,body=null,opportunityId=''){
@@ -795,14 +1372,16 @@ async function humanOverlayRequest(method,body=null,opportunityId=''){
  return payload;
 }
 async function loadHumanOverlay(opportunityId){
- if(!opportunityId||!hexaAccount)return;
+ if(!opportunityId||!hexaAccount)return false;
+ const epoch=++humanOverlayLoadEpoch;
  const payload=await humanOverlayRequest('GET',null,opportunityId);
+ if(epoch!==humanOverlayLoadEpoch||state.current!==opportunityId)return false;
  const dmu=rowsOf(payload?.dmu).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
  const activities=rowsOf(payload?.activities).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
  state.dmu=state.dmu.filter(x=>x.oppId!==opportunityId||x.humanConfirmed!==true).concat(dmu);
  state.activities=state.activities.filter(x=>x.oppId!==opportunityId||x.humanConfirmed!==true).concat(activities);
  state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==opportunityId);
- setLocal();
+ setLocal();renderTeamOverlayStatus('Team-confirmed updates loaded.',false);return true;
 }
 async function persistHumanOverlayCommand(command){
  return humanOverlayRequest('POST',command);
@@ -856,7 +1435,58 @@ async function hydrateStructuredReadOnly(){
   HEXA_STRUCTURED.status={loaded:true,records:records.length,customers:customers.length,contacts:contacts.length};
 }
 function authErrorDetail(e){return String(e?.errorCode||e?.code||e?.subError||e?.message||'unknown error').slice(0,220)}
-async function connectHEXA(){try{const recovered=await recoverHexaAccountSilently();if(recovered){hexaAccount=recovered;const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected';await loadAuthenticatedAi();return}flashConn(false,'Opening Microsoft sign-in…');await hexaMsal.loginRedirect({scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});return new Promise(()=>{})}catch(e){const detail=authErrorDetail(e);flashConn(false,'Sign-in failed: '+detail);console.error('HEXA sign-in failed',e)}}
+async function connectHEXA(){
+ if(hexaEmbeddedFrame()){
+  if(hexaTeamsAuthInFlight)return hexaTeamsAuthInFlight;
+  const button=document.getElementById('hexaSignIn');
+  hexaTeamsAuthInFlight=(async()=>{
+   if(button)button.disabled=true;
+   try{
+    flashConn(false,'Opening secure Microsoft sign-in…');
+    const account=hexaAccount||cachedHexaAccount();
+    const request=hexaPopupRequest({scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account',...(account?{account}:{})});
+    const result=account?await hexaMsal.acquireTokenPopup(request):await hexaMsal.loginPopup(request);
+    if(!result?.accessToken||!result?.account)throw new Error('Microsoft sign-in completed without a valid account and token');
+    hexaAccount=rememberHexaAccount(result.account);
+    if(button)button.textContent='HEXA connected';
+    const pending=humanSavePending();
+   await loadAuthenticatedAiOnce({skipHumanOverlay:pending});
+   if(pending)await saveHumanUpdate();
+    return true;
+   }catch(error){
+    const detail=authErrorDetail(error);
+    if(button)button.textContent='Sign in with HEXA';
+    flashConn(false,'Sign-in failed: '+detail);
+    console.error('HEXA sign-in failed',error);
+    return false;
+   }finally{if(button)button.disabled=false}
+  })();
+  try{return await hexaTeamsAuthInFlight}
+  finally{hexaTeamsAuthInFlight=null}
+ }
+ try{
+  const recovered=await recoverHexaAccountSilently();
+  if(recovered){
+   hexaAccount=recovered;
+   const button=document.getElementById('hexaSignIn');
+   if(button)button.textContent='HEXA connected';
+   const pending=humanSavePending();
+   await loadAuthenticatedAiOnce({skipHumanOverlay:pending});
+   if(pending)await saveHumanUpdate();
+   return true;
+  }
+  flashConn(false,'Opening Microsoft sign-in…');
+  await hexaMsal.loginRedirect({scopes:[PHASE5_REVIEW_SCOPE],prompt:'select_account'});
+  return new Promise(()=>{});
+ }catch(error){
+  const detail=authErrorDetail(error);
+  const button=document.getElementById('hexaSignIn');
+  if(button)button.textContent='Sign in with HEXA';
+  flashConn(false,'Sign-in failed: '+detail);
+  console.error('HEXA sign-in failed',error);
+  return false;
+ }
+}
 async function hydrateFromSharePoint(){try{const item=await getDmuItem();if(item&&item.fields.DMUAppData){const remote=JSON.parse(item.fields.DMUAppData);if(remote&&remote.opportunities)state=remote}await hydrateStructuredReadOnly();renderOppSelector();loadSelectedOpportunity();renderDealCards();flashConn(true,'Connected • V4 + structured read-only');const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected'}catch(e){flashConn(false,'SharePoint connection failed');alert(e.message)}}
 async function saveToSharePoint(){await graphIds();const payload=JSON.stringify(state);const item=await getDmuItem();if(item)await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items/'+item.id+'/fields',{method:'PATCH',body:JSON.stringify({DMUAppData:payload})});else await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items',{method:'POST',body:JSON.stringify({fields:{Title:HEXA_GRAPH.title,DMUAppData:payload}})});flashConn(true,'Saved to SharePoint')}
 async function saveAll(){if(phase6LiveReadOnly){flashConn(true,'Governed read-only • no manual CRM write');return;}syncOpportunity();syncDMU();saveStrategy();setLocal();renderOppSelector();calc();if(!hexaAccount){alert('Please select Sign in with HEXA before saving to SharePoint');return}try{await saveToSharePoint()}catch(e){flashConn(false,'Save failed');alert(e.message)}}
@@ -896,27 +1526,27 @@ async function saveHumanUpdate(){
   }
 }
 addSignIn();
-// Teams Desktop blocks authentication popups. Redirect authentication opens in the
-// browser tab Teams provides, then returns here with the user token.
+// Embedded Teams frames use silent auth plus a user-initiated MSAL popup and the dedicated Auth Bridge.
+// Top-level standalone browser sessions retain MSAL redirect completion.
 (async function finishHEXAAuthentication(){
   try{
-    const result=await hexaMsal.handleRedirectPromise();
+    const result=hexaEmbeddedFrame()?null:await hexaMsal.handleRedirectPromise();
     hexaAccount=rememberHexaAccount((result&&result.account)||cachedHexaAccount())||await recoverHexaAccountSilently();
     if(hexaAccount){
       rememberHexaAccount(hexaAccount);
-      const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected';
+      const button=document.getElementById('hexaSignIn');if(button)button.textContent='HEXA connected';
       const pending=humanSavePending();
-      await loadAuthenticatedAi({skipHumanOverlay:pending});
-      if(pending){
-        await saveHumanUpdate();
-      }
+      await loadAuthenticatedAiOnce({skipHumanOverlay:pending});
+      if(pending)await saveHumanUpdate();
     }else{
       flashConn(false,'Sign in with HEXA');
     }
-  }catch(e){
-    const detail=authErrorDetail(e);
+  }catch(error){
+    const detail=authErrorDetail(error);
+    const button=document.getElementById('hexaSignIn');
+    if(button)button.textContent='Sign in with HEXA';
     flashConn(false,'Sign-in failed: '+detail);
-    console.error('HEXA authentication completion failed',e);
+    console.error('HEXA authentication completion failed',error);
   }
 })();
 
@@ -961,13 +1591,32 @@ function refreshDealOwnerFilter(){
  sel.disabled=owners.length===0;
  if(unavailable)unavailable.style.display=owners.length===0?'block':'none';
 }
-function decisionGapRoles(opportunityId){
- const rows=scoringRowsForOpportunity(opportunityId);
- const critical=['Procurement','Decision Maker','Economic Buyer','Champion'];
- return critical.filter(role=>!rows.some(r=>r.role===role&&!r.aiObserved&&String(r.person||'').trim()&&/^(Confirmed|Known)$/i.test(String(r.status||''))));
+function decisionAttentionReasons(opportunityId){
+ const metrics=dynamicDmuMetrics(opportunityId);
+ if(!metrics.roleCount)return ['No human-confirmed DMU roles'];
+ const reasons=[];
+ if(metrics.roleCount<3)reasons.push('Only '+metrics.roleCount+' confirmed role'+(metrics.roleCount===1?'':'s'));
+ metrics.series.filter(item=>Number(item.value)<3).forEach(item=>reasons.push('Strengthen '+item.label+' ('+Number(item.value).toFixed(1)+'/5)'));
+ if(!reasons.length&&metrics.coverage<60)reasons.push('DMU readiness '+metrics.coverage+'%');
+ return reasons;
 }
 function decisionCoverageCount(opportunityId){
- return 4-decisionGapRoles(opportunityId).length;
+ return dynamicDmuMetrics(opportunityId).coverage;
+}
+function decisionCoverageSummary(opportunityId){
+ const metrics=dynamicDmuMetrics(opportunityId);
+ return metrics.coverage+'% • '+metrics.roleCount+' role'+(metrics.roleCount===1?'':'s');
+}
+function dealNeedsDmuAttention(opportunityId){
+ return !dynamicDmuMetrics(opportunityId).ready;
+}
+function dealMatchesDynamicBucket(o,bucket){
+ const m=dynamicDmuMetrics(o.id);
+ if(bucket==='no-roles')return m.roleCount===0;
+ if(bucket==='thin')return m.roleCount>0&&m.roleCount<3;
+ if(bucket==='low')return m.roleCount>=3&&m.coverage<60;
+ if(bucket==='ready')return m.ready;
+ return true;
 }
 function dealMatchesFilters(o){
  const query=String(window.hexaCustomerQuery||'').trim().toLowerCase();
@@ -975,12 +1624,12 @@ function dealMatchesFilters(o){
  const owner=String(window.hexaDealOwnerFilter||'').trim();
  const customer=String(o?.customer||'').trim().toLowerCase();
  const needsDecisionTeam=window.hexaDecisionGapOnly===true;
- const missingRole=String(window.hexaDecisionRoleFilter||'').trim();
+ const readinessBucket=String(window.hexaDecisionRoleFilter||'').trim();
  return (!query||customer.includes(query))
    &&(!stage||String(o?.stage||'').trim()===stage)
    &&(!owner||String(o?.sales||'').trim()===owner)
-   &&(!needsDecisionTeam||decisionCoverageCount(o.id)<4)
-   &&(!missingRole||decisionGapRoles(o.id).includes(missingRole));
+   &&(!needsDecisionTeam||dealNeedsDmuAttention(o.id))
+   &&(!readinessBucket||dealMatchesDynamicBucket(o,readinessBucket));
 }
 function sortDealsForPortfolio(deals){
  const mode=String(window.hexaDealSort||'customer-asc');
@@ -995,53 +1644,135 @@ function sortDealsForPortfolio(deals){
 }
 function refreshPortfolioSummary(filteredDeals){
  const total=state.opportunities.length;
- const decisionGap=state.opportunities.filter(o=>decisionCoverageCount(o.id)<4).length;
- const roleGapCount=role=>state.opportunities.filter(o=>decisionGapRoles(o.id).includes(role)).length;
+ const attention=state.opportunities.filter(o=>dealNeedsDmuAttention(o.id)).length;
+ const bucketCount=b=>state.opportunities.filter(o=>dealMatchesDynamicBucket(o,b)).length;
  setText('portfolioTotalDeals',total);
  setText('portfolioVisibleDeals',filteredDeals.length);
- setText('portfolioDecisionGap',decisionGap);
- setText('portfolioDecisionComplete',Math.max(0,total-decisionGap));
- setText('gapCountProcurement',roleGapCount('Procurement'));
- setText('gapCountDecisionMaker',roleGapCount('Decision Maker'));
- setText('gapCountEconomicBuyer',roleGapCount('Economic Buyer'));
- setText('gapCountChampion',roleGapCount('Champion'));
+ setText('portfolioDecisionGap',attention);
+ setText('portfolioDecisionComplete',Math.max(0,total-attention));
+ const coverage=phase6CustomerCoverage?.customerCoverage||phase6CustomerCoverage||{};
+ setText('portfolioQuotedCustomers',Number(coverage?.summary?.quotedCustomerCount||0));
+ setText('portfolioDirectoryCustomers',Number(coverage?.summary?.directoryCustomerCount||0));
+ setText('gapCountNoRoles',bucketCount('no-roles'));
+ setText('gapCountThin',bucketCount('thin'));
+ setText('gapCountLow',bucketCount('low'));
+ setText('gapCountReady',bucketCount('ready'));
  document.querySelectorAll('#decisionGapBreakdown .decisionGapChip').forEach(btn=>btn.classList.toggle('active',btn.dataset.role===String(window.hexaDecisionRoleFilter||'')));
 }
 function renderDecisionTeamActionQueue(filteredDeals){
  const box=document.getElementById('decisionActionQueueList');if(!box)return;
  const candidates=[...filteredDeals]
-   .filter(o=>decisionCoverageCount(o.id)<4)
+   .filter(o=>dealNeedsDmuAttention(o.id))
    .sort((a,b)=>decisionCoverageCount(a.id)-decisionCoverageCount(b.id)||String(a.customer||'').localeCompare(String(b.customer||''),undefined,{sensitivity:'base'}));
  const shown=candidates.slice(0,5);
- setText('decisionActionQueueCount',candidates.length+' deals need decision-team action');
- if(!shown.length){box.innerHTML='<div class="small">No decision-team gaps in the current filtered view.</div>';return}
+ setText('decisionActionQueueCount',candidates.length+' deals need DMU attention');
+ if(!shown.length){box.innerHTML='<div class="small">No dynamic DMU readiness gaps in the current filtered view.</div>';return}
  box.innerHTML=shown.map(o=>{
-   const missing=decisionGapRoles(o.id);
+   const reasons=decisionAttentionReasons(o.id);
    const d360=detailFor(o.id);
    const next=valueOf(d360?.ControlTower?.RecommendedNextAction,contextStoryFor(o.id)?.RecommendedNextAction,'Review and confirm next action.');
    return '<div class="decisionActionItem">'+
      '<div><div class="customer">'+esc(o.customer)+'</div><div class="small">'+esc(o.stage||'')+'</div></div>'+
-     '<div class="gap">'+esc(decisionCoverageSummary(o.id))+' • Missing '+esc(missing.join(', '))+'</div>'+
+     '<div class="gap">'+esc(decisionCoverageSummary(o.id))+' • '+esc(reasons.join(' • '))+'</div>'+
      '<div class="action"><b>Next:</b> '+esc(String(next))+'</div>'+
      '<div><button class="btn secondary" type="button" onclick="openDealCard(\''+esc(o.id)+'\')">Open Customer</button></div>'+
    '</div>';
  }).join('');
 }
+function renderDecisionCoverageMatrix(sortedDeals){
+ const body=document.getElementById('decisionCoverageMatrixBody');if(!body)return;
+ const rows=Array.isArray(sortedDeals)?sortedDeals:[];
+ const shown=rows.slice(0,10);
+ setText('decisionCoverageMatrixCount',rows.length+' visible deals');
+ if(!shown.length){body.innerHTML='<tr><td colspan="6" class="small">No customers match the current filters.</td></tr>';return}
+ body.innerHTML=shown.map(o=>{
+   const m=dynamicDmuMetrics(o.id);
+   const reasons=decisionAttentionReasons(o.id);
+   const stateLabel=m.ready?'Ready':'Needs attention';
+   return '<tr data-opp="'+esc(o.id)+'" onclick="openDealCard(\''+esc(o.id)+'\')"><td><strong>'+esc(o.customer)+'</strong></td><td>'+esc(o.stage||'')+'</td><td>'+m.roleCount+'</td><td>'+m.coverage+'%</td><td>'+m.confidence+'%</td><td><span class="coverageState '+(m.ready?'covered':'missing')+'">'+esc(stateLabel)+(reasons.length?' • '+esc(reasons[0]):'')+'</span></td></tr>';
+ }).join('');
+}
+function formatCoverageThb(value){const n=Number(value||0);return Number.isFinite(n)?'THB '+n.toLocaleString('en-US',{maximumFractionDigits:0}):'THB —'}
+function coverageModel(){return phase6CustomerCoverage?.customerCoverage||phase6CustomerCoverage||{}}
+function renderCommercialCustomerCoverage(){
+ const coverage=coverageModel();
+ const quoted=rowsOf(coverage?.quotedCustomers);
+ const directory=rowsOf(coverage?.directoryCustomers);
+ const activeIds=new Set(state.opportunities.map(o=>String(o.id||'').trim()).filter(Boolean));
+ const query=String(window.hexaCustomerQuery||'').trim().toLowerCase();
+ const unlinked=quoted.filter(item=>{
+   const opp=String(item?.CanonicalOpportunityID||'').trim();
+   const text=[item?.Customer,item?.CustomerID,item?.LatestQuotationNo,item?.LatestQuotationTitle].map(x=>String(x||'').toLowerCase()).join(' ');
+   return (!opp||!activeIds.has(opp))&&(!query||text.includes(query));
+ });
+ const qCount=document.getElementById('quotedCoverageCount');
+ if(qCount)qCount.textContent=customerCoverageAvailable
+   ? unlinked.length+' need review • '+quoted.length+' quoted customers'
+   : customerCoverageStatus;
+ const qBox=document.getElementById('quotedCoverageCards');
+ if(qBox){
+   if(!customerCoverageAvailable){
+     qBox.innerHTML='<div class="small">Customer coverage source unavailable; Active DMU Deals remain usable.</div>';
+   }else if(!unlinked.length){
+     qBox.innerHTML='<div class="small">No quoted-only customers match the current search.</div>';
+   }else{
+     qBox.innerHTML=unlinked.slice(0,60).map(item=>{
+       const linked=String(item?.CanonicalOpportunityID||'').trim();
+       const status=linked?'Linked outside active view':'Review Required • Needs Opportunity Link';
+       const quoteMeta=[item?.QuotationCount+' quote'+(Number(item?.QuotationCount)===1?'':'s'),item?.LatestQuotationNo,item?.LatestQuotationDate,item?.LatestQuoteStatus].filter(Boolean).join(' • ');
+       return '<div class="coverageCard">'+
+         '<div class="name">'+esc(item?.Customer||'Customer')+'</div>'+
+         '<div class="meta">'+esc([item?.CustomerID,item?.ProductCategories?.join?.(' / ')].filter(Boolean).join(' • '))+'</div>'+
+         '<div class="amount">'+esc(formatCoverageThb(item?.TotalNetAmountTHB))+'</div>'+
+         '<div class="meta">'+esc(quoteMeta)+'</div>'+
+         '<div class="meta">'+esc(item?.LatestQuotationTitle||'')+'</div>'+
+         '<span class="review '+(linked?'linked':'')+'">'+esc(status)+'</span>'+
+       '</div>';
+     }).join('');
+   }
+ }
+
+ const dirCount=document.getElementById('customerDirectoryCount');
+ if(dirCount)dirCount.textContent=customerCoverageAvailable
+   ? Number(coverage?.summary?.directoryCustomerCount||directory.length).toLocaleString('en-US')+' customers • '+Number(coverage?.summary?.activeDirectoryCustomerCount||0).toLocaleString('en-US')+' active'
+   : customerCoverageStatus;
+ const dBox=document.getElementById('directoryCustomerResults');
+ if(!dBox)return;
+ if(!customerCoverageAvailable){
+   dBox.innerHTML='<div class="small">Customer Directory source unavailable.</div>';return;
+ }
+ const input=document.getElementById('directoryCustomerSearch');
+ const dq=String(input?.value||'').trim().toLowerCase();
+ if(dq.length<2){
+   dBox.innerHTML='<div class="small">Type at least 2 characters to search '+directory.length.toLocaleString('en-US')+' customers.</div>';return;
+ }
+ const matches=directory.filter(item=>[item?.Customer,item?.CustomerID,item?.Province,item?.Zone,item?.Email,item?.Phone].map(x=>String(x||'').toLowerCase()).join(' ').includes(dq)).slice(0,50);
+ dBox.innerHTML=matches.length?matches.map(item=>
+   '<div class="directoryRow"><div><div class="name">'+esc(item?.Customer||'Customer')+'</div>'+
+   '<div class="meta">'+esc([item?.CustomerID,item?.Grade,item?.Status,item?.Province,item?.Zone].filter(Boolean).join(' • '))+'</div>'+
+   '<div class="meta">'+esc([item?.Phone,item?.Email].filter(Boolean).join(' • '))+'</div></div>'+
+   '<div><span class="badge '+(item?.HasHistoricalQuotation?'yellow':'gray')+'">'+(item?.HasHistoricalQuotation?'Quoted':'Directory')+'</span></div></div>'
+ ).join(''):'<div class="small">No customer matches this search.</div>';
+}
 function renderDealCards(){
  const box=document.getElementById('dealCards');if(!box)return;
+ renderCommercialCustomerCoverage();
+ refreshManagementIntelligence();
  refreshDealStageFilter();
  refreshDealOwnerFilter();
  const gap=document.getElementById('decisionGapFilter');if(gap)gap.checked=window.hexaDecisionGapOnly===true;
- if(!state.opportunities.length){setText('dealVisibleCount','0 of 0 customers');refreshPortfolioSummary([]);renderDecisionTeamActionQueue([]);box.innerHTML='<div class="small">Sign in with HEXA to load customers and active deals.</div>';return}
+ if(!state.opportunities.length){setText('dealVisibleCount','0 of 0 customers');refreshPortfolioSummary([]);renderDecisionTeamActionQueue([]);renderDecisionCoverageMatrix([]);box.innerHTML='<div class="small">Sign in with HEXA to load customers and active deals.</div>';return}
  const filteredDeals=state.opportunities.filter(dealMatchesFilters);
  const sortedDeals=sortDealsForPortfolio(filteredDeals);
  refreshPortfolioSummary(filteredDeals);
  renderDecisionTeamActionQueue(filteredDeals);
+ renderDecisionCoverageMatrix(sortedDeals);
  const sort=document.getElementById('dealSort');if(sort)sort.value=String(window.hexaDealSort||'customer-asc');
  setText('dealVisibleCount',filteredDeals.length+' of '+state.opportunities.length+' customers');
  if(!sortedDeals.length){box.innerHTML='<div class="small">No customers match the current search/filter.</div>';return}
  box.innerHTML=sortedDeals.map(o=>{
-   const critical=decisionGapRoles(o.id);
+   const attentionReasons=decisionAttentionReasons(o.id);
+   const dmuMetrics=dynamicDmuMetrics(o.id);
    const hasProb=o.prob!==null&&o.prob!==undefined&&o.prob!==''&&Number.isFinite(Number(o.prob));
    const cls=hasProb&&Number(o.prob)>=70?'yellow':hasProb&&Number(o.prob)>=50?'blue':'gray';
    const d360=detailFor(o.id);
@@ -1051,11 +1782,11 @@ function renderDealCards(){
      <div class="name">${esc(o.customer)}</div>
      <div class="meta">${esc(o.offer||'Sales opportunity')}</div>
      <div style="margin-top:7px"><span class="badge ${cls}">${esc(o.stage||'')} • ${hasProb?Number(o.prob)+'%':'—'}</span></div>
-     <div class="missingPills">${critical.length?critical.map(x=>`<span>Missing: ${esc(x)}</span>`).join(''):'<span class="complete">Decision Team Complete</span>'}</div>
+     <div class="missingPills">${attentionReasons.length?attentionReasons.slice(0,3).map(x=>`<span>${esc(x)}</span>`).join(''):'<span class="complete">DMU Ready</span>'}</div>
      <div class="dealCardAction">
-       <div class="coverage"><b>Decision Coverage:</b> ${esc(coverage)}</div>
+       <div class="coverage"><b>DMU Readiness:</b> ${esc(coverage)} • Confidence ${dmuMetrics.confidence}%</div>
        <div class="next"><b>Next:</b> ${esc(String(next))}</div>
-       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button></div>
+       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button> <button class="btn secondary" type="button" ${customerArchiveAvailable&&o.customerId?'':'disabled'} title="${customerArchiveAvailable?(o.customerId?'Archive this customer from Active views.':'Archive requires canonical CustomerID.'):(customerArchiveStatus||'Archive service unavailable.')}" onclick="event.stopPropagation();archiveCustomer('${esc(o.customerId||'')}')">Archive Customer</button></div>
      </div>
    </div>`;
  }).join('');
@@ -1232,8 +1963,15 @@ function clearHistoricalQuotationFilters(){
 }
 async function openDealCard(id){
  state.current=id;const sel=document.getElementById('oppSelect');if(sel)sel.value=id;
- if(hexaAccount)await loadHumanOverlay(id);
  loadSelectedOpportunity();navTo('viewDMU');renderDealCards();
+ if(!hexaAccount)return;
+ try{
+   const applied=await loadHumanOverlay(id);
+   if(applied&&state.current===id)loadSelectedOpportunity();
+ }catch(e){
+   renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);
+   console.warn('Human overlay load failed while opening deal',e);
+ }
 }
 function scrollToId(id){const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'})}
 function goQuickActivity(){navTo('viewActivity'); setTimeout(()=>scrollToId('actNote'),250)}
@@ -1243,5 +1981,5 @@ function navTo(id,btn){
 }
 
 </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3ef36fdd9a1b754',t:'MTc5MDA1ODE0Mg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
