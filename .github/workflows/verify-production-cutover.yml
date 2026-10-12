@@ -8,7 +8,7 @@ permissions:
 
 env:
   EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
-  EXPECTED_DMU_SHA256: 098176577dc665259a59fccd31357afff3e5bdb3c522b4b51c1d99cb0a562720
+  EXPECTED_DMU_SHA256: df05b719943828cbae6766e16319329c37aa82871b13706d3c089c23a5c977d4
 
 jobs:
   verify:
@@ -64,6 +64,10 @@ jobs:
           ! grep -q '/api/website-enquiry' verify/script.js
           grep -q "location.origin+'/teams/dmu'" verify/dmu-slash.html
           grep -q 'phase6DmuReadModel' verify/dmu-slash.html
+          grep -q 'HEXA_DMU_RADAR_DYNAMIC_2026_10_06_1' verify/dmu-slash.html
+          grep -q 'HEXA_DMU_DYNAMIC_COVERAGE_2026_10_08_1' verify/dmu-slash.html
+          grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' verify/dmu-slash.html
+          grep -q 'HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1' verify/dmu-slash.html
 
           {
             echo "rootHttp=$root_http"
