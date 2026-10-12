@@ -2,6 +2,11 @@ name: Verify production cutover
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/verify-production-vnext.once'
 
 permissions:
   contents: read
