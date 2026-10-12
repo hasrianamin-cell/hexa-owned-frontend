@@ -64,6 +64,12 @@ jobs:
             echo "[HTTP_APEX]"
             curl -sS -I --connect-timeout 15 --max-time 45 http://hexahessman-th.com/ || true
             echo
+            echo "[HTTP_DMU]"
+            curl -sS -I --connect-timeout 15 --max-time 45 http://hexahessman-th.com/teams/dmu/ || true
+            echo
+            echo "[HTTP_DMU_FOLLOW]"
+            curl -sS -I -L --connect-timeout 15 --max-time 45 http://hexahessman-th.com/teams/dmu/ || true
+            echo
             echo "[HTTPS_APEX_INSECURE]"
             curl -k -sS -I --connect-timeout 15 --max-time 45 https://hexahessman-th.com/ || true
             echo
