@@ -5,13 +5,14 @@ on:
     branches:
       - path2-governed-dmu-vnext-20261012
       - fix/dmu-archive-customer-id-resolution-20261012
+      - fix/dmu-opportunity-archive-fallback-20261013
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  EXPECTED_SOURCE_BLOB_SHA: ce2ea0ab96e622c047e58c87cebabd45d07c0540
+  EXPECTED_SOURCE_BLOB_SHA: b435cd4ad9f74d3af6b0a6423578e4b21f03261d
 
 jobs:
   validate:
@@ -39,6 +40,9 @@ jobs:
           grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' "$file"
           grep -q 'HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1' "$file"
           grep -q 'HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1' "$file"
+          grep -q 'HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1' "$file"
+          grep -q 'function archiveDealByOpportunityId(opportunityId)' "$file"
+          grep -q 'function recallArchived(scope,id)' "$file"
           grep -q 'function resolveArchiveCustomerId(deal)' "$file"
           grep -q 'Archive requires one exact canonical CustomerID match.' "$file"
           grep -q 'HEXA_DMU_AUTH_RESILIENCE_2026_10_08_FUNCTION_1' "$file"
