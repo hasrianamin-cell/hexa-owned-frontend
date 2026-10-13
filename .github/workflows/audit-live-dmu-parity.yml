@@ -1,0 +1,64 @@
+name: Audit live DMU parity
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/audit-live-dmu-parity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare Production DMU with governed main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          prod="https://hexahessman-th.com/teams/dmu/"
+          staging="https://hasrianamin-cell.github.io/hexa-owned-frontend/teams/dmu/"
+
+          prod_http="$(curl -L -sS -o evidence/prod.html -w '%{http_code}' --connect-timeout 15 --max-time 120 "$prod")"
+          staging_http="$(curl -L -sS -o evidence/staging.html -w '%{http_code}' --connect-timeout 15 --max-time 120 "$staging")"
+
+          local_sha="$(sha256sum teams/dmu/index.html | awk '{print $1}')"
+          prod_sha="$(sha256sum evidence/prod.html | awk '{print $1}')"
+          staging_sha="$(sha256sum evidence/staging.html | awk '{print $1}')"
+
+          marker() {
+            local file="$1"
+            local value="$2"
+            if grep -q "$value" "$file"; then echo true; else echo false; fi
+          }
+
+          {
+            echo "prodHttp=$prod_http"
+            echo "stagingHttp=$staging_http"
+            echo "localSha=$local_sha"
+            echo "prodSha=$prod_sha"
+            echo "stagingSha=$staging_sha"
+            echo "prodLeadReview=$(marker evidence/prod.html HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1)"
+            echo "prodManagementIntelligence=$(marker evidence/prod.html HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1)"
+            echo "prodOtherSalesTopics=$(marker evidence/prod.html otherSalesTopicStories)"
+            echo "prodContextEndpoint=$(marker evidence/prod.html phase6ContextReviewModel)"
+            echo "prodArchiveFallback=$(marker evidence/prod.html HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1)"
+            echo "stagingLeadReview=$(marker evidence/staging.html HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1)"
+            echo "stagingOtherSalesTopics=$(marker evidence/staging.html otherSalesTopicStories)"
+            echo "prodMatchesGoverned=$([ "$prod_sha" = "$local_sha" ] && echo true || echo false)"
+            echo "stagingMatchesGoverned=$([ "$staging_sha" = "$local_sha" ] && echo true || echo false)"
+          } | tee evidence/summary.txt
+
+          test "$prod_http" = "200"
+          test "$staging_http" = "200"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-dmu-parity
+          path: evidence
+          retention-days: 30
