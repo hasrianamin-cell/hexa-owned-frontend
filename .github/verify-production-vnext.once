@@ -4,3 +4,5 @@ guards=false
 backend=false
 
 archive_fix_verify=20261012-1903
+
+opportunity_archive_fallback_verify=20261013-2004
