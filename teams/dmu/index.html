@@ -116,6 +116,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-management-intelligence" content="HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1">
 <meta name="hexa-dmu-archive-resolver" content="HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1">
 <meta name="hexa-dmu-opportunity-archive-fallback" content="HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1">
+<meta name="hexa-dmu-latest-ai-visibility" content="HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1">
 </head>
 <body>
 <header>
@@ -271,10 +272,10 @@ function legacyNavTo(id,btn){
 <div id="newOpportunityStories" class="aiStoryGrid" style="margin-top:10px"></div>
 </section>
 
-<details class="card full viewSection secondaryPanel" id="otherSalesTopics">
-<summary>Other Sales Topics</summary>
+<details class="card full viewSection secondaryPanel" id="otherSalesTopics" open>
+<summary>Latest AI Updates — Review Required</summary>
 <div class="secondaryPanelBody">
-<div class="small">ข้อมูลรองจากการประชุมที่ยังไม่ต้องใช้ตัดสินใจทันที</div>
+<div class="small">AI อัปเดตจากหลักฐานการประชุมที่ยังไม่ได้ผูก Customer / Opportunity แบบ deterministic • ต้อง Review ก่อน</div>
 <div id="otherSalesTopicStories" class="aiStoryGrid" style="margin-top:10px"></div>
 </div>
 </details>
@@ -807,22 +808,35 @@ function renderManagementStories(){
 
  const otherBox=document.getElementById('otherSalesTopicStories');
  const otherRows=rowsOf(stories.otherSalesTopics).slice().sort((a,b)=>String(valueOf(b.SourceOccurredAt,b.LatestOccurredAt,'')).localeCompare(String(valueOf(a.SourceOccurredAt,a.LatestOccurredAt,'')))||storyPriority(b)-storyPriority(a));
+ const otherPanel=document.getElementById('otherSalesTopics');if(otherPanel&&otherRows.length)otherPanel.open=true;
  const otherLimit=window.hexaShowAllOtherSalesTopics?otherRows.length:Math.min(12,otherRows.length);
  if(otherBox)otherBox.innerHTML=otherRows.slice(0,otherLimit).map(renderStoryCard).join('')+
    storyMoreButton('other',otherRows.length,otherLimit)||
    '<div class="small">No additional sales topic.</div>';
 }
+function latestManagementStoryAt(){
+ const stories=contextReviewModel()?.managementStories||{};
+ const dates=[
+   ...rowsOf(stories.existingOpportunities),
+   ...rowsOf(stories.newOpportunities),
+   ...rowsOf(stories.otherSalesTopics)
+ ].map(story=>String(valueOf(story?.LatestOccurredAt,story?.SourceOccurredAt,'')).trim()).filter(Boolean).sort();
+ return dates.length?dates[dates.length-1]:'';
+}
 function renderSourceFreshness(d360){
  const box=document.getElementById('sourceFreshness');if(!box)return;
  const f=d360?.Freshness||{};
  const contextFresh=valueOf(contextStoryFor(state.current)?.LatestOccurredAt);
- const latest=valueOf(contextFresh,f.latestAnyAt,f.latestAiAt,phase6ReadModel?.lastAiSync,phase6ContextReview?.reviewModel?.generatedAt,phase6ContextReview?.generatedAt);
- const ai=valueOf(f.latestAiAt);
+ const globalAiReview=latestManagementStoryAt();
+ const latestDates=[contextFresh,f.latestAnyAt,f.latestAiAt,globalAiReview,phase6ReadModel?.lastAiSync].map(v=>String(v||'').trim()).filter(Boolean).sort();
+ const latest=latestDates.length?latestDates[latestDates.length-1]:'';
+ const dealAi=valueOf(f.latestAiAt);
  const quote=valueOf(f.latestQuotationAt);
  const email=valueOf(f.latestEmailAt);
  const parts=[
    latest?'<b>Latest sales data:</b> '+esc(formatSourceDate(latest)):'<b>Latest sales data:</b> TBC',
-   ai?'AI '+esc(formatSourceDate(ai)):'',
+   globalAiReview?'<b>AI review:</b> '+esc(formatSourceDate(globalAiReview)):'',
+   dealAi&&dealAi!==globalAiReview?'Deal AI '+esc(formatSourceDate(dealAi)):'',
    quote?'Quotation '+esc(formatSourceDate(quote)):'',
    email?'Email '+esc(formatSourceDate(email)):''
  ].filter(Boolean);
