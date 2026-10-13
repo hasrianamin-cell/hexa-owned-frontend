@@ -13,7 +13,7 @@ permissions:
 
 env:
   EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
-  EXPECTED_DMU_SHA256: 5169582cadcb4e47bedb353ca1f76c76b1959b9e4f656059b35da73fb92b7f3b
+  EXPECTED_DMU_SHA256: 7ddb562a77da4806be4e03bf2c21948cb65e0b8747c89121f2e21189d6b6b001
 
 jobs:
   verify:
@@ -74,6 +74,7 @@ jobs:
           grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' verify/dmu-slash.html
           grep -q 'HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1' verify/dmu-slash.html
           grep -q 'HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1' verify/dmu-slash.html
+          grep -q 'HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1' verify/dmu-slash.html
 
           {
             echo "rootHttp=$root_http"

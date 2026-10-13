@@ -115,6 +115,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-lead-review-inbox" content="HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1">
 <meta name="hexa-dmu-management-intelligence" content="HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1">
 <meta name="hexa-dmu-archive-resolver" content="HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1">
+<meta name="hexa-dmu-opportunity-archive-fallback" content="HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1">
 </head>
 <body>
 <header>
@@ -390,7 +391,7 @@ let state={opportunities:[],current:null,dmu:[],activities:[],legacy:{customers:
 let phase6ReadModel=null,phase6ContextReview=null,showAllActivities=false,phase6LiveReadOnly=false;
 let humanOverlayLoadEpoch=0,currentIdentitySafe=true;
 let phase6CustomerCoverage=null,customerCoverageAvailable=false,customerCoverageStatus='Customer coverage not connected';
-let phase6CanonicalDeals=[],customerArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
+let phase6CanonicalDeals=[],customerArchiveMap=new Map(),opportunityArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
 const CMI_OPPORTUNITY_ID='OPP-2608-019';
 const CMI_GOLDEN=null;
 const SMART_SALE_DRIVE_ID='b!B-is1z_1_UqfbZzVyRnbHy6aaOLL2t5PlafMGwaUNmSVSPOv7ZpkS51SsnFx5aur';
@@ -1192,22 +1193,34 @@ function formatSourceDate(value){const raw=String(value||'').trim();if(!raw)retu
 function milestoneDate(row){const start=valueOf(row.TargetDate,row.Date,row.ExpectedDate,row.DueDate),end=valueOf(row.WindowEndDate,row.EndDate);if(!start)return 'TBC';return end&&String(end)!==String(start)?formatSourceDate(start)+' – '+formatSourceDate(end):formatSourceDate(start)}
 function renderSalesClosePlan(d360){const source=timelineSource(d360),cards=CLOSE_MILESTONES.map(spec=>{const row=findMilestone(source,spec),date=milestoneDate(row),unknown=date==='TBC',status=String(valueOf(row.Status,row.State,unknown?'RequiredConfirmation':'Scheduled')),confirmation=String(valueOf(row.RequiredConfirmation,row.ConfirmationRequired,spec.confirm)),basis=row.Basis?'<div class="small">'+esc(row.Basis)+'</div>':'';return '<div class="closeMilestone"><div class="milestoneName">'+esc(spec.label)+'</div><div class="milestoneDate">'+esc(date)+'</div><div class="milestoneStatus">'+esc(status)+'</div>'+basis+(unknown?'<div class="requiredConfirmation"><strong>RequiredConfirmation:</strong> '+esc(confirmation)+'</div>':'')+'</div>'}).join('');document.getElementById('salesClosePlan').innerHTML='<h3>Sales Close Plan</h3><div class="closePlanGrid">'+cards+'</div>'}
 function archivedCustomerIdSet(){return new Set([...customerArchiveMap.keys()])}
+function archivedOpportunityIdSet(){return new Set([...opportunityArchiveMap.keys()])}
 function isArchivedCustomerId(customerId){return archivedCustomerIdSet().has(String(customerId||'').trim().toUpperCase())}
 function canonicalDealById(opportunityId){return phase6CanonicalDeals.find(o=>o.id===String(opportunityId||'').trim())||null}
-function isArchivedOpportunity(opportunityId){const deal=canonicalDealById(opportunityId);return !!(deal&&deal.customerId&&isArchivedCustomerId(deal.customerId))}
+function isArchivedOpportunity(opportunityId){
+ const id=String(opportunityId||'').trim().toUpperCase();
+ if(archivedOpportunityIdSet().has(id))return true;
+ const deal=canonicalDealById(id);
+ return !!(deal&&deal.customerId&&isArchivedCustomerId(deal.customerId));
+}
 function setCustomerArchivePayload(payload){
  customerArchiveMap=new Map(rowsOf(payload?.archives).map(row=>[String(row?.customerId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
+ opportunityArchiveMap=new Map(rowsOf(payload?.opportunityArchives).map(row=>[String(row?.opportunityId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
 }
 function renderArchivedCustomers(){
  const box=document.getElementById('archivedCustomerList');if(!box)return;
- const rows=[...customerArchiveMap.values()].slice().sort((a,b)=>String(a.customerName||'').localeCompare(String(b.customerName||''),undefined,{sensitivity:'base'}));
+ const customerRows=[...customerArchiveMap.values()].map(row=>({...row,scope:'customer'}));
+ const opportunityRows=[...opportunityArchiveMap.values()].map(row=>({...row,scope:'opportunity'}));
+ const rows=[...customerRows,...opportunityRows].sort((a,b)=>String(a.customerName||'').localeCompare(String(b.customerName||''),undefined,{sensitivity:'base'}));
  setText('archivedCustomerCount',customerArchiveAvailable?(rows.length+' archived'):'Archive unavailable');
  if(!customerArchiveAvailable){box.innerHTML='<div class="small">Archive service unavailable. Active customer views remain unchanged and Archive/Recall controls are disabled.</div>';return}
- if(!rows.length){box.innerHTML='<div class="small">No archived customers.</div>';return}
+ if(!rows.length){box.innerHTML='<div class="small">No archived customers or opportunities.</div>';return}
  box.innerHTML=rows.map(row=>{
    const when=row.archivedAt?formatSourceDate(row.archivedAt):'';
-   const meta=[row.customerId,when?'Archived '+when:''].filter(Boolean).join(' • ');
-   return '<div class="archiveRow"><div><div class="name">'+esc(row.customerName||row.customerId)+'</div><div class="meta">'+esc(meta)+'</div></div><button class="btn secondary" type="button" onclick="recallCustomer(\''+esc(row.customerId)+'\')">Recall Customer</button></div>';
+   const scope=row.scope==='opportunity'?'Opportunity-scoped':'Customer-scoped';
+   const id=row.scope==='opportunity'?row.opportunityId:row.customerId;
+   const meta=[scope,id,when?'Archived '+when:''].filter(Boolean).join(' • ');
+   const label=row.customerName||row.opportunityName||id;
+   return '<div class="archiveRow"><div><div class="name">'+esc(label)+'</div><div class="meta">'+esc(meta)+'</div></div><button class="btn secondary" type="button" onclick="recallArchived(\''+esc(row.scope)+'\',\''+esc(id)+'\')">Recall</button></div>';
  }).join('');
 }
 async function customerArchiveRequest(method,body=null){
@@ -1218,68 +1231,95 @@ async function customerArchiveRequest(method,body=null){
  if(!r.ok)throw new Error(String(payload?.error||('Customer archive HTTP '+r.status)));
  return payload;
 }
-async function archiveCustomer(customerId){
- if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
- const id=String(customerId||'').trim().toUpperCase();
- if(!/^CUS-\d{6}$/.test(id)){flashConn(false,'Archive unavailable: canonical CustomerID is missing.');return}
- const deal=phase6CanonicalDeals.find(o=>o.customerId===id);
- const label=deal?.customer||customerArchiveMap.get(id)?.customerName||id;
- if(!confirm('Archive '+label+'?\n\nThis hides the customer and all linked deals from Active views. No customer or opportunity data will be deleted, and the customer can be recalled later.'))return;
- try{
-   const payload=await customerArchiveRequest('POST',{action:'archive',customerId:id});
-   setCustomerArchivePayload(payload);
-   applyProductionDeals();
-   renderManagementStories();
-   renderArchivedCustomers();
-   flashConn(true,'Archived • '+label+' can be recalled later');
- }catch(e){flashConn(false,'Archive failed: '+authErrorDetail(e));console.error('Customer archive failed',e)}
-}
-async function recallCustomer(customerId){
- if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
- const id=String(customerId||'').trim().toUpperCase();
- if(!/^CUS-\d{6}$/.test(id))return;
- try{
-   const payload=await customerArchiveRequest('POST',{action:'recall',customerId:id});
-   setCustomerArchivePayload(payload);
-   applyProductionDeals();
-   renderManagementStories();
-   renderArchivedCustomers();
-   flashConn(true,'Customer recalled to Active views');
- }catch(e){flashConn(false,'Recall failed: '+authErrorDetail(e));console.error('Customer recall failed',e)}
-}
-function normalizeArchiveCustomerName(value){return String(value||'').normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase()}
+function normalizeArchiveCustomerName(value){return String(value||'').normalize('NFC').replace(/\s+/g,' ').trim().toLocaleLowerCase()}
 function resolveArchiveCustomerId(deal){
  const direct=String(deal?.customerId||'').trim().toUpperCase();
- if(/^CUS-\\d{6}$/.test(direct))return direct;
+ if(/^CUS-\d{6}$/.test(direct))return direct;
  if(!customerCoverageAvailable||!phase6CustomerCoverage)return '';
+ const model=coverageModel();
  const key=normalizeArchiveCustomerName(deal?.customer);
  if(!key)return '';
  const ids=[];
- for(const row of [...rowsOf(phase6CustomerCoverage?.directoryCustomers),...rowsOf(phase6CustomerCoverage?.quotedCustomers)]){
+ for(const row of [...rowsOf(model?.directoryCustomers),...rowsOf(model?.quotedCustomers)]){
    if(normalizeArchiveCustomerName(valueOf(row?.Customer,row?.CustomerName))!==key)continue;
    const id=String(valueOf(row?.CustomerID,row?.customerId,row?.CustomerId)).trim().toUpperCase();
-   if(/^CUS-\\d{6}$/.test(id))ids.push(id);
+   if(/^CUS-\d{6}$/.test(id))ids.push(id);
  }
  const unique=[...new Set(ids)];
  return unique.length===1?unique[0]:'';
 }
+function archiveDescriptor(deal){
+ if(!deal)return null;
+ const customerId=resolveArchiveCustomerId(deal);
+ if(/^CUS-\d{6}$/.test(customerId))return {scope:'customer',customerId,opportunityId:'',label:String(deal.customer||customerId)};
+ const opportunityId=String(deal.id||'').trim().toUpperCase();
+ if(/^OPP-\d{4}-\d{3,}$/.test(opportunityId))return {scope:'opportunity',customerId:'',opportunityId,label:String(deal.customer||opportunityId)};
+ return null;
+}
+async function archiveDeal(deal){
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
+ const target=archiveDescriptor(deal);
+ if(!target){flashConn(false,'Archive unavailable: no canonical CustomerID or OpportunityID.');return}
+ const body=target.scope==='customer'
+   ?{action:'archive',customerId:target.customerId}
+   :{action:'archive',opportunityId:target.opportunityId};
+ const scopeNote=target.scope==='customer'
+   ?'This hides the customer and all linked deals from Active views.'
+   :'No canonical CustomerID exists. This will hide only this exact Opportunity from Active views.';
+ if(!confirm('Archive '+target.label+'?\n\n'+scopeNote+' No customer or opportunity master data will be deleted, and the item can be recalled later.'))return;
+ try{
+   const payload=await customerArchiveRequest('POST',body);
+   setCustomerArchivePayload(payload);
+   applyProductionDeals();
+   renderManagementStories();
+   renderArchivedCustomers();
+   flashConn(true,'Archived • '+target.label+' can be recalled later');
+ }catch(e){flashConn(false,'Archive failed: '+authErrorDetail(e));console.error('Archive failed',e)}
+}
+async function archiveDealByOpportunityId(opportunityId){
+ const id=String(opportunityId||'').trim().toUpperCase();
+ const deal=phase6CanonicalDeals.find(o=>String(o.id||'').trim().toUpperCase()===id);
+ if(!deal){flashConn(false,'Archive unavailable: canonical Opportunity not found.');return}
+ await archiveDeal(deal);
+}
+async function recallArchived(scope,id){
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
+ const normalized=String(id||'').trim().toUpperCase();
+ const body=scope==='opportunity'
+   ?{action:'recall',opportunityId:normalized}
+   :{action:'recall',customerId:normalized};
+ try{
+   const payload=await customerArchiveRequest('POST',body);
+   setCustomerArchivePayload(payload);
+   applyProductionDeals();
+   renderManagementStories();
+   renderArchivedCustomers();
+   flashConn(true,'Recalled to Active views');
+ }catch(e){flashConn(false,'Recall failed: '+authErrorDetail(e));console.error('Archive recall failed',e)}
+}
 async function archiveCurrentCustomer(){
  const deal=state.opportunities.find(o=>o.id===state.current);
  if(!deal){flashConn(false,'Select an active customer first.');return}
- await archiveCustomer(resolveArchiveCustomerId(deal));
+ await archiveDeal(deal);
 }
 function refreshArchiveCurrentCustomerButton(){
  const btn=document.getElementById('archiveCurrentCustomerButton');if(!btn)return;
  const deal=state.opportunities.find(o=>o.id===state.current);
- const archiveId=resolveArchiveCustomerId(deal);
- const ready=customerArchiveAvailable&&!!archiveId;
+ const target=archiveDescriptor(deal);
+ const ready=customerArchiveAvailable&&!!target;
  btn.disabled=!ready;
- btn.title=!customerArchiveAvailable?(customerArchiveStatus||'Archive service unavailable.'):ready?'Archive this customer from Active views. Recall remains available.':'Archive requires one exact canonical CustomerID match.';
+ btn.title=!customerArchiveAvailable
+   ?(customerArchiveStatus||'Archive service unavailable.')
+   :!ready
+     ?'Archive requires a canonical CustomerID or exact OpportunityID.'
+     :target.scope==='customer'
+       ?'Archive this customer from Active views. Recall remains available.'
+       :'CustomerID is not linked; archive will be safely scoped to this exact OpportunityID.';
 }
 function applyProductionDeals(){
  const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customerId:String(valueOf(d.CustomerID,d.customerId,d.CustomerId)).trim().toUpperCase(),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id).map(d=>({...d,customerId:resolveArchiveCustomerId(d)||d.customerId}));
  phase6CanonicalDeals=deals;
- const active=deals.filter(d=>!d.customerId||!isArchivedCustomerId(d.customerId));
+ const active=deals.filter(d=>!isArchivedOpportunity(d.id));
  state.opportunities=active;
  if(!active.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
  if(!active.some(d=>d.id===state.current))state.current=active[0].id;
@@ -1317,6 +1357,7 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
 
  customerArchiveAvailable=false;
  customerArchiveMap=new Map();
+ opportunityArchiveMap=new Map();
  if(archiveResult.status==='fulfilled'){
    const archiveResponse=archiveResult.value;
    const archivePayload=await archiveResponse.json().catch(()=>null);
@@ -1803,7 +1844,7 @@ function renderDealCards(){
      <div class="dealCardAction">
        <div class="coverage"><b>DMU Readiness:</b> ${esc(coverage)} • Confidence ${dmuMetrics.confidence}%</div>
        <div class="next"><b>Next:</b> ${esc(String(next))}</div>
-       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button> <button class="btn secondary" type="button" ${customerArchiveAvailable&&resolveArchiveCustomerId(o)?'':'disabled'} title="${customerArchiveAvailable?(resolveArchiveCustomerId(o)?'Archive this customer from Active views.':'Archive requires one exact canonical CustomerID match.'):(customerArchiveStatus||'Archive service unavailable.')}" onclick="event.stopPropagation();archiveCustomer('${esc(resolveArchiveCustomerId(o))}')">Archive Customer</button></div>
+       <div><button class="btn secondary" type="button" onclick="event.stopPropagation();openDealCard('${esc(o.id)}')">Open Customer</button> <button class="btn secondary" type="button" ${customerArchiveAvailable&&archiveDescriptor(o)?'':'disabled'} title="${!customerArchiveAvailable?(customerArchiveStatus||'Archive service unavailable.'):(archiveDescriptor(o)?.scope==='customer'?'Archive this customer from Active views.':'CustomerID is not linked; archive will be safely scoped to this exact OpportunityID.')}" onclick="event.stopPropagation();archiveDealByOpportunityId('${esc(o.id)}')">Archive Customer</button></div>
      </div>
    </div>`;
  }).join('');
