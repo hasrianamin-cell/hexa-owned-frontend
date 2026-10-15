@@ -394,6 +394,10 @@ let humanOverlayLoadEpoch=0,currentIdentitySafe=true;
 let phase6CustomerCoverage=null,customerCoverageAvailable=false,customerCoverageStatus='Customer coverage not connected';
 let financeQuotationCustomers=[],financeQuotationCoverageAvailable=false,financeQuotationCoverageStatus='Finance quotation source not connected';
 const HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1=true;
+const YARA_CMI_CUSTOMER_UNION_ID='UNION:YARA-CMI';
+const YARA_CMI_CUSTOMER_UNION_LABEL='CMI / Yara Power';
+const YARA_CMI_CUSTOMER_UNION_OPPORTUNITY_IDS=Object.freeze(['OPP-2608-019','OPP-2609-001']);
+const HEXA_CUSTOMER_UNION_YARA_CMI_2026_10_15_1=true;
 let phase6CanonicalDeals=[],customerArchiveMap=new Map(),opportunityArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
 const CMI_OPPORTUNITY_ID='OPP-2608-019';
 const CMI_GOLDEN=null;
@@ -460,12 +464,44 @@ function init(){
 }
 function normalizeWorkspaceCustomerName(value){return String(value||'').normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase()}
 function financeQuotationCustomerById(id){return financeQuotationCustomers.find(item=>item.id===String(id||''))||null}
+function isYaraCmiOpportunityId(id){return YARA_CMI_CUSTOMER_UNION_OPPORTUNITY_IDS.includes(String(id||'').trim())}
+function isYaraCmiFinanceCustomer(item){
+ const n=normalizeWorkspaceCustomerName(item?.customer||item?.financeFolderName||'');
+ return /(?:^|\s)(?:cmi|cm\s+industry)(?:\s|$)/i.test(n)||/\byarra?\s+power\b/i.test(n)||/\byara\b/i.test(n);
+}
+function customerUnionSourceLabel(id){
+ const key=String(id||'').trim();
+ if(key==='OPP-2608-019')return 'CMI • OPP-2608-019';
+ if(key==='OPP-2609-001')return 'Yara Power • OPP-2609-001';
+ return key;
+}
+function workspaceCustomerIdForOpportunity(id){return isYaraCmiOpportunityId(id)?YARA_CMI_CUSTOMER_UNION_ID:String(id||'').trim()}
 function workspaceCustomerEntries(){
  const financeByName=new Map(financeQuotationCustomers.map(item=>[normalizeWorkspaceCustomerName(item.customer),item]).filter(x=>x[0]));
  const active=state.opportunities.map(o=>{const finance=financeByName.get(normalizeWorkspaceCustomerName(o.customer));return finance?{...o,financeQuotation:true,financeFolderUrl:finance.financeFolderUrl,financeModifiedAt:finance.financeModifiedAt}:o});
- const activeNames=new Set(active.map(o=>normalizeWorkspaceCustomerName(o.customer)).filter(Boolean));
- const quoteOnly=financeQuotationCustomers.filter(item=>!activeNames.has(normalizeWorkspaceCustomerName(item.customer)));
- return [...active,...quoteOnly];
+ const unionChildren=active.filter(o=>isYaraCmiOpportunityId(o.id));
+ const unionFinance=financeQuotationCustomers.filter(isYaraCmiFinanceCustomer);
+ const normalActive=active.filter(o=>!isYaraCmiOpportunityId(o.id));
+ const activeNames=new Set(normalActive.map(o=>normalizeWorkspaceCustomerName(o.customer)).filter(Boolean));
+ const quoteOnly=financeQuotationCustomers.filter(item=>!isYaraCmiFinanceCustomer(item)&&!activeNames.has(normalizeWorkspaceCustomerName(item.customer)));
+ const unionEntry=(unionChildren.length||unionFinance.length)?{
+   id:YARA_CMI_CUSTOMER_UNION_ID,
+   customer:YARA_CMI_CUSTOMER_UNION_LABEL,
+   customerId:'',
+   sales:[...new Set(unionChildren.map(x=>String(x.sales||'').trim()).filter(Boolean))].join(' / '),
+   quoteNo:[...new Set(unionChildren.map(x=>String(x.quoteNo||'').trim()).filter(Boolean))].join(', '),
+   offer:[...new Set(unionChildren.map(x=>String(x.offer||'').trim()).filter(Boolean))].join(' • '),
+   stage:'Unified Customer',
+   prob:null,
+   keyContact:[...new Set(unionChildren.map(x=>String(x.keyContact||'').trim()).filter(Boolean))].join(' / '),
+   keyContactRole:[...new Set(unionChildren.map(x=>String(x.keyContactRole||'').trim()).filter(Boolean))].join(' / '),
+   unionCustomer:true,
+   childOpportunityIds:YARA_CMI_CUSTOMER_UNION_OPPORTUNITY_IDS.filter(id=>state.opportunities.some(o=>o.id===id)),
+   financeQuotation:unionFinance.length>0,
+   financeFolders:unionFinance,
+   unionApproved:true
+ }:null;
+ return [...normalActive,...(unionEntry?[unionEntry]:[]),...quoteOnly];
 }
 function workspaceCustomerEntryById(id){return workspaceCustomerEntries().find(item=>item.id===String(id||''))||null}
 function renderOppSelector(){
@@ -476,14 +512,18 @@ function renderOppSelector(){
    const customer=String(o.customer||'').trim()||'Unnamed customer';
    const duplicate=(counts.get(normalizeWorkspaceCustomerName(customer))||0)>1;
    const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';
-   const financeTag=o.financeQuotation?' • Finance Quote'+(o.id.startsWith('FINQ:')?' • Review Required':''):'';
-   const label=(detail?customer+' · '+detail:customer)+financeTag;
+   const unionTag=o.unionCustomer?' • Unified • '+String(rowsOf(o.childOpportunityIds).length)+' Opportunities':'';
+   const financeTag=o.financeQuotation?' • Finance Quote'+(!o.unionCustomer&&o.id.startsWith('FINQ:')?' • Review Required':''):'';
+   const label=(detail?customer+' · '+detail:customer)+unionTag+financeTag;
    return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`;
  }).join('');
  s.onchange=async()=>{
    loadSelectedOpportunity();
    const selected=workspaceCustomerEntryById(state.current);
-   if(hexaAccount&&state.current&&selected&&!selected.financeQuotation){
+   if(hexaAccount&&state.current&&selected?.unionCustomer){
+     try{await loadCustomerUnionHumanOverlays(selected);if(state.current===selected.id)loadSelectedOpportunity()}
+     catch(e){renderTeamOverlayStatus('Unified customer loaded; team-confirmed overlay is partially unavailable.',true);console.warn('Customer union overlay load failed',e)}
+   }else if(hexaAccount&&state.current&&selected&&!selected.financeQuotation){
      const requested=state.current;
      try{const applied=await loadHumanOverlay(requested);if(applied&&state.current===requested)loadSelectedOpportunity()}
      catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay load failed',e)}
@@ -534,6 +574,9 @@ function canonicalRoleForAiMember(member){
  return 'Operations Influencer';
 }
 function scoringRowsForOpportunity(opportunityId){
+ if(String(opportunityId||'')===YARA_CMI_CUSTOMER_UNION_ID){
+   return YARA_CMI_CUSTOMER_UNION_OPPORTUNITY_IDS.flatMap(id=>scoringRowsForOpportunity(id));
+ }
  const human=state.dmu.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
  const ai=governedDmuMembers(detailFor(opportunityId)).map((m,i)=>{
    const finalDm=m.FinalDecisionMaker===true;
@@ -551,6 +594,7 @@ function scoringRowsForOpportunity(opportunityId){
  }).filter(x=>x.person);
  return [...human,...ai];
 }
+
 function roleReadiness(row){
  if(!row||row.aiObserved)return 0;
  const statusScore=row.status==='Confirmed'?5:row.status==='Known'?4:row.status==='To Confirm'?2.5:row.status==='Critical Unknown'?0.5:1;
@@ -582,11 +626,13 @@ function storyOpportunityId(story){return String(valueOf(story?.OpportunityID,st
 function openCustomerFromStory(opportunityId){
  const id=String(opportunityId||'').trim();
  if(!id||!state.opportunities.some(o=>o.id===id))return;
- state.current=id;
- const sel=document.getElementById('oppSelect');if(sel)sel.value=id;
+ const workspaceId=workspaceCustomerIdForOpportunity(id);
+ state.current=workspaceId;
+ const sel=document.getElementById('oppSelect');if(sel)sel.value=workspaceId;
  loadSelectedOpportunity();
  navTo('viewDMU');
 }
+
 function renderStoryCard(story){
  const customer=String(valueOf(story.Customer,story.Topic,'Sales update'));
  const changed=String(valueOf(story.WhatChanged,'AI found a sales update.'));
@@ -885,6 +931,209 @@ function refreshExecutiveDealBrief(){
  setText('briefNextAction',next);
  setText('briefDecisionCoverage',decisionCoverageSummary(state.current));
 }
+function unionUnique(values){return [...new Set(rowsOf(values).map(x=>String(x??'').trim()).filter(Boolean))]}
+function unionEntryChildIds(entry){return rowsOf(entry?.childOpportunityIds).map(x=>String(x||'').trim()).filter(Boolean)}
+function unionChildDeals(entry){const ids=new Set(unionEntryChildIds(entry));return state.opportunities.filter(x=>ids.has(x.id))}
+function unionChildDetails(entry){return unionEntryChildIds(entry).map(id=>({id,detail:detailFor(id)})).filter(x=>x.detail)}
+function unionDmuHumanRows(entry){
+ const ids=new Set(unionEntryChildIds(entry));
+ const byKey=new Map();
+ state.dmu.filter(x=>ids.has(x.oppId)&&x.humanConfirmed===true).forEach(row=>{
+   const key=[normalizedPersonName(row.person),String(row.role||'').trim().toLowerCase()].join('|');
+   if(!key.replace('|',''))return;
+   const existing=byKey.get(key);
+   if(!existing)byKey.set(key,{...row,sourceOpportunityIds:[row.oppId]});
+   else if(!existing.sourceOpportunityIds.includes(row.oppId))existing.sourceOpportunityIds.push(row.oppId);
+ });
+ return [...byKey.values()];
+}
+function unionAiDmuMembers(entry){
+ const byKey=new Map();
+ unionEntryChildIds(entry).forEach(id=>{
+   governedDmuMembers(detailFor(id)).forEach((member,index)=>{
+     const role=String(valueOf(member.DMURole,member.ContactRole,member.JobTitle,'AI suggestion')).trim();
+     const person=String(valueOf(member.Name,member.ContactPerson,'')).trim();
+     const key=[normalizedPersonName(person),role.toLowerCase()].join('|');
+     if(!person)return;
+     const existing=byKey.get(key);
+     if(!existing)byKey.set(key,{...member,_unionRole:role,_unionPerson:person,_sourceOpportunityIds:[id],_unionIndex:index});
+     else if(!existing._sourceOpportunityIds.includes(id))existing._sourceOpportunityIds.push(id);
+   });
+ });
+ return [...byKey.values()];
+}
+function unionSupportLabel(value){
+ const labels={0:'?',1:'Against',2:'Neutral',3:'Support',4:'Strong',5:'Champion'};
+ return Object.prototype.hasOwnProperty.call(labels,Number(value))?labels[Number(value)]:'—';
+}
+function renderCustomerUnionDmu(entry){
+ const human=unionDmuHumanRows(entry),ai=unionAiDmuMembers(entry);
+ const humanHtml=human.map(r=>'<tr class="unionDmuRow">'+
+   '<td>'+esc(String(r.role||''))+'</td>'+
+   '<td><strong>'+esc(String(r.person||''))+'</strong><div class="small">'+esc(r.sourceOpportunityIds.map(customerUnionSourceLabel).join(' • '))+'</div></td>'+
+   '<td>'+esc(String(r.power??'—'))+'</td>'+
+   '<td>'+esc(unionSupportLabel(r.support))+'</td>'+
+   '<td>'+esc(String(r.care||''))+'</td>'+
+   '<td>'+esc(String(r.win||''))+'</td>'+
+   '<td>'+esc(String(r.strategy||''))+'</td>'+
+   '<td>'+esc(String(r.status||''))+'</td>'+
+   '<td><span class="badge green">Union source</span></td></tr>').join('');
+ const aiHtml=ai.map(m=>{
+   const source=rowsOf(m._sourceOpportunityIds).map(customerUnionSourceLabel).join(' • ');
+   const confidence=Number(m.Confidence||0);
+   const conf=Number.isFinite(confidence)&&confidence>0?Math.round(confidence*100)+'%':'—';
+   return '<tr class="aiDmuRow" data-ai="1">'+
+     '<td>'+esc(String(m._unionRole||'AI suggestion'))+'</td>'+
+     '<td><strong>'+esc(String(m._unionPerson||'Observed contact'))+'</strong><div class="small">'+esc(source)+'</div></td>'+
+     '<td>— / Not Confirmed</td><td>'+esc(conf)+'</td>'+
+     '<td>Observed from sales activity</td><td>—</td><td>'+esc(String(valueOf(m.SourceType,'Sales source')))+'</td>'+
+     '<td><span class="aiDmuBadge">'+esc(String(m.FinalDecisionMaker===true?'Final Decision Maker':valueOf(m.Status,'AI suggestion')))+'</span></td><td></td></tr>';
+ }).join('');
+ document.querySelector('#dmuTable tbody').innerHTML=humanHtml+aiHtml||'<tr><td colspan="9">No DMU evidence yet</td></tr>';
+}
+function unionActivityRows(entry){
+ const ids=unionEntryChildIds(entry),out=[],seen=new Set();
+ ids.forEach(id=>{
+   const source=customerUnionSourceLabel(id);
+   const rows=[...state.activities.filter(x=>x.oppId===id&&x.humanConfirmed===true),...activityFor(id)];
+   rows.forEach(a=>{
+     const key=source+'|'+String(a.id||'')+'|'+String(a.date||'')+'|'+String(a.note||'');
+     if(seen.has(key))return;seen.add(key);
+     out.push({...a,_unionSource:source});
+   });
+ });
+ return out.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+}
+function renderCustomerUnionActivities(entry){
+ const rows=unionActivityRows(entry),visible=showAllActivities?rows:rows.slice(0,10),more=rows.length>10&&!showAllActivities;
+ document.getElementById('activityList').innerHTML=visible.map(a=>'<li><b>'+esc(String(a.date||''))+' • '+esc(String(a.type||'Activity'))+' • '+esc(a._unionSource)+'</b><br>'+esc(String(a.note||''))+'</li>').join('')+
+   (more?'<li><button class="btn secondary" type="button" onclick="showMoreActivities()">Show More</button></li>':'')||'<li>No activities yet</li>';
+}
+function renderCustomerUnionQuotationHistory(entry){
+ const box=document.getElementById('quotationHistory');if(!box)return;
+ const rows=[];
+ unionChildDetails(entry).forEach(({id,detail})=>rowsOf(detail?.QuotationHistory).forEach(q=>rows.push({id,q})));
+ const quoteText=rows.map(({id,q})=>customerUnionSourceLabel(id)+' — '+String(q.QuotationNo||'Quotation')).join(' • ');
+ const links=rowsOf(entry.financeFolders).map(folder=>'<a href="'+esc(String(folder.financeFolderUrl||''))+'" target="_blank" rel="noopener noreferrer">'+esc(String(folder.financeFolderName||folder.customer||'Finance folder'))+'</a>').join(' • ');
+ box.hidden=!(quoteText||links);
+ box.innerHTML=(quoteText?'<b>Quotation history:</b> '+esc(quoteText):'')+(links?'<div><b>Finance source:</b> '+links+'</div>':'');
+}
+function unionControlValue(entry,key){
+ const parts=[];
+ unionChildDetails(entry).forEach(({id,detail})=>{
+   const control=detail?.ControlTower||{};
+   const value=key==='RecommendedNextAction'?valueOf(detail?.NextAction,control?.RecommendedNextAction):valueOf(control?.[key],detail?.GoldenBaseline?.[key],control?.GoldenBaseline?.[key]);
+   if(String(value||'').trim())parts.push('['+customerUnionSourceLabel(id)+'] '+String(value).trim());
+ });
+ return parts.join('\n');
+}
+function renderCustomerUnionSalesActions(entry){
+ const box=document.getElementById('salesActions');if(!box)return;
+ const rows=[];
+ unionChildDetails(entry).forEach(({id,detail})=>rowsOf(detail?.SalesActions).forEach(a=>rows.push({id,a})));
+ box.innerHTML=rows.length?'<b>Sales actions • Unified customer</b>'+rows.map(({id,a})=>{
+   const action=valueOf(a.Action,a.action,a.Title,a.title,a.NextAction,a.nextAction);
+   const owner=valueOf(a.Owner,a.owner,a.AssignedTo,a.assignedTo);
+   const due=valueOf(a.DueDate,a.dueDate,a.Due,a.due);
+   return '<div style="margin-top:4px"><b>'+esc(customerUnionSourceLabel(id))+'</b> • '+esc(String(action||'Sales action'))+(owner?' • '+esc(String(owner)):'')+(due?' • '+esc(String(due).slice(0,10)):'')+'</div>';
+ }).join(''):'';
+}
+function renderCustomerUnionLatestEvidence(entry){
+ const box=document.getElementById('latestAiPanel');if(!box)return;
+ const storyBlocks=unionEntryChildIds(entry).map(id=>{
+   const story=contextStoryFor(id);if(!story)return '';
+   const highlights=rowsOf(story.BusinessHighlights);
+   const actions=rowsOf(story.Actions);
+   const body=highlights.length?'<ul style="margin:6px 0 0 18px">'+highlights.slice(0,8).map(x=>'<li>'+esc(String(x))+'</li>').join('')+'</ul>':
+     actions.length?'<ul style="margin:6px 0 0 18px">'+actions.slice(0,8).map(x=>'<li>'+esc(String(valueOf(x.Action,'Sales update')))+'</li>').join('')+'</ul>':
+     '<div class="small">No newer source-grounded update.</div>';
+   return '<div style="margin-top:10px"><b>'+esc(customerUnionSourceLabel(id))+'</b>'+body+
+     '<div class="small"><b>Next:</b> '+esc(String(valueOf(story.RecommendedNextAction,'Review latest customer status.')))+'</div></div>';
+ }).filter(Boolean).join('');
+ const financeLinks=rowsOf(entry.financeFolders).map(folder=>'<li><a href="'+esc(String(folder.financeFolderUrl||''))+'" target="_blank" rel="noopener noreferrer">'+esc(String(folder.financeFolderName||folder.customer||'Finance quotation folder'))+'</a></li>').join('');
+ box.style.display='block';
+ box.innerHTML='<div class="contextLatestUpdate"><h3>Unified Customer Evidence • CMI + Yara Power</h3>'+
+   '<div class="small">User-confirmed customer union. Source Opportunities remain separate for provenance: '+esc(unionEntryChildIds(entry).join(' + '))+'. No Customer/Opportunity master record was rewritten.</div>'+
+   storyBlocks+(financeLinks?'<div style="margin-top:10px"><b>Finance quotation sources</b><ul style="margin:6px 0 0 18px">'+financeLinks+'</ul></div>':'')+'</div>';
+}
+function renderCustomerUnionSalesPlan(entry){
+ const box=document.getElementById('salesClosePlan');if(!box)return;
+ const deals=unionChildDeals(entry);
+ box.innerHTML='<div class="small"><b>Unified customer • source Opportunities retained</b></div>'+deals.map(o=>{
+   const d=detailFor(o.id),story=contextStoryFor(o.id);
+   const next=valueOf(d?.ControlTower?.RecommendedNextAction,d?.NextAction,story?.RecommendedNextAction,'Review and confirm next action.');
+   const probability=(o.prob===null||o.prob===undefined||o.prob==='')?'—':String(o.prob)+'%';
+   return '<div style="margin-top:8px"><b>'+esc(customerUnionSourceLabel(o.id))+'</b> • '+esc(String(o.stage||'Lead'))+' • '+esc(probability)+
+     '<br><span class="small">'+esc(String(o.offer||'Sales opportunity'))+'</span><br><span class="small"><b>Next:</b> '+esc(String(next))+'</span></div>';
+ }).join('');
+}
+function renderCustomerUnionMetrics(entry){
+ const rows=scoringRowsForOpportunity(entry.id),metrics=dynamicDmuMetricsFromRows(rows);
+ setText('coveragePct',metrics.coverage+'%');
+ setText('dmuConfidence',metrics.confidence+'%');
+ setText('pipelineDisplay','—');
+ setText('mgmtForecast','—');
+ const badge=document.getElementById('forecastBadge');if(badge){badge.className='badge gray';badge.textContent='Customer Union'};
+ drawRadar(rows);
+}
+async function loadCustomerUnionHumanOverlays(entry){
+ if(!hexaAccount)return 0;
+ let loaded=0;
+ for(const id of unionEntryChildIds(entry)){
+   try{
+     const payload=await humanOverlayRequest('GET',null,id);
+     const dmu=rowsOf(payload?.dmu).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+     const activities=rowsOf(payload?.activities).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+     state.dmu=state.dmu.filter(x=>x.oppId!==id||x.humanConfirmed!==true).concat(dmu);
+     state.activities=state.activities.filter(x=>x.oppId!==id||x.humanConfirmed!==true).concat(activities);
+     state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==id);
+     loaded+=1;
+   }catch(error){console.warn('Union child overlay unavailable',id,error)}
+ }
+ setLocal();
+ renderTeamOverlayStatus('Unified customer • loaded '+loaded+' of '+unionEntryChildIds(entry).length+' team-confirmed source overlays.',loaded<unionEntryChildIds(entry).length);
+ return loaded;
+}
+function renderCustomerUnionWorkspace(entry){
+ currentIdentitySafe=true;
+ const deals=unionChildDeals(entry),details=unionChildDetails(entry);
+ const owners=unionUnique(deals.map(x=>x.sales));
+ const quotes=unionUnique(details.flatMap(({detail})=>[detail?.LatestQuotationNo,detail?.LatestQuotation?.QuotationNo]).concat(deals.map(x=>x.quoteNo)));
+ const offers=unionUnique(deals.map(x=>x.offer).concat(details.map(({detail})=>quotationOffer(detail))));
+ const contacts=unionUnique(details.flatMap(({detail})=>[detail?.ContactPerson,detail?.LatestQuotation?.ContactPerson]).concat(deals.map(x=>x.keyContact)));
+ const roles=unionUnique(details.map(({detail})=>detail?.ContactRole).concat(deals.map(x=>x.keyContactRole)));
+ const competitors=unionUnique(deals.map(x=>x.competitors).concat(details.map(({detail})=>detail?.ControlTower?.CompetitorSignal)));
+ const stages=unionUnique(deals.map(x=>x.stage));
+ setVal('oppId',unionEntryChildIds(entry).join(' + '));
+ setVal('customer',YARA_CMI_CUSTOMER_UNION_LABEL);
+ setVal('salesOwner',owners.join(' / '));
+ setVal('quoteNo',quotes.join(', '));
+ setVal('offer',offers.join(' • '));
+ setVal('stage',stages[0]||'Lead');
+ setVal('pipelineProb','');
+ setVal('competitors',competitors.join(' / '));
+ setVal('keyContact',contacts.join(' / '));
+ setVal('keyContactRole',roles.join(' / '));
+ document.getElementById('contactPhone').textContent='Customer-level union • source contacts and phone numbers remain on child Opportunities.';
+ setVal('diagnosis',unionControlValue(entry,'CurrentDiagnosis'));
+ setVal('nextAction',unionControlValue(entry,'RecommendedNextAction'));
+ setVal('championTest',unionControlValue(entry,'ChampionTest'));
+ setVal('decisionProcess',unionControlValue(entry,'DecisionProcess'));
+ setVal('winTheme',unionControlValue(entry,'WinTheme'));
+ setVal('missingInfo',unionControlValue(entry,'CriticalMissingInfo'));
+ const provenance=document.getElementById('nextActionProvenance');if(provenance)provenance.textContent='Unified customer view • each statement retains its source Opportunity label.';
+ renderCustomerUnionQuotationHistory(entry);
+ renderCustomerUnionDmu(entry);
+ renderCustomerUnionActivities(entry);
+ renderCustomerUnionSalesActions(entry);
+ renderCustomerUnionLatestEvidence(entry);
+ renderCustomerUnionSalesPlan(entry);
+ const freshness=document.getElementById('sourceFreshness');if(freshness)freshness.textContent='Unified from governed CMI + Yara Power Opportunity, DMU, activity and Finance quotation evidence.';
+ renderCustomerUnionMetrics(entry);
+ refreshArchiveCurrentCustomerButton();
+ setLocal();
+ renderDealCards();
+}
 function loadSelectedOpportunity(){
  const selector=document.getElementById('oppSelect');
  state.current=(selector&&selector.value)||state.current;
@@ -892,6 +1141,8 @@ function loadSelectedOpportunity(){
  if(!selectedOpportunityId){renderDealCards();return;}
  showAllActivities=false;
  clearLiveDealBinding();
+ const unionEntry=workspaceCustomerEntryById(selectedOpportunityId);
+ if(unionEntry?.unionCustomer){renderCustomerUnionWorkspace(unionEntry);return;}
  const financeOnly=financeQuotationCustomerById(selectedOpportunityId);
  if(financeOnly){
    currentIdentitySafe=false;
@@ -938,14 +1189,23 @@ function addDMURow(){if(!humanOverlayOpportunityReady()){flashConn(false,'เล
 function removeDMU(id){const row=state.dmu.find(x=>x.id===id);if(!row||row.humanConfirmed!==true)return;if(row.persisted===true){state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes);if(!state.pendingHumanDeletes.some(x=>x.kind==='dmu'&&x.rowId===id))state.pendingHumanDeletes.push({kind:'dmu',rowId:id,opportunityId:row.oppId})}state.dmu=state.dmu.filter(x=>x.id!==id);renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards()}
 function seedStandardRoles(){if(phase6LiveReadOnly)return;state.dmu=state.dmu.filter(x=>x.oppId!==state.current);state.dmu.push(...seedForOpp(state.current));renderDMU(state.dmu.filter(x=>x.oppId===state.current),detailFor(state.current));calc();setLocal();renderDealCards()}
 function renderActivities(){
+ const unionEntry=workspaceCustomerEntryById(state.current);
+ if(unionEntry?.unionCustomer){renderCustomerUnionActivities(unionEntry);return;}
  let rows=state.activities.filter(x=>x.oppId===state.current);const legacy=legacyActivitiesForCurrent();const ai=activityFor(state.current);const seen=new Set(rows.map(x=>x.id));
  for(const a of [...legacy,...ai])if(!seen.has(a.id)){rows.push(a);seen.add(a.id)}
  rows=rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
  const visible=showAllActivities?rows:rows.slice(0,10),more=rows.length>10&&!showAllActivities;
  document.getElementById('activityList').innerHTML=visible.map(a=>`<li><b>${esc(a.date)} • ${esc(a.type)}${a.legacy?' • Legacy':''}</b><br>${esc(a.note)}</li>`).join('')+(more?'<li><button class="btn secondary" type="button" onclick="showMoreActivities()">Show More</button></li>':'')||'<li>No activities yet</li>'
 }
+
 function showMoreActivities(){showAllActivities=true;renderActivities()}
-function addActivity(){const note=document.getElementById('actNote').value.trim();if(!note||!state.current)return;state.activities.push({id:`${state.current}-A-${Date.now()}`,oppId:state.current,date:document.getElementById('actDate').value||new Date().toISOString().slice(0,10),type:document.getElementById('actType').value,note,humanConfirmed:true,persisted:false,dirty:true});document.getElementById('actNote').value='';renderActivities();setLocal()}
+function addActivity(){
+ if(String(state.current||'')===YARA_CMI_CUSTOMER_UNION_ID){flashConn(true,'Unified customer view is read-only • source Opportunities remain authoritative');return;}
+ const note=document.getElementById('actNote').value.trim();if(!note||!state.current)return;
+ state.activities.push({id:`${state.current}-A-${Date.now()}`,oppId:state.current,date:document.getElementById('actDate').value||new Date().toISOString().slice(0,10),type:document.getElementById('actType').value,note,humanConfirmed:true,persisted:false,dirty:true});
+ document.getElementById('actNote').value='';renderActivities();setLocal()
+}
+
 function loadStrategy(oppId){const key='strategy_'+oppId,s=state[key]||{};['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(k=>setVal(k,s[k]||''))}
 function saveStrategy(){if(phase6LiveReadOnly)return;state['strategy_'+state.current]={};['diagnosis','nextAction','championTest','decisionProcess','winTheme','missingInfo'].forEach(k=>state['strategy_'+state.current][k]=document.getElementById(k).value)}
 function calc(){
@@ -1378,6 +1638,7 @@ function applyProductionDeals(){
  phase6CanonicalDeals=deals;
  const active=deals.filter(d=>!isArchivedOpportunity(d.id));
  state.opportunities=active;
+ state.current=workspaceCustomerIdForOpportunity(state.current);
  const workspace=workspaceCustomerEntries();
  if(!workspace.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
  if(!workspace.some(d=>d.id===state.current))state.current=workspace[0].id;
@@ -1461,13 +1722,20 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  setPhase6LiveReadOnly(true);
  applyProductionDeals();
  let overlayAvailable=true;
+ const currentWorkspaceEntry=workspaceCustomerEntryById(state.current);
  if(state.current&&!skipHumanOverlay){
-   try{await loadHumanOverlay(state.current)}
-   catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
+   try{
+     if(currentWorkspaceEntry?.unionCustomer){
+       const loaded=await loadCustomerUnionHumanOverlays(currentWorkspaceEntry);
+       overlayAvailable=loaded===unionEntryChildIds(currentWorkspaceEntry).length;
+     }else{
+       await loadHumanOverlay(state.current);
+     }
+   }catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
  }
  if(state.current)loadSelectedOpportunity();
  renderManagementStories();
- renderSourceFreshness(detailFor(state.current));
+ if(!currentWorkspaceEntry?.unionCustomer)renderSourceFreshness(detailFor(state.current));
  const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
  const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
  const financeStatus=financeQuotationCoverageAvailable?' • Finance quotes '+financeQuotationCustomers.length:' • Finance quotes unavailable';
@@ -2146,17 +2414,26 @@ function clearHistoricalQuotationFilters(){
  renderArchivedQuotations();
 }
 async function openDealCard(id){
- state.current=id;const sel=document.getElementById('oppSelect');if(sel)sel.value=id;
+ const sourceId=String(id||'').trim();
+ const workspaceId=workspaceCustomerIdForOpportunity(sourceId);
+ state.current=workspaceId;const sel=document.getElementById('oppSelect');if(sel)sel.value=workspaceId;
  loadSelectedOpportunity();navTo('viewDMU');renderDealCards();
  if(!hexaAccount)return;
  try{
-   const applied=await loadHumanOverlay(id);
-   if(applied&&state.current===id)loadSelectedOpportunity();
+   const entry=workspaceCustomerEntryById(workspaceId);
+   if(entry?.unionCustomer){
+     await loadCustomerUnionHumanOverlays(entry);
+     if(state.current===workspaceId)loadSelectedOpportunity();
+   }else{
+     const applied=await loadHumanOverlay(sourceId);
+     if(applied&&state.current===sourceId)loadSelectedOpportunity();
+   }
  }catch(e){
    renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);
-   console.warn('Human overlay load failed while opening deal',e);
+   console.warn('Human overlay load failed while opening customer',e);
  }
 }
+
 function scrollToId(id){const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'center'})}
 function goQuickActivity(){navTo('viewActivity'); setTimeout(()=>scrollToId('actNote'),250)}
 function navTo(id,btn){
