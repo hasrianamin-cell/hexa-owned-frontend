@@ -49,8 +49,10 @@ jobs:
             echo "prodOtherSalesTopics=$(marker evidence/prod.html otherSalesTopicStories)"
             echo "prodContextEndpoint=$(marker evidence/prod.html phase6ContextReviewModel)"
             echo "prodArchiveFallback=$(marker evidence/prod.html HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1)"
+            echo "prodFinanceQuotationWorkspace=$(marker evidence/prod.html HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1)"
             echo "stagingLeadReview=$(marker evidence/staging.html HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1)"
             echo "stagingOtherSalesTopics=$(marker evidence/staging.html otherSalesTopicStories)"
+            echo "stagingFinanceQuotationWorkspace=$(marker evidence/staging.html HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1)"
             echo "prodMatchesGoverned=$([ "$prod_sha" = "$local_sha" ] && echo true || echo false)"
             echo "stagingMatchesGoverned=$([ "$staging_sha" = "$local_sha" ] && echo true || echo false)"
           } | tee evidence/summary.txt
