@@ -20,7 +20,7 @@ concurrency:
 
 env:
   EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
-  EXPECTED_DMU_SHA256: f03eaf4f98191aea4e23c865b70529951d54b3b0dd1bdf5e7098c1d8945c1d99
+  EXPECTED_DMU_SHA256: 7c2d13bf1a2f08fe498e27d2346c0d7facb1f45fe1cdbf6162a909128b3f9e70
 
 jobs:
   build:
@@ -46,6 +46,9 @@ jobs:
           grep -q 'HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1' teams/dmu/index.html
           grep -q 'HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1' teams/dmu/index.html
           grep -q 'HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1' teams/dmu/index.html
+          grep -q 'HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1' teams/dmu/index.html
+          grep -q 'function loadFinanceQuotationCustomers()' teams/dmu/index.html
+          grep -q 'No Opportunity is created automatically' teams/dmu/index.html
           grep -q 'function archiveDealByOpportunityId(opportunityId)' teams/dmu/index.html
           grep -q "redirectUri:location.origin+'/teams/dmu'" teams/dmu/index.html
 
@@ -119,6 +122,9 @@ jobs:
           grep -q 'HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1' verify/dmu.html
           grep -q 'HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1' verify/dmu.html
           grep -q 'HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1' verify/dmu.html
+          grep -q 'HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1' verify/dmu.html
+          grep -q 'function loadFinanceQuotationCustomers()' verify/dmu.html
+          grep -q 'No Opportunity is created automatically' verify/dmu.html
 
           {
             echo "HEXA_OWNED_FRONTEND_PAGES_STAGING=PASS"
