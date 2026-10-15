@@ -1638,6 +1638,7 @@ function applyProductionDeals(){
  phase6CanonicalDeals=deals;
  const active=deals.filter(d=>!isArchivedOpportunity(d.id));
  state.opportunities=active;
+ state.current=workspaceCustomerIdForOpportunity(state.current);
  const workspace=workspaceCustomerEntries();
  if(!workspace.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
  if(!workspace.some(d=>d.id===state.current))state.current=workspace[0].id;
@@ -1721,13 +1722,20 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  setPhase6LiveReadOnly(true);
  applyProductionDeals();
  let overlayAvailable=true;
+ const currentWorkspaceEntry=workspaceCustomerEntryById(state.current);
  if(state.current&&!skipHumanOverlay){
-   try{await loadHumanOverlay(state.current)}
-   catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
+   try{
+     if(currentWorkspaceEntry?.unionCustomer){
+       const loaded=await loadCustomerUnionHumanOverlays(currentWorkspaceEntry);
+       overlayAvailable=loaded===unionEntryChildIds(currentWorkspaceEntry).length;
+     }else{
+       await loadHumanOverlay(state.current);
+     }
+   }catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
  }
  if(state.current)loadSelectedOpportunity();
  renderManagementStories();
- renderSourceFreshness(detailFor(state.current));
+ if(!currentWorkspaceEntry?.unionCustomer)renderSourceFreshness(detailFor(state.current));
  const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
  const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
  const financeStatus=financeQuotationCoverageAvailable?' • Finance quotes '+financeQuotationCustomers.length:' • Finance quotes unavailable';
