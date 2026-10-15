@@ -2405,7 +2405,7 @@ function clearHistoricalQuotationFilters(){
  ['historyCustomerSearch','historyQuoteSearch','historyDateFrom','historyDateTo','historyProductSearch','historyProductFilter','historyStatusFilter','historyOpportunitySearch','historyOwnerFilter'].forEach(function(id){const el=document.getElementById(id);if(el)el.value=''});
  renderArchivedQuotations();
 }
-async async function openDealCard(id){
+async function openDealCard(id){
  const sourceId=String(id||'').trim();
  const workspaceId=workspaceCustomerIdForOpportunity(sourceId);
  state.current=workspaceId;const sel=document.getElementById('oppSelect');if(sel)sel.value=workspaceId;
