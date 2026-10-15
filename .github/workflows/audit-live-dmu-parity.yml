@@ -1,5 +1,5 @@
 name: Audit live DMU parity
-# latest_ai_hash_probe_1
+# yara_cmi_union_hash_probe_1
 
 on:
   push:
