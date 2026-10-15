@@ -392,6 +392,8 @@ let state={opportunities:[],current:null,dmu:[],activities:[],legacy:{customers:
 let phase6ReadModel=null,phase6ContextReview=null,showAllActivities=false,phase6LiveReadOnly=false;
 let humanOverlayLoadEpoch=0,currentIdentitySafe=true;
 let phase6CustomerCoverage=null,customerCoverageAvailable=false,customerCoverageStatus='Customer coverage not connected';
+let financeQuotationCustomers=[],financeQuotationCoverageAvailable=false,financeQuotationCoverageStatus='Finance quotation source not connected';
+const HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1=true;
 let phase6CanonicalDeals=[],customerArchiveMap=new Map(),opportunityArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
 const CMI_OPPORTUNITY_ID='OPP-2608-019';
 const CMI_GOLDEN=null;
@@ -456,7 +458,38 @@ function init(){
   const dateInput=document.getElementById('actDate');if(dateInput)dateInput.value=new Date().toISOString().slice(0,10);
   const freshness=document.getElementById('sourceFreshness');if(freshness)freshness.textContent='Sign in with HEXA to load latest sales data.';
 }
-function renderOppSelector(){const s=document.getElementById('oppSelect');if(!s)return;const counts=new Map();state.opportunities.forEach(o=>{const k=String(o.customer||'').trim().toLowerCase();counts.set(k,(counts.get(k)||0)+1)});s.innerHTML=state.opportunities.map(o=>{const customer=String(o.customer||'').trim()||'Unnamed customer';const duplicate=(counts.get(customer.toLowerCase())||0)>1;const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';const label=detail?customer+' · '+detail:customer;return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`}).join('');s.onchange=async()=>{loadSelectedOpportunity();if(hexaAccount&&state.current){const requested=state.current;try{const applied=await loadHumanOverlay(requested);if(applied&&state.current===requested)loadSelectedOpportunity()}catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay load failed',e)}}}}
+function normalizeWorkspaceCustomerName(value){return String(value||'').normalize('NFC').replace(/\\s+/g,' ').trim().toLocaleLowerCase()}
+function financeQuotationCustomerById(id){return financeQuotationCustomers.find(item=>item.id===String(id||''))||null}
+function workspaceCustomerEntries(){
+ const financeByName=new Map(financeQuotationCustomers.map(item=>[normalizeWorkspaceCustomerName(item.customer),item]).filter(x=>x[0]));
+ const active=state.opportunities.map(o=>{const finance=financeByName.get(normalizeWorkspaceCustomerName(o.customer));return finance?{...o,financeQuotation:true,financeFolderUrl:finance.financeFolderUrl,financeModifiedAt:finance.financeModifiedAt}:o});
+ const activeNames=new Set(active.map(o=>normalizeWorkspaceCustomerName(o.customer)).filter(Boolean));
+ const quoteOnly=financeQuotationCustomers.filter(item=>!activeNames.has(normalizeWorkspaceCustomerName(item.customer)));
+ return [...active,...quoteOnly];
+}
+function workspaceCustomerEntryById(id){return workspaceCustomerEntries().find(item=>item.id===String(id||''))||null}
+function renderOppSelector(){
+ const s=document.getElementById('oppSelect');if(!s)return;
+ const entries=workspaceCustomerEntries();
+ const counts=new Map();entries.forEach(o=>{const k=normalizeWorkspaceCustomerName(o.customer);counts.set(k,(counts.get(k)||0)+1)});
+ s.innerHTML=entries.map(o=>{
+   const customer=String(o.customer||'').trim()||'Unnamed customer';
+   const duplicate=(counts.get(normalizeWorkspaceCustomerName(customer))||0)>1;
+   const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';
+   const financeTag=o.financeQuotation?' • Finance Quote'+(o.id.startsWith('FINQ:')?' • Review Required':''):'';
+   const label=(detail?customer+' · '+detail:customer)+financeTag;
+   return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`;
+ }).join('');
+ s.onchange=async()=>{
+   loadSelectedOpportunity();
+   const selected=workspaceCustomerEntryById(state.current);
+   if(hexaAccount&&state.current&&selected&&!selected.financeQuotation){
+     const requested=state.current;
+     try{const applied=await loadHumanOverlay(requested);if(applied&&state.current===requested)loadSelectedOpportunity()}
+     catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay load failed',e)}
+   }
+ }
+}
 
 function setPhase6LiveReadOnly(enabled){
  phase6LiveReadOnly=!!enabled;
@@ -859,6 +892,13 @@ function loadSelectedOpportunity(){
  if(!selectedOpportunityId){renderDealCards();return;}
  showAllActivities=false;
  clearLiveDealBinding();
+ const financeOnly=financeQuotationCustomerById(selectedOpportunityId);
+ if(financeOnly){
+   currentIdentitySafe=false;
+   setVal('oppId','');setVal('customer',financeOnly.customer);setVal('salesOwner','');setVal('quoteNo','');setVal('offer',financeOnly.offer);setVal('stage','Quotation');setVal('pipelineProb','');setVal('competitors','');setVal('keyContact','');setVal('keyContactRole','');
+   renderFinanceQuotationWorkspace(financeOnly);
+   renderDMU([],null);renderActivities();renderSourceFreshness(null);refreshExecutiveDealBrief();refreshArchiveCurrentCustomerButton();calc();setLocal();renderDealCards();return;
+ }
  const o=state.opportunities.find(x=>x.id===selectedOpportunityId);if(!o)return;refreshArchiveCurrentCustomerButton();
  const live=liveDeal(selectedOpportunityId),d360=detailFor(selectedOpportunityId),story=contextStoryFor(selectedOpportunityId);
  const identitySafe=validateDealBinding(selectedOpportunityId,o,live,d360,story);
@@ -1046,6 +1086,9 @@ const PHASE6_LEAD_REVIEW_PROMOTION_CONFIRMATION='PHASE6-LEAD-REVIEW-PROMOTION-V1
 const PHASE6_HUMAN_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay';
 const PHASE6_CUSTOMER_ARCHIVE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerArchive';
 const PHASE6_CUSTOMER_COVERAGE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerCoverage';
+const FINANCE_QUOTATION_SITE_HOST='hexahessmanth.sharepoint.com';
+const FINANCE_QUOTATION_SITE_PATH='/sites/FinanceAcounting';
+const FINANCE_QUOTATION_FOLDER_SEGMENTS=['Accounting','ราคาเสนอขาย_Sale'];
 const HEXA_LAST_USERNAME_KEY='hexa.lastUsername';
 const HEXA_LAST_HOME_ACCOUNT_ID_KEY='hexa.lastHomeAccountId';
 const HEXA_AUTH_BRIDGE_URI=location.origin+'/teams/dmu';
@@ -1335,8 +1378,9 @@ function applyProductionDeals(){
  phase6CanonicalDeals=deals;
  const active=deals.filter(d=>!isArchivedOpportunity(d.id));
  state.opportunities=active;
- if(!active.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
- if(!active.some(d=>d.id===state.current))state.current=active[0].id;
+ const workspace=workspaceCustomerEntries();
+ if(!workspace.length){state.current=null;renderOppSelector();renderDealCards();renderArchivedCustomers();refreshArchiveCurrentCustomerButton();return}
+ if(!workspace.some(d=>d.id===state.current))state.current=workspace[0].id;
  renderOppSelector();loadSelectedOpportunity();renderArchivedCustomers();refreshArchiveCurrentCustomerButton()
 }
 async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
@@ -1406,6 +1450,14 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
    console.warn('Customer coverage fetch unavailable',coverageResult.reason);
  }
 
+ financeQuotationCustomers=[];
+ financeQuotationCoverageAvailable=false;
+ try{
+   await loadFinanceQuotationCustomers();
+ }catch(error){
+   financeQuotationCoverageStatus='Finance quotation source unavailable; Active DMU Deals remain usable.';
+   console.warn('Finance quotation customer source unavailable',error);
+ }
  setPhase6LiveReadOnly(true);
  applyProductionDeals();
  let overlayAvailable=true;
@@ -1418,7 +1470,8 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  renderSourceFreshness(detailFor(state.current));
  const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
  const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
- flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus);
+ const financeStatus=financeQuotationCoverageAvailable?' • Finance quotes '+financeQuotationCustomers.length:' • Finance quotes unavailable';
+ flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus+financeStatus);
  startDmuAutoRefresh();
 }
 function loadAuthenticatedAiOnce(options={}){
@@ -1459,6 +1512,65 @@ async function persistHumanOverlayCommand(command){
  return humanOverlayRequest('POST',command);
 }
 async function graph(url,opts={}){const token=await graphToken();const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok)throw new Error('SharePoint '+r.status);return r.status===204?null:r.json()}
+function cleanFinanceQuotationCustomerName(name){
+ return String(name||'').normalize('NFC')
+   .replace(/^\\s*\\d+\\s*[_-]\\s*/,'')
+   .replace(/^งานเช่า\\s*[_-]?\\s*/i,'')
+   .replace(/_/g,' ')
+   .replace(/\\s+/g,' ')
+   .trim();
+}
+function financeQuotationWorkspaceRecord(item){
+ const raw=String(item?.name||'').trim();
+ const customer=cleanFinanceQuotationCustomerName(raw)||raw||'Quotation customer';
+ return {
+   id:'FINQ:'+String(item?.id||raw),
+   customer,
+   customerId:'',
+   sales:'',
+   quoteNo:'',
+   offer:'Finance-approved quotation / final price source',
+   stage:'Quotation',
+   prob:null,
+   keyContact:'',
+   keyContactRole:'',
+   financeQuotation:true,
+   financeFolderId:String(item?.id||''),
+   financeFolderName:raw,
+   financeFolderUrl:String(item?.webUrl||''),
+   financeModifiedAt:String(item?.lastModifiedDateTime||''),
+   reviewRequired:true
+ };
+}
+async function loadFinanceQuotationCustomers(){
+ financeQuotationCoverageAvailable=false;
+ financeQuotationCoverageStatus='Finance quotation source unavailable';
+ const site=await graph('/sites/'+FINANCE_QUOTATION_SITE_HOST+':'+FINANCE_QUOTATION_SITE_PATH+'?$select=id');
+ const siteId=String(site?.id||'').trim();
+ if(!siteId)throw new Error('Finance quotation SharePoint site could not be resolved.');
+ const folderPath=FINANCE_QUOTATION_FOLDER_SEGMENTS.map(encodeURIComponent).join('/');
+ const payload=await graph('/sites/'+encodeURIComponent(siteId)+'/drive/root:/'+folderPath+':/children?$top=200&$select=id,name,folder,webUrl,lastModifiedDateTime');
+ const folders=rowsOf(payload?.value).filter(item=>item?.folder&&!/^00(?:_|\\b)/i.test(String(item?.name||'')));
+ financeQuotationCustomers=folders.map(financeQuotationWorkspaceRecord).filter(item=>item.customer);
+ financeQuotationCoverageAvailable=true;
+ financeQuotationCoverageStatus='Finance quotation customers loaded • '+financeQuotationCustomers.length;
+ return financeQuotationCustomers;
+}
+function renderFinanceQuotationWorkspace(item){
+ const box=document.getElementById('latestAiPanel');
+ if(box){
+   const sourceLink=item.financeFolderUrl?'<div style="margin-top:8px"><a href="'+esc(item.financeFolderUrl)+'" target="_blank" rel="noopener noreferrer">Open Finance quotation folder ↗</a></div>':'';
+   box.style.display='block';
+   box.innerHTML='<div class="contextLatestUpdate"><h3>Finance Quotation • Final Price Source</h3>'+
+     '<div><b>Customer:</b> '+esc(item.customer)+'</div>'+
+     '<div class="small" style="margin-top:6px">Canonical commercial source: Accounting / ราคาเสนอขาย_Sale. Final approved price must come from Finance evidence, not meeting discussion or costing assumptions.</div>'+
+     '<div class="small" style="margin-top:6px">Status: Review Required • No Opportunity is created automatically.'+
+     (item.financeModifiedAt?' • Folder updated '+esc(formatSourceDate(item.financeModifiedAt)):'')+'</div>'+sourceLink+'</div>';
+ }
+ const history=document.getElementById('quotationHistory');
+ if(history){history.hidden=false;history.textContent='Finance quotation source: '+String(item.financeFolderName||item.customer)}
+ document.getElementById('salesClosePlan').innerHTML='<div class="small">Opportunity timeline is unavailable until this quotation-backed customer is linked to an existing or human-approved Opportunity.</div>';
+}
 async function graphIds(){if(hexaListId)return;const site=await graph('/sites/'+HEXA_GRAPH.host+':'+HEXA_GRAPH.path);hexaSiteId=site.id;const lists=await graph('/sites/'+hexaSiteId+'/lists?$select=id,displayName');const list=lists.value.find(x=>x.displayName===HEXA_GRAPH.list);if(!list)throw new Error('Sales Opportunity list not found');hexaListId=list.id}
 async function getDmuItem(){await graphIds();const j=await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items?expand=fields');return j.value.find(x=>x.fields&&x.fields.Title===HEXA_GRAPH.title)}
 async function structuredListId(name){
