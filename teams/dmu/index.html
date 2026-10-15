@@ -467,7 +467,7 @@ function canonicalWorkspaceCustomerKey(value){
    .replace(/\\s+/g,' ')
    .trim();
  if(!n)return '';
- if(/\\byarra?\\s+power\\b/i.test(n)||/ยาร์ร่า\\s*พาวเวอร์/i.test(n)||/ยาร่า\\s*พาวเวอร์/i.test(n))return 'canonical:yara-power';
+ if(/\\bya(?:r|rr)a\\s+power\\b/i.test(n)||/ยาร์ร่า\\s*พาวเวอร์/i.test(n)||/ยาร่า\\s*พาวเวอร์/i.test(n))return 'canonical:yara-power';
  if(/(?:^|\\s)cmi(?:\\s|$)/i.test(n)||/\\bcm\\s+industry\\b/i.test(n)||/ซีเอ็ม\\s*(?:อุตสาหกรรม|อินดัสทรี)/i.test(n))return 'canonical:cmi';
  return n;
 }
