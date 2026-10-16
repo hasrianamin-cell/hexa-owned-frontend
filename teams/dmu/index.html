@@ -1161,7 +1161,6 @@ const PHASE6_LEAD_REVIEW_PROMOTE_ENDPOINT='https://func-hexa-sales-intelligence-
 const PHASE6_LEAD_REVIEW_PROMOTION_CONFIRMATION='PHASE6-LEAD-REVIEW-PROMOTION-V1';
 const PHASE6_HUMAN_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay';
 const PHASE6_CUSTOMER_ARCHIVE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerArchive';
-const PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6FinanceWorkspaceOverlay';
 const PHASE6_CUSTOMER_COVERAGE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerCoverage';
 const FINANCE_QUOTATION_SITE_HOST='hexahessmanth.sharepoint.com';
 const FINANCE_QUOTATION_SITE_PATH='/sites/FinanceAcounting';
@@ -1412,8 +1411,8 @@ async function archiveDeal(deal){
    if(!meta){flashConn(false,'Archive unavailable: Finance Workspace metadata missing.');return}
    if(!confirm('Archive '+target.label+'?\n\nThis hides this Finance Workspace from Active views. No customer, opportunity or Finance quotation data will be deleted.'))return;
    try{
-     const payload=await financeWorkspaceOverlayRequest('POST',{action:'archive',...meta});
-     setFinanceWorkspaceArchivePayload(payload);
+     const payload=await customerArchiveRequest('POST',{action:'archive',...meta});
+     setCustomerArchivePayload(payload);setFinanceWorkspaceArchivePayload(payload);
      applyProductionDeals();renderManagementStories();renderArchivedCustomers();
      flashConn(true,'Archived Finance Workspace • '+target.label+' can be recalled later');
    }catch(e){flashConn(false,'Finance Workspace archive failed: '+authErrorDetail(e));console.error('Finance Workspace archive failed',e)}
@@ -1447,7 +1446,7 @@ async function recallArchived(scope,id){
    const archived=financeWorkspaceArchiveMap.get(normalized);
    if(!archived){flashConn(false,'Finance Workspace archive record not found.');return}
    try{
-     const payload=await financeWorkspaceOverlayRequest('POST',{
+     const payload=await customerArchiveRequest('POST',{
        action:'recall',
        workspaceId:normalized,
        financeFolderId:String(archived.financeFolderId||normalized.replace(/^FINQ:/,'')),
@@ -1455,7 +1454,7 @@ async function recallArchived(scope,id){
        financeFolderUrl:String(archived.financeFolderUrl||''),
        customerName:String(archived.customerName||'')
      });
-     setFinanceWorkspaceArchivePayload(payload);
+     setCustomerArchivePayload(payload);setFinanceWorkspaceArchivePayload(payload);
      applyProductionDeals();renderManagementStories();renderArchivedCustomers();
      flashConn(true,'Finance Workspace recalled to Active views');
    }catch(e){flashConn(false,'Finance Workspace recall failed: '+authErrorDetail(e));console.error('Finance Workspace recall failed',e)}
@@ -1506,12 +1505,11 @@ function applyProductionDeals(){
 async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  const token=await phase5ReviewToken();
  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
- const [dmuResult,contextResult,archiveResult,coverageResult,financeWorkspaceResult]=await Promise.allSettled([
+ const [dmuResult,contextResult,archiveResult,coverageResult]=await Promise.allSettled([
    fetch(PHASE6_DMU_READ_ENDPOINT,{headers}),
    fetch(PHASE6_CONTEXT_REVIEW_ENDPOINT,{headers}),
    fetch(PHASE6_CUSTOMER_ARCHIVE_ENDPOINT,{headers}),
-   fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers}),
-   fetch(PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT,{headers})
+   fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers})
  ]);
  if(dmuResult.status!=='fulfilled'){
    const detail=authErrorDetail(dmuResult.reason);
@@ -1537,6 +1535,9 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  customerArchiveAvailable=false;
  customerArchiveMap=new Map();
  opportunityArchiveMap=new Map();
+ financeWorkspaceOverlayAvailable=false;
+ financeWorkspaceArchiveMap=new Map();
+ financeWorkspaceOverlayStatus='Finance Workspace overlay unavailable';
  if(archiveResult.status==='fulfilled'){
    const archiveResponse=archiveResult.value;
    const archivePayload=await archiveResponse.json().catch(()=>null);
@@ -1544,6 +1545,9 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
      customerArchiveAvailable=true;
      customerArchiveStatus='Archive service connected';
      setCustomerArchivePayload(archivePayload);
+     setFinanceWorkspaceArchivePayload(archivePayload);
+     financeWorkspaceOverlayAvailable=archivePayload?.governance?.financeWorkspaceOverlay===true;
+     financeWorkspaceOverlayStatus=financeWorkspaceOverlayAvailable?'Finance Workspace DMU/Archive connected':'Finance Workspace capability unavailable on Archive service';
    }else{
      customerArchiveStatus=String(archivePayload?.error||('Archive service unavailable (HTTP '+archiveResponse.status+').'));
      console.warn(customerArchiveStatus);
@@ -1571,24 +1575,6 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
    console.warn('Customer coverage fetch unavailable',coverageResult.reason);
  }
 
- financeWorkspaceOverlayAvailable=false;
- financeWorkspaceArchiveMap=new Map();
- if(financeWorkspaceResult.status==='fulfilled'){
-   const financeWorkspaceResponse=financeWorkspaceResult.value;
-   const financeWorkspacePayload=await financeWorkspaceResponse.json().catch(()=>null);
-   if(financeWorkspaceResponse.ok){
-     financeWorkspaceOverlayAvailable=true;
-     financeWorkspaceOverlayStatus='Finance Workspace overlay connected';
-     setFinanceWorkspaceArchivePayload(financeWorkspacePayload);
-   }else{
-     financeWorkspaceOverlayStatus=String(financeWorkspacePayload?.error||('Finance Workspace overlay unavailable (HTTP '+financeWorkspaceResponse.status+').'));
-     console.warn(financeWorkspaceOverlayStatus);
-   }
- }else{
-   financeWorkspaceOverlayStatus='Finance Workspace overlay unavailable; Finance quotations remain read-only.';
-   console.warn('Finance Workspace overlay fetch unavailable',financeWorkspaceResult.reason);
- }
-
  financeQuotationCustomers=[];
  financeQuotationCoverageAvailable=false;
  try{
@@ -1612,7 +1598,7 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
  const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
  const financeStatus=financeQuotationCoverageAvailable?' • Finance quotes '+financeQuotationCustomers.length:' • Finance quotes unavailable';
- const financeWorkspaceStatus=financeWorkspaceOverlayAvailable?' • Finance Workspace DMU/Archive ready':' • Finance Workspace overlay unavailable';
+ const financeWorkspaceStatus=financeWorkspaceOverlayAvailable?' • Finance Workspace DMU/Archive ready':' • Finance Workspace capability unavailable';
  flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus+financeStatus+financeWorkspaceStatus);
  startDmuAutoRefresh();
 }
@@ -1654,23 +1640,24 @@ async function persistHumanOverlayCommand(command){
  return humanOverlayRequest('POST',command);
 }
 function setFinanceWorkspaceArchivePayload(payload){
- financeWorkspaceArchiveMap=new Map(rowsOf(payload?.archives).map(row=>[String(row?.workspaceId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
+ const financeRows=rowsOf(payload?.financeWorkspaceArchives);
+ financeWorkspaceArchiveMap=new Map(financeRows.map(row=>[String(row?.workspaceId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
 }
-async function financeWorkspaceOverlayRequest(method,body=null,workspaceId=''){
+async function financeWorkspaceHumanOverlayRequest(method,body=null,workspaceId=''){
  if(!financeWorkspaceOverlayAvailable&&method!=='GET')throw new Error(financeWorkspaceOverlayStatus||'Finance Workspace overlay unavailable');
  const token=await phase5ReviewToken();
  const url=method==='GET'&&workspaceId
-   ?PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT+'?workspaceId='+encodeURIComponent(workspaceId)
-   :PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT;
+   ?PHASE6_HUMAN_OVERLAY_ENDPOINT+'?workspaceId='+encodeURIComponent(workspaceId)
+   :PHASE6_HUMAN_OVERLAY_ENDPOINT;
  const r=await fetch(url,{method,headers:{Authorization:'Bearer '+token,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
  const payload=await r.json().catch(()=>null);
- if(!r.ok)throw new Error(String(payload?.error||('Finance Workspace overlay HTTP '+r.status)));
+ if(!r.ok)throw new Error(String(payload?.error||('Finance Workspace human overlay HTTP '+r.status)));
  return payload;
 }
 async function loadFinanceWorkspaceOverlay(workspaceId){
  if(!financeWorkspaceIdReady(workspaceId)||!hexaAccount)return false;
  const requested=String(workspaceId).trim().toUpperCase();
- const payload=await financeWorkspaceOverlayRequest('GET',null,requested);
+ const payload=await financeWorkspaceHumanOverlayRequest('GET',null,requested);
  if(state.current!==requested)return false;
  const dmu=rowsOf(payload?.dmu).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
  const activities=rowsOf(payload?.activities).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
@@ -1682,7 +1669,7 @@ async function loadFinanceWorkspaceOverlay(workspaceId){
 async function persistFinanceWorkspaceCommand(command){
  const meta=financeWorkspaceMetadata(command?.workspaceId||state.current);
  if(!meta)throw new Error('Finance Workspace metadata is unavailable.');
- return financeWorkspaceOverlayRequest('POST',{...command,...meta});
+ return financeWorkspaceHumanOverlayRequest('POST',{...command,...meta});
 }
 async function graph(url,opts={}){const token=await graphToken();const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok)throw new Error('SharePoint '+r.status);return r.status===204?null:r.json()}
 function cleanFinanceQuotationCustomerName(name){
