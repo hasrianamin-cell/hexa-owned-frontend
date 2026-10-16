@@ -394,6 +394,8 @@ let humanOverlayLoadEpoch=0,currentIdentitySafe=true;
 let phase6CustomerCoverage=null,customerCoverageAvailable=false,customerCoverageStatus='Customer coverage not connected';
 let financeQuotationCustomers=[],financeQuotationCoverageAvailable=false,financeQuotationCoverageStatus='Finance quotation source not connected';
 const HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1=true;
+let financeWorkspaceArchiveMap=new Map(),financeWorkspaceOverlayAvailable=false,financeWorkspaceOverlayStatus='Finance Workspace overlay not connected';
+const HEXA_FINANCE_WORKSPACE_DMU_ARCHIVE_2026_10_16_1=true;
 let phase6CanonicalDeals=[],customerArchiveMap=new Map(),opportunityArchiveMap=new Map(),customerArchiveAvailable=false,customerArchiveStatus='Archive service not connected';
 const CMI_OPPORTUNITY_ID='OPP-2608-019';
 const CMI_GOLDEN=null;
@@ -478,6 +480,29 @@ function canonicalWorkspaceCustomerLabel(value){
  return String(value||'').trim();
 }
 function financeQuotationCustomerById(id){return financeQuotationCustomers.find(item=>item.id===String(id||''))||null}
+function financeWorkspaceIdReady(id){return /^FINQ:[A-Z0-9]{20,80}$/.test(String(id||'').trim().toUpperCase())}
+function isArchivedFinanceWorkspace(id){return financeWorkspaceArchiveMap.has(String(id||'').trim().toUpperCase())}
+function financeWorkspaceEntryById(id){
+ const target=String(id||'').trim().toUpperCase();
+ const direct=financeQuotationCustomers.find(item=>String(item.id||'').trim().toUpperCase()===target);
+ if(direct)return direct;
+ return workspaceCustomerEntries().find(item=>String(item.id||'').trim().toUpperCase()===target&&item.financeQuotation)||null;
+}
+function financeWorkspaceMetadata(id){
+ const item=financeWorkspaceEntryById(id);
+ if(!item)return null;
+ const folder=rowsOf(item.financeFolders)[0]||item;
+ const workspaceId=String(item.id||id||'').trim().toUpperCase();
+ const financeFolderId=String(folder.financeFolderId||workspaceId.replace(/^FINQ:/,'')).trim().toUpperCase();
+ if(!financeWorkspaceIdReady(workspaceId)||workspaceId!=='FINQ:'+financeFolderId)return null;
+ return {
+   workspaceId,
+   financeFolderId,
+   financeFolderName:String(folder.financeFolderName||item.financeFolderName||item.customer||'').trim(),
+   financeFolderUrl:String(folder.financeFolderUrl||item.financeFolderUrl||'').trim(),
+   customerName:String(item.customer||folder.customer||'').trim()
+ };
+}
 function workspaceCustomerEntries(){
  const financeByKey=new Map();
  financeQuotationCustomers.forEach(item=>{
@@ -503,7 +528,7 @@ function workspaceCustomerEntries(){
  const seenQuoteKeys=new Set();
  financeQuotationCustomers.forEach(item=>{
    const key=canonicalWorkspaceCustomerKey(item.customer);
-   if(!key||activeKeys.has(key)||seenQuoteKeys.has(key))return;
+   if(!key||activeKeys.has(key)||seenQuoteKeys.has(key)||isArchivedFinanceWorkspace(item.id))return;
    seenQuoteKeys.add(key);
    const peers=financeByKey.get(key)||[item];
    quoteOnly.push({...item,customer:canonicalWorkspaceCustomerLabel(item.customer),financeFolders:peers});
@@ -519,17 +544,21 @@ function renderOppSelector(){
    const customer=String(o.customer||'').trim()||'Unnamed customer';
    const duplicate=(counts.get(canonicalWorkspaceCustomerKey(customer))||0)>1;
    const detail=duplicate?[o.offer,o.stage].filter(Boolean).join(' · '):'';
-   const financeTag=o.financeQuotation?' • Finance Quote'+(o.id.startsWith('FINQ:')?' • Review Required':''):'';
+   const financeTag=o.financeQuotation?' • Finance Quote'+(o.id.startsWith('FINQ:')?' • Workspace':''):'';
    const label=(detail?customer+' · '+detail:customer)+financeTag;
    return `<option value="${esc(o.id)}" ${o.id===state.current?'selected':''}>${esc(label)}</option>`;
  }).join('');
  s.onchange=async()=>{
    loadSelectedOpportunity();
    const selected=workspaceCustomerEntryById(state.current);
-   if(hexaAccount&&state.current&&selected&&!selected.financeQuotation){
+   if(hexaAccount&&state.current&&selected){
      const requested=state.current;
-     try{const applied=await loadHumanOverlay(requested);if(applied&&state.current===requested)loadSelectedOpportunity()}
-     catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay load failed',e)}
+     try{
+       const applied=financeWorkspaceIdReady(requested)
+         ?await loadFinanceWorkspaceOverlay(requested)
+         :await loadHumanOverlay(requested);
+       if(applied&&state.current===requested)loadSelectedOpportunity();
+     }catch(e){renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Workspace overlay load failed',e)}
    }
  }
 }
@@ -937,10 +966,11 @@ function loadSelectedOpportunity(){
  clearLiveDealBinding();
  const financeOnly=financeQuotationCustomerById(selectedOpportunityId);
  if(financeOnly){
-   currentIdentitySafe=false;
+   currentIdentitySafe=true;
    setVal('oppId','');setVal('customer',financeOnly.customer);setVal('salesOwner','');setVal('quoteNo','');setVal('offer',financeOnly.offer);setVal('stage','Quotation');setVal('pipelineProb','');setVal('competitors','');setVal('keyContact','');setVal('keyContactRole','');
    renderFinanceQuotationWorkspace(financeOnly);
-   renderDMU([],null);renderActivities();renderSourceFreshness(null);refreshExecutiveDealBrief();refreshArchiveCurrentCustomerButton();calc();setLocal();renderDealCards();return;
+   const financeDmu=state.dmu.filter(x=>x.oppId===selectedOpportunityId&&x.humanConfirmed===true);
+   renderDMU(financeDmu,null);renderActivities();renderSourceFreshness(null);refreshExecutiveDealBrief();refreshArchiveCurrentCustomerButton();calc();setLocal();renderDealCards();return;
  }
  const o=state.opportunities.find(x=>x.id===selectedOpportunityId);if(!o)return;refreshArchiveCurrentCustomerButton();
  const workspaceEntry=workspaceCustomerEntryById(selectedOpportunityId)||o;
@@ -979,7 +1009,8 @@ function supportOptions(v){return [[0,'?'],[1,'Against'],[2,'Neutral'],[3,'Suppo
 function statusOptions(v){return ['Unknown','Known','To Confirm','Critical Unknown','Confirmed'].map(x=>`<option ${v===x?'selected':''}>${x}</option>`).join('')}
 function syncDMU(){const rows=[...document.querySelectorAll('#dmuTable tbody tr:not([data-ai="1"])')];const ids=new Set(rows.map(r=>r.dataset.id));state.dmu=state.dmu.filter(x=>x.oppId!==state.current||ids.has(x.id));rows.forEach(tr=>{let obj=state.dmu.find(x=>x.id===tr.dataset.id);if(!obj){obj={id:tr.dataset.id,oppId:state.current,humanConfirmed:true,persisted:false};state.dmu.push(obj)}tr.querySelectorAll('[data-k]').forEach(el=>obj[el.dataset.k]=el.type==='number'?parseFloat(el.value)||0:el.tagName==='SELECT'?el.value:el.value);obj.support=+obj.support;obj.humanConfirmed=true;obj.dirty=true});setLocal()}
 function humanOverlayOpportunityReady(opportunityId=state.current){const id=String(opportunityId||'').trim();return /^OPP-\d{4}-\d{3,}$/.test(id)&&state.opportunities.some(o=>o.id===id)}
-function addDMURow(){if(!humanOverlayOpportunityReady()){flashConn(false,'เลือกงานขายที่ยืนยันแล้วก่อนเพิ่ม DMU');return}syncDMU();const id=`${state.current}-H-${Date.now()}`;state.dmu.push({id,oppId:state.current,role:'New Role',person:'',power:1,support:0,care:'',win:'',strategy:'',status:'Unknown',humanConfirmed:true,persisted:false,dirty:true});renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards();setPhase6LiveReadOnly(phase6LiveReadOnly)}
+function humanOverlayWorkspaceReady(workspaceId=state.current){return humanOverlayOpportunityReady(workspaceId)||(financeWorkspaceIdReady(workspaceId)&&!!financeWorkspaceMetadata(workspaceId)&&financeWorkspaceOverlayAvailable)}
+function addDMURow(){if(!humanOverlayWorkspaceReady()){flashConn(false,'เลือก Opportunity หรือ Finance Workspace ที่พร้อมก่อนเพิ่ม DMU');return}syncDMU();const id=`${state.current}-H-${Date.now()}`;state.dmu.push({id,oppId:state.current,role:'New Role',person:'',power:1,support:0,care:'',win:'',strategy:'',status:'Unknown',humanConfirmed:true,persisted:false,dirty:true});renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards();setPhase6LiveReadOnly(phase6LiveReadOnly)}
 function removeDMU(id){const row=state.dmu.find(x=>x.id===id);if(!row||row.humanConfirmed!==true)return;if(row.persisted===true){state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes);if(!state.pendingHumanDeletes.some(x=>x.kind==='dmu'&&x.rowId===id))state.pendingHumanDeletes.push({kind:'dmu',rowId:id,opportunityId:row.oppId})}state.dmu=state.dmu.filter(x=>x.id!==id);renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards()}
 function seedStandardRoles(){if(phase6LiveReadOnly)return;state.dmu=state.dmu.filter(x=>x.oppId!==state.current);state.dmu.push(...seedForOpp(state.current));renderDMU(state.dmu.filter(x=>x.oppId===state.current),detailFor(state.current));calc();setLocal();renderDealCards()}
 function renderActivities(){
@@ -1130,6 +1161,7 @@ const PHASE6_LEAD_REVIEW_PROMOTE_ENDPOINT='https://func-hexa-sales-intelligence-
 const PHASE6_LEAD_REVIEW_PROMOTION_CONFIRMATION='PHASE6-LEAD-REVIEW-PROMOTION-V1';
 const PHASE6_HUMAN_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6HumanOverlay';
 const PHASE6_CUSTOMER_ARCHIVE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerArchive';
+const PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6FinanceWorkspaceOverlay';
 const PHASE6_CUSTOMER_COVERAGE_ENDPOINT='https://func-hexa-sales-intelligence-hacackeudjhbfzfd.southeastasia-01.azurewebsites.net/api/phase6CustomerCoverage';
 const FINANCE_QUOTATION_SITE_HOST='hexahessmanth.sharepoint.com';
 const FINANCE_QUOTATION_SITE_PATH='/sites/FinanceAcounting';
@@ -1321,16 +1353,18 @@ function renderArchivedCustomers(){
  const box=document.getElementById('archivedCustomerList');if(!box)return;
  const customerRows=[...customerArchiveMap.values()].map(row=>({...row,scope:'customer'}));
  const opportunityRows=[...opportunityArchiveMap.values()].map(row=>({...row,scope:'opportunity'}));
- const rows=[...customerRows,...opportunityRows].sort((a,b)=>String(a.customerName||'').localeCompare(String(b.customerName||''),undefined,{sensitivity:'base'}));
- setText('archivedCustomerCount',customerArchiveAvailable?(rows.length+' archived'):'Archive unavailable');
- if(!customerArchiveAvailable){box.innerHTML='<div class="small">Archive service unavailable. Active customer views remain unchanged and Archive/Recall controls are disabled.</div>';return}
- if(!rows.length){box.innerHTML='<div class="small">No archived customers or opportunities.</div>';return}
+ const financeRows=[...financeWorkspaceArchiveMap.values()].map(row=>({...row,scope:'finance-workspace'}));
+ const rows=[...customerRows,...opportunityRows,...financeRows].sort((a,b)=>String(a.customerName||'').localeCompare(String(b.customerName||''),undefined,{sensitivity:'base'}));
+ const available=customerArchiveAvailable||financeWorkspaceOverlayAvailable;
+ setText('archivedCustomerCount',available?(rows.length+' archived'):'Archive unavailable');
+ if(!available){box.innerHTML='<div class="small">Archive services unavailable. Active customer views remain unchanged and Archive/Recall controls are disabled.</div>';return}
+ if(!rows.length){box.innerHTML='<div class="small">No archived customers, opportunities or Finance Workspaces.</div>';return}
  box.innerHTML=rows.map(row=>{
    const when=row.archivedAt?formatSourceDate(row.archivedAt):'';
-   const scope=row.scope==='opportunity'?'Opportunity-scoped':'Customer-scoped';
-   const id=row.scope==='opportunity'?row.opportunityId:row.customerId;
+   const scope=row.scope==='finance-workspace'?'Finance Workspace':row.scope==='opportunity'?'Opportunity-scoped':'Customer-scoped';
+   const id=row.scope==='finance-workspace'?row.workspaceId:row.scope==='opportunity'?row.opportunityId:row.customerId;
    const meta=[scope,id,when?'Archived '+when:''].filter(Boolean).join(' • ');
-   const label=row.customerName||row.opportunityName||id;
+   const label=row.customerName||row.opportunityName||row.financeFolderName||id;
    return '<div class="archiveRow"><div><div class="name">'+esc(label)+'</div><div class="meta">'+esc(meta)+'</div></div><button class="btn secondary" type="button" onclick="recallArchived(\''+esc(row.scope)+'\',\''+esc(id)+'\')">Recall</button></div>';
  }).join('');
 }
@@ -1361,16 +1395,31 @@ function resolveArchiveCustomerId(deal){
 }
 function archiveDescriptor(deal){
  if(!deal)return null;
+ const workspaceId=String(deal.id||'').trim().toUpperCase();
+ if(financeWorkspaceIdReady(workspaceId))return {scope:'finance-workspace',workspaceId,label:String(deal.customer||workspaceId)};
  const customerId=resolveArchiveCustomerId(deal);
  if(/^CUS-\d{6}$/.test(customerId))return {scope:'customer',customerId,opportunityId:'',label:String(deal.customer||customerId)};
- const opportunityId=String(deal.id||'').trim().toUpperCase();
+ const opportunityId=workspaceId;
  if(/^OPP-\d{4}-\d{3,}$/.test(opportunityId))return {scope:'opportunity',customerId:'',opportunityId,label:String(deal.customer||opportunityId)};
  return null;
 }
 async function archiveDeal(deal){
- if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
  const target=archiveDescriptor(deal);
- if(!target){flashConn(false,'Archive unavailable: no canonical CustomerID or OpportunityID.');return}
+ if(!target){flashConn(false,'Archive unavailable: no governed workspace identity.');return}
+ if(target.scope==='finance-workspace'){
+   if(!financeWorkspaceOverlayAvailable){flashConn(false,financeWorkspaceOverlayStatus||'Finance Workspace overlay unavailable.');return}
+   const meta=financeWorkspaceMetadata(target.workspaceId);
+   if(!meta){flashConn(false,'Archive unavailable: Finance Workspace metadata missing.');return}
+   if(!confirm('Archive '+target.label+'?\n\nThis hides this Finance Workspace from Active views. No customer, opportunity or Finance quotation data will be deleted.'))return;
+   try{
+     const payload=await financeWorkspaceOverlayRequest('POST',{action:'archive',...meta});
+     setFinanceWorkspaceArchivePayload(payload);
+     applyProductionDeals();renderManagementStories();renderArchivedCustomers();
+     flashConn(true,'Archived Finance Workspace • '+target.label+' can be recalled later');
+   }catch(e){flashConn(false,'Finance Workspace archive failed: '+authErrorDetail(e));console.error('Finance Workspace archive failed',e)}
+   return;
+ }
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
  const body=target.scope==='customer'
    ?{action:'archive',customerId:target.customerId}
    :{action:'archive',opportunityId:target.opportunityId};
@@ -1381,9 +1430,7 @@ async function archiveDeal(deal){
  try{
    const payload=await customerArchiveRequest('POST',body);
    setCustomerArchivePayload(payload);
-   applyProductionDeals();
-   renderManagementStories();
-   renderArchivedCustomers();
+   applyProductionDeals();renderManagementStories();renderArchivedCustomers();
    flashConn(true,'Archived • '+target.label+' can be recalled later');
  }catch(e){flashConn(false,'Archive failed: '+authErrorDetail(e));console.error('Archive failed',e)}
 }
@@ -1394,38 +1441,57 @@ async function archiveDealByOpportunityId(opportunityId){
  await archiveDeal(deal);
 }
 async function recallArchived(scope,id){
- if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
  const normalized=String(id||'').trim().toUpperCase();
+ if(scope==='finance-workspace'){
+   if(!financeWorkspaceOverlayAvailable){flashConn(false,financeWorkspaceOverlayStatus||'Finance Workspace overlay unavailable.');return}
+   const archived=financeWorkspaceArchiveMap.get(normalized);
+   if(!archived){flashConn(false,'Finance Workspace archive record not found.');return}
+   try{
+     const payload=await financeWorkspaceOverlayRequest('POST',{
+       action:'recall',
+       workspaceId:normalized,
+       financeFolderId:String(archived.financeFolderId||normalized.replace(/^FINQ:/,'')),
+       financeFolderName:String(archived.financeFolderName||''),
+       financeFolderUrl:String(archived.financeFolderUrl||''),
+       customerName:String(archived.customerName||'')
+     });
+     setFinanceWorkspaceArchivePayload(payload);
+     applyProductionDeals();renderManagementStories();renderArchivedCustomers();
+     flashConn(true,'Finance Workspace recalled to Active views');
+   }catch(e){flashConn(false,'Finance Workspace recall failed: '+authErrorDetail(e));console.error('Finance Workspace recall failed',e)}
+   return;
+ }
+ if(!customerArchiveAvailable){flashConn(false,customerArchiveStatus||'Archive service unavailable.');return}
  const body=scope==='opportunity'
    ?{action:'recall',opportunityId:normalized}
    :{action:'recall',customerId:normalized};
  try{
    const payload=await customerArchiveRequest('POST',body);
    setCustomerArchivePayload(payload);
-   applyProductionDeals();
-   renderManagementStories();
-   renderArchivedCustomers();
+   applyProductionDeals();renderManagementStories();renderArchivedCustomers();
    flashConn(true,'Recalled to Active views');
  }catch(e){flashConn(false,'Recall failed: '+authErrorDetail(e));console.error('Archive recall failed',e)}
 }
 async function archiveCurrentCustomer(){
- const deal=state.opportunities.find(o=>o.id===state.current);
+ const deal=workspaceCustomerEntryById(state.current);
  if(!deal){flashConn(false,'Select an active customer first.');return}
  await archiveDeal(deal);
 }
 function refreshArchiveCurrentCustomerButton(){
  const btn=document.getElementById('archiveCurrentCustomerButton');if(!btn)return;
- const deal=state.opportunities.find(o=>o.id===state.current);
+ const deal=workspaceCustomerEntryById(state.current);
  const target=archiveDescriptor(deal);
- const ready=customerArchiveAvailable&&!!target;
+ const ready=!!target&&(target.scope==='finance-workspace'?financeWorkspaceOverlayAvailable:customerArchiveAvailable);
  btn.disabled=!ready;
- btn.title=!customerArchiveAvailable
-   ?(customerArchiveStatus||'Archive service unavailable.')
-   :!ready
-     ?'Archive requires a canonical CustomerID or exact OpportunityID.'
-     :target.scope==='customer'
-       ?'Archive this customer from Active views. Recall remains available.'
-       :'CustomerID is not linked; archive will be safely scoped to this exact OpportunityID.';
+ btn.title=!target
+   ?'Archive requires a governed Customer, Opportunity or Finance Workspace identity.'
+   :target.scope==='finance-workspace'
+     ?(financeWorkspaceOverlayAvailable?'Archive this Finance Workspace. Recall remains available.':financeWorkspaceOverlayStatus||'Finance Workspace overlay unavailable.')
+     :!customerArchiveAvailable
+       ?(customerArchiveStatus||'Archive service unavailable.')
+       :target.scope==='customer'
+         ?'Archive this customer from Active views. Recall remains available.'
+         :'CustomerID is not linked; archive will be safely scoped to this exact OpportunityID.';
 }
 function applyProductionDeals(){
  const deals=rowsOf(phase6ReadModel?.deals).map(d=>({id:idOf(d),customerId:String(valueOf(d.CustomerID,d.customerId,d.CustomerId)).trim().toUpperCase(),customer:valueOf(d.Customer,d.CustomerName,'Customer name pending'),sales:valueOf(d.Owner,d.SalesOwner),quoteNo:valueOf(d.LatestQuotationNo,d.LatestQuoteNo),offer:valueOf(d.OpportunityName,d.SolutionSummary),stage:valueOf(d.StageCode,d.Stage,'Lead'),prob:(d.Probability===undefined||d.Probability===null||d.Probability==='')?null:Number(d.Probability),keyContact:valueOf(d.ContactPerson,d.ContactName),keyContactRole:valueOf(d.ContactRole)})).filter(d=>d.id).map(d=>({...d,customerId:resolveArchiveCustomerId(d)||d.customerId}));
@@ -1440,11 +1506,12 @@ function applyProductionDeals(){
 async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  const token=await phase5ReviewToken();
  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
- const [dmuResult,contextResult,archiveResult,coverageResult]=await Promise.allSettled([
+ const [dmuResult,contextResult,archiveResult,coverageResult,financeWorkspaceResult]=await Promise.allSettled([
    fetch(PHASE6_DMU_READ_ENDPOINT,{headers}),
    fetch(PHASE6_CONTEXT_REVIEW_ENDPOINT,{headers}),
    fetch(PHASE6_CUSTOMER_ARCHIVE_ENDPOINT,{headers}),
-   fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers})
+   fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers}),
+   fetch(PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT,{headers})
  ]);
  if(dmuResult.status!=='fulfilled'){
    const detail=authErrorDetail(dmuResult.reason);
@@ -1504,6 +1571,24 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
    console.warn('Customer coverage fetch unavailable',coverageResult.reason);
  }
 
+ financeWorkspaceOverlayAvailable=false;
+ financeWorkspaceArchiveMap=new Map();
+ if(financeWorkspaceResult.status==='fulfilled'){
+   const financeWorkspaceResponse=financeWorkspaceResult.value;
+   const financeWorkspacePayload=await financeWorkspaceResponse.json().catch(()=>null);
+   if(financeWorkspaceResponse.ok){
+     financeWorkspaceOverlayAvailable=true;
+     financeWorkspaceOverlayStatus='Finance Workspace overlay connected';
+     setFinanceWorkspaceArchivePayload(financeWorkspacePayload);
+   }else{
+     financeWorkspaceOverlayStatus=String(financeWorkspacePayload?.error||('Finance Workspace overlay unavailable (HTTP '+financeWorkspaceResponse.status+').'));
+     console.warn(financeWorkspaceOverlayStatus);
+   }
+ }else{
+   financeWorkspaceOverlayStatus='Finance Workspace overlay unavailable; Finance quotations remain read-only.';
+   console.warn('Finance Workspace overlay fetch unavailable',financeWorkspaceResult.reason);
+ }
+
  financeQuotationCustomers=[];
  financeQuotationCoverageAvailable=false;
  try{
@@ -1516,16 +1601,19 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
  applyProductionDeals();
  let overlayAvailable=true;
  if(state.current&&!skipHumanOverlay){
-   try{await loadHumanOverlay(state.current)}
-   catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Human overlay unavailable',e)}
+   try{
+     if(financeWorkspaceIdReady(state.current))await loadFinanceWorkspaceOverlay(state.current);
+     else await loadHumanOverlay(state.current);
+   }catch(e){overlayAvailable=false;renderTeamOverlayStatus('Team-confirmed updates unavailable; core sales data remains available.',true);console.warn('Workspace overlay unavailable',e)}
  }
  if(state.current)loadSelectedOpportunity();
  renderManagementStories();
- renderSourceFreshness(detailFor(state.current));
+ renderSourceFreshness(financeWorkspaceIdReady(state.current)?null:detailFor(state.current));
  const coreStatus=contextAvailable?(overlayAvailable?'Connected • Sales data + team updates':'Connected • Sales data • team overlay unavailable'):'Connected • Sales data loaded; AI review unavailable';
  const coverageStatus=customerCoverageAvailable?' • Customer coverage ready':' • Customer coverage unavailable';
  const financeStatus=financeQuotationCoverageAvailable?' • Finance quotes '+financeQuotationCustomers.length:' • Finance quotes unavailable';
- flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus+financeStatus);
+ const financeWorkspaceStatus=financeWorkspaceOverlayAvailable?' • Finance Workspace DMU/Archive ready':' • Finance Workspace overlay unavailable';
+ flashConn(true,coreStatus+(customerArchiveAvailable?' • Archive ready':' • Archive unavailable')+coverageStatus+financeStatus+financeWorkspaceStatus);
  startDmuAutoRefresh();
 }
 function loadAuthenticatedAiOnce(options={}){
@@ -1564,6 +1652,37 @@ async function loadHumanOverlay(opportunityId){
 }
 async function persistHumanOverlayCommand(command){
  return humanOverlayRequest('POST',command);
+}
+function setFinanceWorkspaceArchivePayload(payload){
+ financeWorkspaceArchiveMap=new Map(rowsOf(payload?.archives).map(row=>[String(row?.workspaceId||'').trim().toUpperCase(),row]).filter(x=>x[0]));
+}
+async function financeWorkspaceOverlayRequest(method,body=null,workspaceId=''){
+ if(!financeWorkspaceOverlayAvailable&&method!=='GET')throw new Error(financeWorkspaceOverlayStatus||'Finance Workspace overlay unavailable');
+ const token=await phase5ReviewToken();
+ const url=method==='GET'&&workspaceId
+   ?PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT+'?workspaceId='+encodeURIComponent(workspaceId)
+   :PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT;
+ const r=await fetch(url,{method,headers:{Authorization:'Bearer '+token,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const payload=await r.json().catch(()=>null);
+ if(!r.ok)throw new Error(String(payload?.error||('Finance Workspace overlay HTTP '+r.status)));
+ return payload;
+}
+async function loadFinanceWorkspaceOverlay(workspaceId){
+ if(!financeWorkspaceIdReady(workspaceId)||!hexaAccount)return false;
+ const requested=String(workspaceId).trim().toUpperCase();
+ const payload=await financeWorkspaceOverlayRequest('GET',null,requested);
+ if(state.current!==requested)return false;
+ const dmu=rowsOf(payload?.dmu).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+ const activities=rowsOf(payload?.activities).map(x=>({...x,humanConfirmed:true,persisted:true,dirty:false}));
+ state.dmu=state.dmu.filter(x=>x.oppId!==requested||x.humanConfirmed!==true).concat(dmu);
+ state.activities=state.activities.filter(x=>x.oppId!==requested||x.humanConfirmed!==true).concat(activities);
+ state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==requested);
+ setLocal();renderTeamOverlayStatus('Finance Workspace team updates loaded.',false);return true;
+}
+async function persistFinanceWorkspaceCommand(command){
+ const meta=financeWorkspaceMetadata(command?.workspaceId||state.current);
+ if(!meta)throw new Error('Finance Workspace metadata is unavailable.');
+ return financeWorkspaceOverlayRequest('POST',{...command,...meta});
 }
 async function graph(url,opts={}){const token=await graphToken();const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok)throw new Error('SharePoint '+r.status);return r.status===204?null:r.json()}
 function cleanFinanceQuotationCustomerName(name){
@@ -1618,12 +1737,12 @@ function renderFinanceQuotationWorkspace(item){
    box.innerHTML='<div class="contextLatestUpdate"><h3>Finance Quotation • Final Price Source</h3>'+
      '<div><b>Customer:</b> '+esc(item.customer)+'</div>'+
      '<div class="small" style="margin-top:6px">Canonical commercial source: Accounting / ราคาเสนอขาย_Sale. Final approved price must come from Finance evidence, not meeting discussion or costing assumptions.</div>'+
-     '<div class="small" style="margin-top:6px">Status: Review Required • No Opportunity is created automatically.'+
+     '<div class="small" style="margin-top:6px">Status: Finance Workspace • DMU / Activity / Archive enabled • No Opportunity is created automatically.'+
      (item.financeModifiedAt?' • Folder updated '+esc(formatSourceDate(item.financeModifiedAt)):'')+'</div>'+sourceLink+'</div>';
  }
  const history=document.getElementById('quotationHistory');
  if(history){history.hidden=false;history.textContent='Finance quotation source: '+String(item.financeFolderName||item.customer)}
- document.getElementById('salesClosePlan').innerHTML='<div class="small">Opportunity timeline is unavailable until this quotation-backed customer is linked to an existing or human-approved Opportunity.</div>';
+ document.getElementById('salesClosePlan').innerHTML='<div class="small">Finance Workspace overlay is active. DMU, Activity and Archive are persisted independently until this customer is linked to a canonical Opportunity.</div>';
 }
 async function graphIds(){if(hexaListId)return;const site=await graph('/sites/'+HEXA_GRAPH.host+':'+HEXA_GRAPH.path);hexaSiteId=site.id;const lists=await graph('/sites/'+hexaSiteId+'/lists?$select=id,displayName');const list=lists.value.find(x=>x.displayName===HEXA_GRAPH.list);if(!list)throw new Error('Sales Opportunity list not found');hexaListId=list.id}
 async function getDmuItem(){await graphIds();const j=await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items?expand=fields');return j.value.find(x=>x.fields&&x.fields.Title===HEXA_GRAPH.title)}
@@ -1734,33 +1853,39 @@ function humanSavePending(){try{return localStorage.getItem(HUMAN_SAVE_PENDING_K
 function setHumanSavePending(){try{localStorage.setItem(HUMAN_SAVE_PENDING_KEY,'1')}catch(e){}try{sessionStorage.setItem(HUMAN_SAVE_PENDING_KEY,'1')}catch(e){}}
 function clearHumanSavePending(){try{localStorage.removeItem(HUMAN_SAVE_PENDING_KEY)}catch(e){}try{sessionStorage.removeItem(HUMAN_SAVE_PENDING_KEY)}catch(e){}}
 async function saveHumanUpdate(){
-  if(!humanOverlayOpportunityReady()){flashConn(false,'บันทึก DMU ได้เมื่อเลือกงานขายที่ยืนยันแล้ว');return;}
+  if(!humanOverlayWorkspaceReady()){flashConn(false,'บันทึก DMU ได้เมื่อเลือก Opportunity หรือ Finance Workspace ที่พร้อม');return;}
   syncDMU();setLocal();renderDealCards();calc();
   if(!hexaAccount){setHumanSavePending();await connectHEXA();return;}
   setHumanSavePending();
   try{
-    const opportunityId=state.current;
-    const deletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId===opportunityId);
+    const workspaceId=state.current;
+    const isFinance=financeWorkspaceIdReady(workspaceId);
+    const deletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId===workspaceId);
     for(const item of deletes){
-      await persistHumanOverlayCommand({kind:item.kind,action:'delete',opportunityId,rowId:item.rowId});
+      if(isFinance)await persistFinanceWorkspaceCommand({kind:item.kind,action:'delete',workspaceId,rowId:item.rowId});
+      else await persistHumanOverlayCommand({kind:item.kind,action:'delete',opportunityId:workspaceId,rowId:item.rowId});
     }
-    const dmuRows=state.dmu.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
+    const dmuRows=state.dmu.filter(x=>x.oppId===workspaceId&&x.humanConfirmed===true);
     for(const row of dmuRows){
-      await persistHumanOverlayCommand({kind:'dmu',action:'upsert',opportunityId,rowId:row.id,payload:{role:row.role,person:row.person,power:row.power,support:row.support,care:row.care,win:row.win,strategy:row.strategy,status:row.status}});
+      const payload={role:row.role,person:row.person,power:row.power,support:row.support,care:row.care,win:row.win,strategy:row.strategy,status:row.status};
+      if(isFinance)await persistFinanceWorkspaceCommand({kind:'dmu',action:'upsert',workspaceId,rowId:row.id,payload});
+      else await persistHumanOverlayCommand({kind:'dmu',action:'upsert',opportunityId:workspaceId,rowId:row.id,payload});
     }
-    const activities=state.activities.filter(x=>x.oppId===opportunityId&&x.humanConfirmed===true);
+    const activities=state.activities.filter(x=>x.oppId===workspaceId&&x.humanConfirmed===true);
     for(const row of activities){
-      await persistHumanOverlayCommand({kind:'activity',action:'upsert',opportunityId,rowId:row.id,payload:{date:row.date,type:row.type,note:row.note}});
+      const payload={date:row.date,type:row.type,note:row.note};
+      if(isFinance)await persistFinanceWorkspaceCommand({kind:'activity',action:'upsert',workspaceId,rowId:row.id,payload});
+      else await persistHumanOverlayCommand({kind:'activity',action:'upsert',opportunityId:workspaceId,rowId:row.id,payload});
     }
-    state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==opportunityId);
-    await loadHumanOverlay(opportunityId);
+    state.pendingHumanDeletes=rowsOf(state.pendingHumanDeletes).filter(x=>x.opportunityId!==workspaceId);
+    if(isFinance)await loadFinanceWorkspaceOverlay(workspaceId);else await loadHumanOverlay(workspaceId);
     loadSelectedOpportunity();
     clearHumanSavePending();
-    flashConn(true,'Saved • Team update confirmed');
+    flashConn(true,isFinance?'Saved • Finance Workspace team update confirmed':'Saved • Team update confirmed');
   }catch(e){
     const detail=authErrorDetail(e);
     flashConn(false,'Save pending: '+detail);
-    console.error('Human DMU overlay save failed',e);
+    console.error('Human workspace overlay save failed',e);
   }
 }
 addSignIn();
