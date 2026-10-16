@@ -20,7 +20,7 @@ concurrency:
 
 env:
   EXPECTED_WEBSITE_SCRIPT_SHA256: c5afad0dc168fdc2bc0d44b629f4e4ddcda123bf564021520b612fafaa173877
-  EXPECTED_DMU_SHA256: b1d14068afb9a4a6885147e22b7f3e2e7d275bc8df958b76260b778f8c3851fd
+  EXPECTED_DMU_SHA256: 6c7850a692c7df0c82e4eb2bd722bc81898e3749c0d99ae86fa895974231c8eb
 
 jobs:
   build:
@@ -48,6 +48,14 @@ jobs:
           grep -q 'HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1' teams/dmu/index.html
           grep -q 'HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1' teams/dmu/index.html
           grep -q 'HEXA_SEPARATE_CUSTOMER_ALIAS_UNION_YARA_CMI_2026_10_16_1' teams/dmu/index.html
+          grep -q 'HEXA_FINANCE_WORKSPACE_DMU_ARCHIVE_2026_10_16_1' teams/dmu/index.html
+          grep -q 'function financeWorkspaceHumanOverlayRequest' teams/dmu/index.html
+          grep -q 'function loadFinanceWorkspaceOverlay' teams/dmu/index.html
+          grep -q 'function persistFinanceWorkspaceCommand' teams/dmu/index.html
+          grep -q "scope==='finance-workspace'" teams/dmu/index.html
+          grep -q 'PHASE6_HUMAN_OVERLAY_ENDPOINT' teams/dmu/index.html
+          grep -q 'PHASE6_CUSTOMER_ARCHIVE_ENDPOINT' teams/dmu/index.html
+          ! grep -q 'PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT' teams/dmu/index.html
           grep -q 'canonical:yara-power' teams/dmu/index.html
           grep -q 'canonical:cmi' teams/dmu/index.html
           grep -q 'OPP-2608-019' teams/dmu/index.html
@@ -131,6 +139,14 @@ jobs:
           grep -q 'HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1' verify/dmu.html
           grep -q 'HEXA_FINANCE_QUOTATION_CUSTOMER_WORKSPACE_2026_10_15_1' verify/dmu.html
           grep -q 'HEXA_SEPARATE_CUSTOMER_ALIAS_UNION_YARA_CMI_2026_10_16_1' verify/dmu.html
+          grep -q 'HEXA_FINANCE_WORKSPACE_DMU_ARCHIVE_2026_10_16_1' verify/dmu.html
+          grep -q 'function financeWorkspaceHumanOverlayRequest' verify/dmu.html
+          grep -q 'function loadFinanceWorkspaceOverlay' verify/dmu.html
+          grep -q 'function persistFinanceWorkspaceCommand' verify/dmu.html
+          grep -q "scope==='finance-workspace'" verify/dmu.html
+          grep -q 'PHASE6_HUMAN_OVERLAY_ENDPOINT' verify/dmu.html
+          grep -q 'PHASE6_CUSTOMER_ARCHIVE_ENDPOINT' verify/dmu.html
+          ! grep -q 'PHASE6_FINANCE_WORKSPACE_OVERLAY_ENDPOINT' verify/dmu.html
           grep -q 'canonical:yara-power' verify/dmu.html
           grep -q 'canonical:cmi' verify/dmu.html
           grep -q 'OPP-2608-019' verify/dmu.html
