@@ -117,7 +117,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-archive-resolver" content="HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1">
 <meta name="hexa-dmu-opportunity-archive-fallback" content="HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1">
 <meta name="hexa-dmu-latest-ai-visibility" content="HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1">
-<meta name="hexa-dmu-sharepoint-fallback" content="HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1">
+<meta name="hexa-dmu-sharepoint-fallback" content="HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1">\n<meta name="hexa-dmu-sharepoint-fallback-odata-fix" content="HEXA_DMU_SHAREPOINT_FALLBACK_ODATA_FIX_2026_10_20_1">
 </head>
 <body>
 <header>
@@ -1688,7 +1688,16 @@ async function persistFinanceWorkspaceCommand(command){
  if(!meta)throw new Error('Finance Workspace metadata is unavailable.');
  return financeWorkspaceHumanOverlayRequest('POST',{...command,...meta});
 }
-async function graph(url,opts={}){const token=await graphToken();const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok)throw new Error('SharePoint '+r.status);return r.status===204?null:r.json()}
+async function graph(url,opts={}){
+ const token=await graphToken();
+ const r=await fetch('https://graph.microsoft.com/v1.0'+url,{...opts,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',...(opts.headers||{})}});
+ if(!r.ok){
+   let detail='';
+   try{const payload=await r.clone().json();detail=String(payload?.error?.message||'').trim()}catch(e){}
+   throw new Error('SharePoint '+r.status+(detail?': '+detail.slice(0,180):''));
+ }
+ return r.status===204?null:r.json()
+}
 function cleanFinanceQuotationCustomerName(name){
  return String(name||'').normalize('NFC')
    .replace(/^\\s*\\d+\\s*[_-]\\s*/,'')
@@ -1749,7 +1758,7 @@ function renderFinanceQuotationWorkspace(item){
  document.getElementById('salesClosePlan').innerHTML='<div class="small">Finance Workspace overlay is active. DMU, Activity and Archive are persisted independently until this customer is linked to a canonical Opportunity.</div>';
 }
 async function graphIds(){if(hexaListId)return;const site=await graph('/sites/'+HEXA_GRAPH.host+':'+HEXA_GRAPH.path);hexaSiteId=site.id;const lists=await graph('/sites/'+hexaSiteId+'/lists?$select=id,displayName');const list=lists.value.find(x=>x.displayName===HEXA_GRAPH.list);if(!list)throw new Error('Sales Opportunity list not found');hexaListId=list.id}
-async function getDmuItem(){await graphIds();const j=await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items?expand=fields');return j.value.find(x=>x.fields&&x.fields.Title===HEXA_GRAPH.title)}
+async function getDmuItem(){await graphIds();const j=await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items?$top=200&$expand=fields');return (j.value||[]).find(x=>x.fields&&x.fields.Title===HEXA_GRAPH.title)}
 async function structuredListId(name){
   await graphIds();
   if(HEXA_STRUCTURED.listIds[name])return HEXA_STRUCTURED.listIds[name];
@@ -1761,10 +1770,15 @@ async function structuredListId(name){
 }
 async function structuredItems(name,fields,filter){
   const id=await structuredListId(name);
-  const select=fields.map(encodeURIComponent).join(',');
-  const where=filter?'&$filter='+encodeURIComponent(filter):'';
-  const j=await graph('/sites/'+hexaSiteId+'/lists/'+id+'/items?$top=200&expand=fields($select='+select+')'+where);
-  return j.value||[];
+  // Read the small governed lists with standard Graph OData syntax and filter client-side.
+  // This avoids brittle field projections and non-indexed SharePoint field filters during fallback.
+  const j=await graph('/sites/'+hexaSiteId+'/lists/'+id+'/items?$top=200&$expand=fields');
+  const rows=j.value||[];
+  if(!filter)return rows;
+  const match=/^fields\/([A-Za-z0-9_]+) eq '((?:''|[^'])*)'$/.exec(String(filter||''));
+  if(!match)return rows;
+  const field=match[1],expected=match[2].replace(/''/g,"'");
+  return rows.filter(item=>String(item?.fields?.[field]??'')===expected);
 }
 function applyStructuredOverlay(records,customers,contacts){
   // Compatibility only: structured records may fill absent display fields, never
@@ -1775,8 +1789,8 @@ function applyStructuredOverlay(records,customers,contacts){
     const r=item.fields||{},o=state.opportunities.find(x=>x.id===r.OpportunityID);
     if(!o)continue;
     const c=customerById.get(r.CustomerID)||{},p=contactById.get(r.PrimaryContactID)||{};
-    if(!o.customer&&(c.Customer_x0020_Name||c['Customer Name']))o.customer=c.Customer_x0020_Name||c['Customer Name'];
-    if(!o.offer&&r.SolutionSummary)o.offer=r.SolutionSummary;
+    if(!o.customer&&(r.Customer||c.CustomerName||c.Title||c.Customer_x0020_Name||c['Customer Name']))o.customer=r.Customer||c.CustomerName||c.Title||c.Customer_x0020_Name||c['Customer Name'];
+    if(!o.offer&&(r.OpportunityName||r.SolutionSummary))o.offer=r.OpportunityName||r.SolutionSummary;
     if(!o.stage&&r.StageCode)o.stage=r.StageCode;
     if(!o.keyContact&&p.Title)o.keyContact=p.Title;
     if(!o.keyContactRole&&p.Designation)o.keyContactRole=p.Designation;
@@ -1784,11 +1798,11 @@ function applyStructuredOverlay(records,customers,contacts){
   }
 }
 async function hydrateStructuredReadOnly(){
-  const records=await structuredItems(HEXA_STRUCTURED.lists.records,['OpportunityID','CustomerID','PrimaryContactID','SolutionSummary','StageCode','WonLostStatus','RevenueRealizedAmount','ResultEvidenceID']);
+  const records=await structuredItems(HEXA_STRUCTURED.lists.records,['OpportunityID','CustomerID','Customer','OpportunityName','PrimaryContactID','SolutionSummary','StageCode','WonLostStatus','RevenueRealizedAmount','ResultEvidenceID']);
   const customerIds=[...new Set(records.map(x=>x.fields&&x.fields.CustomerID).filter(Boolean))];
   const contactIds=[...new Set(records.map(x=>x.fields&&x.fields.PrimaryContactID).filter(Boolean))];
   const [customerRows,contactRows]=await Promise.all([
-    Promise.all(customerIds.map(id=>structuredItems(HEXA_STRUCTURED.lists.customers,['CustomerID','Customer_x0020_Name'],"fields/CustomerID eq '"+String(id).replace(/'/g,"''")+"'"))),
+    Promise.all(customerIds.map(id=>structuredItems(HEXA_STRUCTURED.lists.customers,['CustomerID','CustomerName','Title'],"fields/CustomerID eq '"+String(id).replace(/'/g,"''")+"'"))),
     Promise.all(contactIds.map(id=>structuredItems(HEXA_STRUCTURED.lists.contacts,['ContactID','Title','Designation'],"fields/ContactID eq '"+String(id).replace(/'/g,"''")+"'")))
   ]);
   const customers=customerRows.flat(),contacts=contactRows.flat();
