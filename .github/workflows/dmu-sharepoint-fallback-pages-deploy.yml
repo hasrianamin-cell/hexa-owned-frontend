@@ -1,0 +1,127 @@
+name: Deploy DMU SharePoint fallback to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/dmu-sharepoint-fallback-pages-deploy.yml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: hexa-owned-frontend-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact main
+        uses: actions/checkout@v4
+
+      - name: Validate DMU fallback candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=teams/dmu/index.html
+          grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1' "$file"
+          grep -q 'HEXA_DMU_RADAR_DYNAMIC_2026_10_06_1' "$file"
+          grep -q 'HEXA_DMU_DYNAMIC_COVERAGE_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_MANAGEMENT_INTELLIGENCE_2026_10_08_1' "$file"
+          grep -q 'HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1' "$file"
+          grep -q 'HEXA_FINANCE_WORKSPACE_DMU_ARCHIVE_2026_10_16_1' "$file"
+          grep -q 'function hydrateFromSharePointCompatibility' "$file"
+          grep -q "Connected • SharePoint current data" "$file"
+          grep -q "redirectUri:location.origin+'/teams/dmu'" "$file"
+          node <<'NODE'
+          const fs=require('fs');
+          const vm=require('vm');
+          const html=fs.readFileSync('teams/dmu/index.html','utf8');
+          const scripts=[...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+          if(!scripts.length) throw new Error('no inline scripts found');
+          scripts.forEach((src,i)=>new vm.Script(src,{filename:'dmu-inline-'+i+'.js'}));
+          console.log('INLINE_JS_PARSE=PASS scripts='+scripts.length);
+          NODE
+          sha256sum "$file" | tee /tmp/dmu-source-sha256.txt
+
+      - name: Build Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/teams/dmu _site/assets
+          cp .nojekyll _site/.nojekyll
+          cp index.html script.js styles.css gate.css brands.css _site/
+          cp teams/dmu/index.html _site/teams/dmu/index.html
+          cp assets/* _site/assets/
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify production DMU
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_url='https://raw.githubusercontent.com/hasrianamin-cell/hexa-owned-frontend/main/teams/dmu/index.html'
+          prod='https://hexahessman-th.com/teams/dmu/'
+          mkdir -p verify
+          for attempt in 1 2 3 4 5 6 7 8; do
+            source_http="$(curl -L -sS -o verify/source.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "$source_url" || true)"
+            prod_http="$(curl -L -sS -o verify/prod.html -w '%{http_code}' --connect-timeout 15 --max-time 60 "$prod" || true)"
+            if [ "$source_http" = "200" ] && [ "$prod_http" = "200" ]; then
+              source_sha="$(sha256sum verify/source.html | awk '{print $1}')"
+              prod_sha="$(sha256sum verify/prod.html | awk '{print $1}')"
+              if [ "$source_sha" = "$prod_sha" ] && grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1' verify/prod.html; then
+                break
+              fi
+            fi
+            sleep 10
+          done
+          test "$source_http" = "200"
+          test "$prod_http" = "200"
+          source_sha="$(sha256sum verify/source.html | awk '{print $1}')"
+          prod_sha="$(sha256sum verify/prod.html | awk '{print $1}')"
+          test "$source_sha" = "$prod_sha"
+          grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1' verify/prod.html
+          grep -q 'function hydrateFromSharePointCompatibility' verify/prod.html
+          {
+            echo "HEXA_DMU_SHAREPOINT_FALLBACK_DEPLOY=PASS"
+            echo "sourceHttp=$source_http"
+            echo "prodHttp=$prod_http"
+            echo "sourceSha256=$source_sha"
+            echo "prodSha256=$prod_sha"
+            echo "fallbackMarker=true"
+            echo "backendMutationPerformed=false"
+            echo "sharePointDataWritePerformed=false"
+            echo "vmUsed=false"
+            echo "selfHostedRunnerUsed=false"
+          } | tee verify/summary.txt
+
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmu-sharepoint-fallback-production-evidence
+          path: verify
+          retention-days: 30
