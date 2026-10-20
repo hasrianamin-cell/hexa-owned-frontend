@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '.github/workflows/dmu-sharepoint-fallback-pages-deploy.yml'
+      - 'teams/dmu/index.html'
 
 permissions:
   contents: read
@@ -29,6 +30,8 @@ jobs:
           set -euo pipefail
           file=teams/dmu/index.html
           grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1' "$file"
+          grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_ODATA_FIX_2026_10_20_1' "$file"
+          grep -q "items?\$top=200&\$expand=fields" "$file"
           grep -q 'HEXA_DMU_RADAR_DYNAMIC_2026_10_06_1' "$file"
           grep -q 'HEXA_DMU_DYNAMIC_COVERAGE_2026_10_08_1' "$file"
           grep -q 'HEXA_DMU_LEAD_REVIEW_INBOX_2026_10_08_1' "$file"
@@ -105,6 +108,7 @@ jobs:
           prod_sha="$(sha256sum verify/prod.html | awk '{print $1}')"
           test "$source_sha" = "$prod_sha"
           grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1' verify/prod.html
+          grep -q 'HEXA_DMU_SHAREPOINT_FALLBACK_ODATA_FIX_2026_10_20_1' verify/prod.html
           grep -q 'function hydrateFromSharePointCompatibility' verify/prod.html
           {
             echo "HEXA_DMU_SHAREPOINT_FALLBACK_DEPLOY=PASS"
@@ -113,6 +117,7 @@ jobs:
             echo "sourceSha256=$source_sha"
             echo "prodSha256=$prod_sha"
             echo "fallbackMarker=true"
+            echo "sharePointODataFixMarker=true"
             echo "backendMutationPerformed=false"
             echo "sharePointDataWritePerformed=false"
             echo "vmUsed=false"
