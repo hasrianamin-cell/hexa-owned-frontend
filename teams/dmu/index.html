@@ -117,6 +117,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-archive-resolver" content="HEXA_DMU_ARCHIVE_ID_RESOLUTION_2026_10_12_1">
 <meta name="hexa-dmu-opportunity-archive-fallback" content="HEXA_DMU_OPPORTUNITY_ARCHIVE_FALLBACK_2026_10_13_1">
 <meta name="hexa-dmu-latest-ai-visibility" content="HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1">
+<meta name="hexa-dmu-sharepoint-fallback" content="HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1">
 </head>
 <body>
 <header>
@@ -1503,7 +1504,15 @@ function applyProductionDeals(){
  renderOppSelector();loadSelectedOpportunity();renderArchivedCustomers();refreshArchiveCurrentCustomerButton()
 }
 async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
- const token=await phase5ReviewToken();
+ let token='';
+ try{
+   token=await phase5ReviewToken();
+ }catch(error){
+   const detail=authErrorDetail(error);
+   console.warn('DMU API token unavailable; using SharePoint current-data fallback',error);
+   await hydrateFromSharePointCompatibility('AI API token unavailable: '+detail);
+   return;
+ }
  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
  const [dmuResult,contextResult,archiveResult,coverageResult]=await Promise.allSettled([
    fetch(PHASE6_DMU_READ_ENDPOINT,{headers}),
@@ -1511,14 +1520,22 @@ async function loadAuthenticatedAi({skipHumanOverlay=false}={}){
    fetch(PHASE6_CUSTOMER_ARCHIVE_ENDPOINT,{headers}),
    fetch(PHASE6_CUSTOMER_COVERAGE_ENDPOINT,{headers})
  ]);
+ let dmuFailure='';
  if(dmuResult.status!=='fulfilled'){
-   const detail=authErrorDetail(dmuResult.reason);
-   throw new Error('DMU read fetch failed: '+detail);
+   dmuFailure='DMU read fetch failed: '+authErrorDetail(dmuResult.reason);
+ }else{
+   const dmuResponse=dmuResult.value;
+   const dmuPayload=await dmuResponse.json().catch(()=>null);
+   if(!dmuResponse.ok)dmuFailure='DMU read HTTP '+dmuResponse.status;
+   else if(!dmuPayload)dmuFailure='DMU read returned no usable payload';
+   else phase6ReadModel=dmuPayload?.readModel||dmuPayload;
  }
- const dmuResponse=dmuResult.value;
- const dmuPayload=await dmuResponse.json().catch(()=>null);
- if(!dmuResponse.ok)throw new Error('DMU read HTTP '+dmuResponse.status);
- phase6ReadModel=dmuPayload?.readModel||dmuPayload;
+ if(dmuFailure){
+   console.warn(dmuFailure+'; using SharePoint current-data fallback.');
+   await hydrateFromSharePointCompatibility(dmuFailure);
+   return;
+ }
+ setSharePointFallbackMode(false);
 
  let contextAvailable=false;
  if(contextResult.status==='fulfilled'){
@@ -1831,7 +1848,78 @@ async function connectHEXA(){
   return false;
  }
 }
-async function hydrateFromSharePoint(){try{const item=await getDmuItem();if(item&&item.fields.DMUAppData){const remote=JSON.parse(item.fields.DMUAppData);if(remote&&remote.opportunities)state=remote}await hydrateStructuredReadOnly();renderOppSelector();loadSelectedOpportunity();renderDealCards();flashConn(true,'Connected • V4 + structured read-only');const b=document.getElementById('hexaSignIn');if(b)b.textContent='HEXA connected'}catch(e){flashConn(false,'SharePoint connection failed');alert(e.message)}}
+let sharePointFallbackMode=false;
+function setSharePointFallbackMode(enabled,reason=''){
+ sharePointFallbackMode=!!enabled;
+ document.body.classList.toggle('sharePointFallbackMode',sharePointFallbackMode);
+ document.querySelectorAll('.humanWriteControl button,.humanWriteControl input,.humanWriteControl textarea,.humanWriteControl select').forEach(el=>{
+   if(sharePointFallbackMode){
+     if(!el.disabled){el.dataset.hexaFallbackDisabled='1';el.disabled=true}
+   }else if(el.dataset.hexaFallbackDisabled==='1'){
+     el.disabled=false;
+     delete el.dataset.hexaFallbackDisabled;
+   }
+ });
+ if(sharePointFallbackMode){
+   renderTeamOverlayStatus('Read-only fallback • current SharePoint sales data is available; backend write actions are temporarily unavailable.',true);
+ }else{
+   const status=document.getElementById('teamOverlayStatus');
+   if(status&&/Read-only fallback/.test(status.textContent||'')){status.textContent='';status.classList.remove('warn')}
+ }
+}
+async function hydrateFromSharePointCompatibility(reason=''){
+ const item=await getDmuItem();
+ if(item&&item.fields.DMUAppData){
+   const remote=JSON.parse(item.fields.DMUAppData);
+   if(remote&&remote.opportunities)state=remote;
+ }
+ await hydrateStructuredReadOnly();
+ phase6ReadModel=null;
+ phase6ContextReview=null;
+ phase6CanonicalDeals=[];
+ customerArchiveAvailable=false;
+ customerArchiveMap=new Map();
+ opportunityArchiveMap=new Map();
+ customerArchiveStatus='Archive service unavailable in SharePoint fallback';
+ customerCoverageAvailable=false;
+ phase6CustomerCoverage=null;
+ customerCoverageStatus='Customer coverage backend unavailable in SharePoint fallback';
+ financeWorkspaceOverlayAvailable=false;
+ financeWorkspaceArchiveMap=new Map();
+ financeWorkspaceOverlayStatus='Finance Workspace backend unavailable in SharePoint fallback';
+ financeQuotationCustomers=[];
+ financeQuotationCoverageAvailable=false;
+ try{
+   await loadFinanceQuotationCustomers();
+ }catch(error){
+   financeQuotationCoverageStatus='Finance quotation source unavailable in SharePoint fallback';
+   console.warn('Finance quotation fallback unavailable',error);
+ }
+ setPhase6LiveReadOnly(true);
+ setSharePointFallbackMode(true,reason);
+ renderOppSelector();
+ loadSelectedOpportunity();
+ renderDealCards();
+ renderArchivedCustomers();
+ refreshArchiveCurrentCustomerButton();
+ renderManagementStories();
+ renderSourceFreshness(null);
+ const b=document.getElementById('hexaSignIn');
+ if(b)b.textContent='HEXA connected';
+ const detail=String(reason||'backend unavailable').slice(0,120);
+ flashConn(true,'Connected • SharePoint current data • AI/backend temporarily unavailable'+(detail?' • '+detail:''));
+ startDmuAutoRefresh();
+ return true;
+}
+async function hydrateFromSharePoint(){
+ try{
+   await hydrateFromSharePointCompatibility('Manual SharePoint current-data view');
+ }catch(e){
+   flashConn(false,'SharePoint connection failed: '+authErrorDetail(e));
+   console.error('SharePoint fallback failed',e);
+   alert(e.message);
+ }
+}
 async function saveToSharePoint(){await graphIds();const payload=JSON.stringify(state);const item=await getDmuItem();if(item)await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items/'+item.id+'/fields',{method:'PATCH',body:JSON.stringify({DMUAppData:payload})});else await graph('/sites/'+hexaSiteId+'/lists/'+hexaListId+'/items',{method:'POST',body:JSON.stringify({fields:{Title:HEXA_GRAPH.title,DMUAppData:payload}})});flashConn(true,'Saved to SharePoint')}
 async function saveAll(){if(phase6LiveReadOnly){flashConn(true,'Governed read-only • no manual CRM write');return;}syncOpportunity();syncDMU();saveStrategy();setLocal();renderOppSelector();calc();if(!hexaAccount){alert('Please select Sign in with HEXA before saving to SharePoint');return}try{await saveToSharePoint()}catch(e){flashConn(false,'Save failed');alert(e.message)}}
 async function testSharePoint(){if(!hexaAccount){await connectHEXA();return}await hydrateFromSharePoint()}
