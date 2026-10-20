@@ -6,13 +6,14 @@ on:
       - path2-governed-dmu-vnext-20261012
       - fix/dmu-archive-customer-id-resolution-20261012
       - fix/dmu-opportunity-archive-fallback-20261013
+      - fix/dmu-sharepoint-fallback-20261020
   workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
-  EXPECTED_SOURCE_BLOB_SHA: b435cd4ad9f74d3af6b0a6423578e4b21f03261d
+  EXPECTED_SOURCE_BLOB_SHA: fd85dfbd448d840e2eade3a75b94e0e4df6226ee
 
 jobs:
   validate:
