@@ -1896,7 +1896,6 @@ async function hydrateFromSharePointCompatibility(reason=''){
    console.warn('Finance quotation fallback unavailable',error);
  }
  setPhase6LiveReadOnly(true);
- setSharePointFallbackMode(true,reason);
  renderOppSelector();
  loadSelectedOpportunity();
  renderDealCards();
@@ -1904,6 +1903,7 @@ async function hydrateFromSharePointCompatibility(reason=''){
  refreshArchiveCurrentCustomerButton();
  renderManagementStories();
  renderSourceFreshness(null);
+ setSharePointFallbackMode(true,reason);
  const b=document.getElementById('hexaSignIn');
  if(b)b.textContent='HEXA connected';
  const detail=String(reason||'backend unavailable').slice(0,120);
