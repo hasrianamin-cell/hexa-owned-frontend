@@ -120,6 +120,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-sharepoint-fallback" content="HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1">
 <meta name="hexa-dmu-sharepoint-fallback-odata-fix" content="HEXA_DMU_SHAREPOINT_FALLBACK_ODATA_FIX_2026_10_20_1">
 <meta name="hexa-dmu-legacy-readonly-visibility" content="HEXA_DMU_LEGACY_READONLY_VISIBILITY_2026_10_25_1">
+<meta name="hexa-dmu-radar-history-preserve" content="HEXA_DMU_RADAR_HISTORY_PRESERVE_2026_10_25_2">
 </head>
 <body>
 <header>
@@ -1036,7 +1037,21 @@ function rowHTML(r){const influence=Math.max(0,Math.min(5,Number(r.power)||0));r
 function changeInfluence(id,delta){const tr=[...document.querySelectorAll('#dmuTable tbody tr.humanDmuRow')].find(x=>x.dataset.id===id);if(!tr)return;const input=tr.querySelector('[data-k="power"]');const next=Math.max(0,Math.min(5,(Number(input.value)||0)+delta));input.value=String(next);tr.querySelector('output').textContent=String(next);syncDMU();calc()}
 function supportOptions(v){return [[0,'?'],[1,'Against'],[2,'Neutral'],[3,'Support'],[4,'Strong'],[5,'Champion']].map(x=>`<option value="${x[0]}" ${+v===x[0]?'selected':''}>${x[1]}</option>`).join('')}
 function statusOptions(v){return ['Unknown','Known','To Confirm','Critical Unknown','Confirmed'].map(x=>`<option ${v===x?'selected':''}>${x}</option>`).join('')}
-function syncDMU(){const rows=[...document.querySelectorAll('#dmuTable tbody tr:not([data-ai="1"])')];const ids=new Set(rows.map(r=>r.dataset.id));state.dmu=state.dmu.filter(x=>x.oppId!==state.current||ids.has(x.id));rows.forEach(tr=>{let obj=state.dmu.find(x=>x.id===tr.dataset.id);if(!obj){obj={id:tr.dataset.id,oppId:state.current,humanConfirmed:true,persisted:false};state.dmu.push(obj)}tr.querySelectorAll('[data-k]').forEach(el=>obj[el.dataset.k]=el.type==='number'?parseFloat(el.value)||0:el.tagName==='SELECT'?el.value:el.value);obj.support=+obj.support;obj.humanConfirmed=true;obj.dirty=true});setLocal()}
+function syncDMU(){
+ // Read-only rendering must never mutate or delete the SharePoint historical snapshot.
+ if(phase6LiveReadOnly||sharePointFallbackMode)return;
+ const rows=[...document.querySelectorAll('#dmuTable tbody tr.humanDmuRow')];
+ const ids=new Set(rows.map(r=>r.dataset.id));
+ // Preserve legacy/unverified evidence even when the editable confirmed table is empty.
+ state.dmu=state.dmu.filter(x=>x.oppId!==state.current||x.humanConfirmed!==true||ids.has(x.id));
+ rows.forEach(tr=>{
+   let obj=state.dmu.find(x=>x.id===tr.dataset.id);
+   if(!obj){obj={id:tr.dataset.id,oppId:state.current,humanConfirmed:true,persisted:false};state.dmu.push(obj)}
+   tr.querySelectorAll('[data-k]').forEach(el=>obj[el.dataset.k]=el.type==='number'?parseFloat(el.value)||0:el.tagName==='SELECT'?el.value:el.value);
+   obj.support=+obj.support;obj.humanConfirmed=true;obj.dirty=true
+ });
+ setLocal();
+}
 function humanOverlayOpportunityReady(opportunityId=state.current){const id=String(opportunityId||'').trim();return /^OPP-\d{4}-\d{3,}$/.test(id)&&state.opportunities.some(o=>o.id===id)}
 function humanOverlayWorkspaceReady(workspaceId=state.current){return humanOverlayOpportunityReady(workspaceId)||(financeWorkspaceIdReady(workspaceId)&&!!financeWorkspaceMetadata(workspaceId)&&financeWorkspaceOverlayAvailable)}
 function addDMURow(){if(!humanOverlayWorkspaceReady()){flashConn(false,'เลือก Opportunity หรือ Finance Workspace ที่พร้อมก่อนเพิ่ม DMU');return}syncDMU();const id=`${state.current}-H-${Date.now()}`;state.dmu.push({id,oppId:state.current,role:'New Role',person:'',power:1,support:0,care:'',win:'',strategy:'',status:'Unknown',humanConfirmed:true,persisted:false,dirty:true});renderDMU(state.dmu.filter(x=>x.oppId===state.current&&x.humanConfirmed===true),detailFor(state.current));calc();setLocal();renderDealCards();setPhase6LiveReadOnly(phase6LiveReadOnly)}
