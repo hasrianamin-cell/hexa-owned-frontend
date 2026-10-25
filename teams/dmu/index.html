@@ -119,6 +119,7 @@ function legacyNavTo(id,btn){
 <meta name="hexa-dmu-latest-ai-visibility" content="HEXA_DMU_LATEST_AI_VISIBILITY_2026_10_13_1">
 <meta name="hexa-dmu-sharepoint-fallback" content="HEXA_DMU_SHAREPOINT_FALLBACK_2026_10_20_1">
 <meta name="hexa-dmu-sharepoint-fallback-odata-fix" content="HEXA_DMU_SHAREPOINT_FALLBACK_ODATA_FIX_2026_10_20_1">
+<meta name="hexa-dmu-legacy-readonly-visibility" content="HEXA_DMU_LEGACY_READONLY_VISIBILITY_2026_10_25_1">
 </head>
 <body>
 <header>
@@ -340,13 +341,14 @@ function legacyNavTo(id,btn){
 <section class="card full">
 <h2>Decision Team (DMU)</h2>
 <div class="tablewrap"><table id="dmuTable"><thead><tr><th>DMU Role</th><th>Person / Function</th><th>Influence (0–5)</th><th>Support</th><th>Care About / Pain</th><th>Win Criteria</th><th>HEXA Strategy</th><th>Status</th><th></th></tr></thead><tbody></tbody></table></div>
+<div id="legacyDmuPanel" style="display:none;margin-top:12px"></div>
 <div class="actionrow humanWriteControl"><button class="btn accent" onclick="addDMURow()">+ Add DMU Member</button></div>
 </section>
 
 <section class="card">
 <h2>DMU Radar</h2>
 <div class="radarWrap"><svg id="radar" width="420" height="360" viewBox="0 0 420 360"></svg></div>
-<div class="small">Radar สร้างแกนตาม DMU Role ที่ยืนยันแล้วของลูกค้ารายนี้โดยอัตโนมัติ • role ซ้ำใช้ readiness สูงสุด • ไม่ใช้ AI suggestion จนกว่าจะยืนยัน</div>
+<div id="radarSourceNote" class="small">Radar สร้างแกนตาม DMU Role ที่ยืนยันแล้วของลูกค้ารายนี้โดยอัตโนมัติ • role ซ้ำใช้ readiness สูงสุด • ไม่ใช้ AI suggestion จนกว่าจะยืนยัน</div>
 </section>
 
 <section class="card viewSection" id="viewActivity">
@@ -989,8 +991,18 @@ function loadSelectedOpportunity(){
  if(identitySafe)renderWorkspaceFinanceSources(workspaceEntry);
  const contactPhone=identitySafe?valueOf(d360?.ContactPhone,latestQuotation?.ContactPhone,live?.ContactPhone):'';document.getElementById('contactPhone').textContent=contactPhone?'Contact phone: '+contactPhone:'';
  let d=state.dmu.filter(x=>x.oppId===o.id&&x.humanConfirmed===true);if(!phase6LiveReadOnly&&!d.length){d=seedForOpp(o.id);state.dmu.push(...d)}renderDMU(d,identitySafe?d360:null);renderActivities();
- if(identitySafe){applyControlTower(o.id,d360);renderSourceFreshness(d360);setTimeout(()=>renderSalesClosePlan(d360),0);if(d360&&!document.getElementById('competitors').value.trim())setVal('competitors',valueOf(d360.ControlTower?.CompetitorSignal))}
- else{renderSourceFreshness(null)}
+ if(identitySafe){
+   applyControlTower(o.id,d360);
+   if(sharePointFallbackMode||(!phase6ReadModel&&rowsOf(state.dmu).some(x=>x.oppId===o.id))){
+     const saved=state['strategy_'+o.id]||{};
+     for(const [id,key] of [['diagnosis','diagnosis'],['nextAction','nextAction'],['championTest','championTest'],['decisionProcess','decisionProcess'],['winTheme','winTheme'],['missingInfo','missingInfo']]){
+       const el=document.getElementById(id);
+       if(el&&!String(el.value||'').trim()&&String(saved[key]||'').trim())el.value=saved[key];
+     }
+   }
+   renderSourceFreshness(d360);setTimeout(()=>renderSalesClosePlan(d360),0);
+   if(d360&&!document.getElementById('competitors').value.trim())setVal('competitors',valueOf(d360.ControlTower?.CompetitorSignal))
+ }else{renderSourceFreshness(null)}
  refreshExecutiveDealBrief();
  calc();setLocal();renderDealCards()
 }
@@ -1003,7 +1015,22 @@ function renderDMU(rows,d360=null){
    return name&&!knownNames.has(name);
  });
  document.querySelector('#dmuTable tbody').innerHTML=trusted.map(r=>rowHTML(r)).join('')+ai.map(aiDmuRowHTML).join('');
+ renderLegacyDmuEvidence(state.current);
  setPhase6LiveReadOnly(phase6LiveReadOnly);
+}
+function legacyDmuEvidenceRows(opportunityId){
+ if(!sharePointFallbackMode && phase6ReadModel)return [];
+ return rowsOf(state.dmu).filter(row=>row&&row.oppId===opportunityId&&row.humanConfirmed!==true&&String(row.role||row.person||'').trim());
+}
+function renderLegacyDmuEvidence(opportunityId){
+ const panel=document.getElementById('legacyDmuPanel');
+ if(!panel)return;
+ const rows=legacyDmuEvidenceRows(opportunityId);
+ panel.style.display=rows.length?'block':'none';
+ if(!rows.length){panel.innerHTML='';return}
+ panel.innerHTML='<div style="padding:10px;border:1px solid #f0d79b;border-radius:9px;background:#fffbeb"><strong>Historical DMU — '+rows.length+' saved rows • Not yet human-confirmed</strong><div class="small" style="margin:6px 0 10px">Recovered from HEXA-DMU-V4 in SharePoint. Reference-only; excluded from verified readiness, confidence, and forecast. Generic job titles and placeholders are not verified contacts.</div><div class="tablewrap"><table><thead><tr><th>Role</th><th>Person / Function</th><th>Influence</th><th>Support</th><th>Care About</th><th>HEXA Strategy</th><th>Recorded Status</th></tr></thead><tbody>'+
+ rows.map(row=>'<tr><td>'+esc(row.role)+'</td><td>'+esc(row.person||'Not identified')+'</td><td>'+esc(row.power??'—')+'</td><td>'+esc(row.support??'—')+'</td><td>'+esc(row.care||'—')+'</td><td>'+esc(row.strategy||'—')+'</td><td>'+esc(row.status||'Unverified')+'</td></tr>').join('')+
+ '</tbody></table></div></div>';
 }
 function rowHTML(r){const influence=Math.max(0,Math.min(5,Number(r.power)||0));return `<tr class="humanWriteControl humanDmuRow" data-id="${esc(r.id)}"><td><input data-k="role" value="${esc(r.role)}" oninput="syncDMU();calc()"></td><td><input data-k="person" value="${esc(r.person)}"></td><td><div class="influenceControl"><button class="btn secondary" type="button" onclick="changeInfluence('${esc(r.id)}',-1)" aria-label="Decrease influence">−</button><output aria-label="Influence">${influence}</output><input data-k="power" type="hidden" value="${influence}"><button class="btn secondary" type="button" onclick="changeInfluence('${esc(r.id)}',1)" aria-label="Increase influence">+</button></div></td><td><select data-k="support" onchange="syncDMU();calc()">${supportOptions(r.support)}</select></td><td><input data-k="care" value="${esc(r.care)}"></td><td><input data-k="win" value="${esc(r.win||'')}"></td><td><input data-k="strategy" value="${esc(r.strategy)}"></td><td><select data-k="status" onchange="syncDMU();calc()">${statusOptions(r.status)}</select></td><td><button class="btn danger humanWriteControl" type="button" onclick="removeDMU('${esc(r.id)}')" aria-label="Delete DMU member">Delete DMU</button></td></tr>`}
 function changeInfluence(id,delta){const tr=[...document.querySelectorAll('#dmuTable tbody tr.humanDmuRow')].find(x=>x.dataset.id===id);if(!tr)return;const input=tr.querySelector('[data-k="power"]');const next=Math.max(0,Math.min(5,(Number(input.value)||0)+delta));input.value=String(next);tr.querySelector('output').textContent=String(next);syncDMU();calc()}
@@ -1044,7 +1071,16 @@ function calc(){
  b.className='badge '+(!hasPipeline?'gray':forecast>=65?'green':forecast>=35?'yellow':'red');
  b.textContent=!hasPipeline?'Forecast TBC':forecast>=65?'Green Forecast':forecast>=35?'Yellow Forecast':'Red Forecast';
  refreshExecutiveDealBrief();
- drawRadar(rows)
+ const historical=legacyDmuEvidenceRows(state.current);
+ if(!metrics.series.length&&historical.length){
+   drawRadar(historical);
+   const note=document.getElementById('radarSourceNote');
+   if(note)note.textContent='Historical DMU Radar • Recovered SharePoint planning snapshot (not human-confirmed). Visual only; official DMU Readiness, Evidence Confidence and Forecast remain based on confirmed records.';
+ }else{
+   drawRadar(rows);
+   const note=document.getElementById('radarSourceNote');
+   if(note)note.textContent='Confirmed DMU Radar • role ซ้ำใช้ readiness สูงสุด • ไม่ใช้ AI suggestion จนกว่าจะยืนยัน';
+ }
 }
 function decisionStatusConfidence(row){
  if(!row||row.aiObserved)return 0;
@@ -1888,6 +1924,8 @@ async function hydrateFromSharePointCompatibility(reason=''){
    const remote=JSON.parse(item.fields.DMUAppData);
    if(remote&&remote.opportunities)state=remote;
  }
+ // Set fallback mode before first workspace render, so legacy evidence is visible.
+ sharePointFallbackMode=true;
  await hydrateStructuredReadOnly();
  phase6ReadModel=null;
  phase6ContextReview=null;
